@@ -75,6 +75,31 @@
 
 <!-- ═══════════════════════════════════════════════════════════════ INSTALL SCREEN -->
 <div id="screen-install" class="screen">
+  <!-- Titlebar for install screen -->
+  <div class="titlebar" id="install-titlebar">
+    <div class="titlebar-left">
+      <svg width="18" height="18" viewBox="0 0 72 72" style="margin-right:6px;opacity:.7">
+        <defs><linearGradient id="lg_tb2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#6d28d9"/>
+        </linearGradient></defs>
+        <polygon points="36,4 64,20 64,52 36,68 8,52 8,20" fill="url(#lg_tb2)"/>
+        <polygon points="36,26 44,32 44,42 36,48 28,42 28,32" fill="#a855f7" opacity="0.8"/>
+      </svg>
+      <span class="titlebar-name">MyLauncher — Setup</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="tb-btn" id="install-btn-minimize" title="Minimize">
+        <svg width="12" height="2" viewBox="0 0 12 2"><rect width="12" height="2" fill="currentColor"/></svg>
+      </button>
+      <button class="tb-btn tb-close" id="install-btn-close" title="Close">
+        <svg width="10" height="10" viewBox="0 0 10 10">
+          <line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
   <div class="install-container">
     <!-- Logo small -->
     <div class="install-logo">

@@ -249,6 +249,37 @@ async function downloadMinecraft(gameDir) {
 async function installNeoForge(gameDir, javaExe) {
   emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Downloading NeoForge installer...' });
 
+  // NeoForge installer requires launcher_profiles.json to exist (Mojang launcher format)
+  const profilesPath = path.join(gameDir, 'launcher_profiles.json');
+  if (!fs.existsSync(profilesPath)) {
+    const profiles = {
+      profiles: {
+        '(Default)': {
+          name: '(Default)',
+          type: 'latest-release',
+          created: new Date().toISOString(),
+          lastUsed: new Date().toISOString(),
+          icon: 'Grass',
+          lastVersionId: 'latest-release'
+        }
+      },
+      settings: {
+        enableSnapshots: false,
+        enableAdvancedSettings: false,
+        keepLauncherOpen: false,
+        profileSorting: 'ByLastPlayed',
+        showGameLog: false,
+        showMenu: false,
+        soundOn: false
+      },
+      selectedProfile: '(Default)',
+      authenticationDatabase: {},
+      clientToken: '00000000-0000-0000-0000-000000000000',
+      launcherVersion: { format: 21, name: '2.2.1476', profilesFormat: 2 }
+    };
+    fs.writeFileSync(profilesPath, JSON.stringify(profiles, null, 2), 'utf8');
+  }
+
   const nfVersion    = config.NEOFORGE_VERSION;
   const installerUrl = `https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/neoforge-${nfVersion}-installer.jar`;
   const installerJar = path.join(gameDir, `neoforge-${nfVersion}-installer.jar`);

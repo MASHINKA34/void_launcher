@@ -505,6 +505,10 @@ function initSettingsUI() {
 function initTitleBar() {
   $('btn-minimize').addEventListener('click', () => window.api.minimize());
   $('btn-close').addEventListener('click',    () => window.api.close());
+
+  // Install screen titlebar buttons
+  $('install-btn-minimize').addEventListener('click', () => window.api.minimize());
+  $('install-btn-close').addEventListener('click',    () => window.api.close());
 }
 
 /* ─────────────────────────────────────────────────────────────── Sidebar nav */

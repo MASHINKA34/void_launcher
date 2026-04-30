@@ -193,9 +193,20 @@ body {
 /* ═══════════════════════════════════════════════════ INSTALL SCREEN */
 #screen-install {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   background: var(--bg-primary);
+}
+
+#install-titlebar {
+  flex-shrink: 0;
+}
+
+#screen-install .install-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
 }
 
 .install-container {
