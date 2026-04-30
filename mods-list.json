@@ -1,0 +1,8 @@
+[
+  {
+    "name": "ExampleMod",
+    "filename": "examplemod-1.0.jar",
+    "url": "https://example.com/mods/examplemod-1.0.jar",
+    "sha256": "abc123def456abc123def456abc123def456abc123def456abc123def456abc123"
+  }
+]

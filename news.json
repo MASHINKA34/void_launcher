@@ -1,0 +1,17 @@
+[
+  {
+    "date": "2025-01-15",
+    "title": "Server Launch!",
+    "body": "Welcome to our private Minecraft server! We are running NeoForge 1.21.1 with a carefully curated mod pack. Join us and explore!"
+  },
+  {
+    "date": "2025-01-10",
+    "title": "Launcher Released",
+    "body": "Our custom launcher is now available. It automatically installs and updates all required mods so you can focus on playing."
+  },
+  {
+    "date": "2025-01-05",
+    "title": "Mod Pack Update v1.1",
+    "body": "Several mods have been updated to their latest versions. The launcher will automatically sync your mods on the next launch."
+  }
+]
