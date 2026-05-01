@@ -340,11 +340,25 @@ function initConsole() {
     $('console-output').innerHTML = '';
   });
 
+  $('btn-copy-console').addEventListener('click', async () => {
+    const text = $('console-output').innerText;
+    if (!text.trim()) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = $('btn-copy-console');
+      const orig = btn.innerHTML;
+      btn.textContent = '✓ Скопировано!';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    } catch (_) {
+      showError('Не удалось скопировать в буфер обмена.');
+    }
+  });
+
   window.api.onGameStdout((data) => appendConsole(data, 'stdout'));
   window.api.onGameStderr((data) => appendConsole(data, 'stderr'));
   window.api.onGameExit((code) => {
     state.isGameRunning = false;
-    $('btn-play').disabled = false;
+    setPlayBtnState('idle');
     appendConsole(`\n[Лаунчер] Игра завершена (код ${code})\n`, 'system');
   });
 }
@@ -381,10 +395,31 @@ function handleModSyncProgress(data) {
 }
 
 /* ─────────────────────────────────────────────────────────────── Play */
+function setPlayBtnState(state_) {
+  const btn = $('btn-play');
+  if (state_ === 'loading') {
+    btn.disabled = true;
+    btn.innerHTML = `<div class="play-spinner"></div><span>ЗАПУСК...</span>`;
+  } else if (state_ === 'syncing') {
+    btn.disabled = true;
+    btn.innerHTML = `<div class="play-spinner"></div><span>СИНХРОНИЗАЦИЯ</span>`;
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg><span>ИГРАТЬ</span>`;
+  }
+}
+
 async function startGame() {
-  if (state.isGameRunning) return;
+  if (state.isGameRunning) {
+    appendConsole('[Лаунчер] Игра уже запущена\n', 'system');
+    showTab('console');
+    return;
+  }
+
+  appendConsole('[Лаунчер] Нажата кнопка ИГРАТЬ\n', 'system');
+
   const overlay = $('sync-overlay');
-  $('btn-play').disabled = true;
+  setPlayBtnState('syncing');
   $('sync-progress-bar').style.width = '0%';
   $('sync-mod-name').textContent = 'Подготовка...';
   $('sync-detail').textContent   = '';
@@ -392,40 +427,56 @@ async function startGame() {
   window.api.removeAllListeners('mod-sync-progress');
   window.api.onModSyncProgress(handleModSyncProgress);
 
-  // Sync mods
-  overlay.classList.remove('hidden');
-  const syncResult = await window.api.syncMods({ gameDir: state.settings.gameDir });
-  overlay.classList.add('hidden');
+  try {
+    // ── Синхронизация модов ─────────────────────────────────────────
+    overlay.classList.remove('hidden');
+    appendConsole('[Лаунчер] Синхронизация модов...\n', 'system');
 
-  if (!syncResult.success) {
-    $('btn-play').disabled = false;
-    showError(
-      `Ошибка синхронизации модов: ${syncResult.error}\n\nПроверь подключение к интернету и попробуй ещё раз.`,
-      () => startGame()
-    );
-    return;
+    const syncResult = await window.api.syncMods({ gameDir: state.settings.gameDir });
+    overlay.classList.add('hidden');
+
+    if (!syncResult.success) {
+      setPlayBtnState('idle');
+      appendConsole(`[ОШИБКА] Синхронизация: ${syncResult.error}\n`, 'stderr');
+      showError(
+        `Ошибка синхронизации модов:\n${syncResult.error}\n\nПроверь подключение к интернету.`,
+        () => startGame()
+      );
+      return;
+    }
+
+    appendConsole('[Лаунчер] Моды синхронизированы ✓\n', 'system');
+
+    // ── Запуск игры ─────────────────────────────────────────────────
+    setPlayBtnState('loading');
+    showTab('console');
+    appendConsole(`[Лаунчер] Запуск Minecraft...\n[Лаунчер] Игрок: ${state.profile.username}\n[Лаунчер] Папка: ${state.settings.gameDir}\n[Лаунчер] ОЗУ: ${state.settings.ram}ГБ\n`, 'system');
+
+    const result = await window.api.launchGame({
+      username: state.profile.username,
+      gameDir:  state.settings.gameDir,
+      ram:      state.settings.ram,
+      width:    state.settings.width,
+      height:   state.settings.height,
+      javaPath: state.settings.javaPath
+    });
+
+    if (!result.success) {
+      setPlayBtnState('idle');
+      appendConsole(`[ОШИБКА] ${result.error}\n`, 'stderr');
+      showError(`Не удалось запустить Minecraft:\n${result.error}`);
+      return;
+    }
+
+    appendConsole('[Лаунчер] Процесс запущен, скрываем лаунчер...\n', 'system');
+    state.isGameRunning = true;
+
+  } catch (err) {
+    overlay.classList.add('hidden');
+    setPlayBtnState('idle');
+    appendConsole(`[КРИТИЧЕСКАЯ ОШИБКА] ${err.message}\n`, 'stderr');
+    showError(`Критическая ошибка:\n${err.message}`);
   }
-
-  // Launch
-  appendConsole('[Лаунчер] Запуск Minecraft...\n', 'system');
-  showTab('console');
-
-  const result = await window.api.launchGame({
-    username: state.profile.username,
-    gameDir:  state.settings.gameDir,
-    ram:      state.settings.ram,
-    width:    state.settings.width,
-    height:   state.settings.height,
-    javaPath: state.settings.javaPath
-  });
-
-  if (!result.success) {
-    $('btn-play').disabled = false;
-    showError(`Не удалось запустить Minecraft:\n${result.error}`);
-    return;
-  }
-
-  state.isGameRunning = true;
 }
 
 /* ─────────────────────────────────────────────────────────────── Settings UI */
@@ -513,6 +564,9 @@ function initTitleBar() {
 
 /* ─────────────────────────────────────────────────────────────── Sidebar nav */
 function initSidebar() {
+  // Применяем Lucide иконки
+  if (window.lucide) window.lucide.createIcons();
+
   document.querySelectorAll('.sidebar-icon').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
@@ -574,6 +628,9 @@ async function boot() {
     initLoginScreen();
   }
 }
+
+// Инициализация Lucide иконок
+if (window.lucide) window.lucide.createIcons();
 
 boot().catch(err => {
   console.error('Boot error:', err);

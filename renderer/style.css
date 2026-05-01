@@ -532,27 +532,42 @@ body {
   border: none;
   background: linear-gradient(135deg, #6d28d9, #a855f7);
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   font-family: inherit;
   letter-spacing: 2px;
   cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px;
+  gap: 6px;
   box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
   animation: glow-pulse 3s ease-in-out infinite;
+  outline: none;
 }
-.btn-play:hover {
-  box-shadow: 0 0 50px rgba(168, 85, 247, 0.7);
-  transform: scale(1.04);
+.btn-play:hover:not(:disabled) {
+  box-shadow:
+    0 0 30px rgba(168, 85, 247, 0.8),
+    0 0 60px rgba(168, 85, 247, 0.5),
+    0 0 100px rgba(168, 85, 247, 0.2);
+  transform: scale(1.07);
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
   animation: none;
 }
-.btn-play:active { transform: scale(0.98); }
+.btn-play:active:not(:disabled) { transform: scale(0.97); }
 .btn-play:disabled {
-  opacity: 0.5; cursor: not-allowed;
+  opacity: 0.6; cursor: not-allowed;
   transform: none; animation: none;
-  box-shadow: none;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+}
+
+/* Спиннер внутри кнопки ИГРАТЬ */
+.play-spinner {
+  width: 22px; height: 22px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
 @keyframes glow-pulse {
@@ -749,7 +764,8 @@ body {
   border-bottom: 1px solid rgba(168,85,247,0.08);
   flex-shrink: 0;
 }
-.console-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.console-title   { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.console-actions { display: flex; gap: 8px; align-items: center; }
 
 .console-output {
   flex: 1;

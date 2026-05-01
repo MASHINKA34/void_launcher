@@ -22,6 +22,7 @@ function createWindow() {
     center: true,
     backgroundColor: '#0d0618',
     show: false,
+    icon: path.join(__dirname, 'assets', 'icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
