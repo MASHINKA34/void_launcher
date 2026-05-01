@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
-  <title>MyLauncher</title>
+  <title>VoID Cube</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════ LOGIN SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════ ЭКРАН ВХОДА -->
 <div id="screen-login" class="screen active">
   <canvas id="particles-canvas"></canvas>
 
   <div class="login-card">
-    <!-- Logo -->
+    <!-- Логотип -->
     <div class="logo-wrap">
       <svg class="logo-svg" width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -27,36 +27,30 @@
             <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <!-- Outer hexagon -->
         <polygon points="36,4 64,20 64,52 36,68 8,52 8,20"
                  fill="url(#lg1)" opacity="0.85" filter="url(#glow)"/>
-        <!-- Mid hex ring -->
         <polygon points="36,12 57,24 57,48 36,60 15,48 15,24"
                  fill="none" stroke="#c084fc" stroke-width="1.2" opacity="0.6"/>
-        <!-- Inner hex -->
         <polygon points="36,20 50,28 50,44 36,52 22,44 22,28"
                  fill="none" stroke="#a855f7" stroke-width="0.8" opacity="0.4"/>
-        <!-- Crystal facets -->
         <line x1="36" y1="12" x2="36" y2="60" stroke="#e9d5ff" stroke-width="0.6" opacity="0.35"/>
         <line x1="15" y1="24" x2="57" y2="48" stroke="#e9d5ff" stroke-width="0.6" opacity="0.35"/>
         <line x1="57" y1="24" x2="15" y2="48" stroke="#e9d5ff" stroke-width="0.6" opacity="0.35"/>
-        <!-- Center gem -->
-        <polygon points="36,26 44,32 44,42 36,48 28,42 28,32"
-                 fill="#a855f7" opacity="0.7"/>
+        <polygon points="36,26 44,32 44,42 36,48 28,42 28,32" fill="#a855f7" opacity="0.7"/>
         <polygon points="36,26 44,32 36,36" fill="#c084fc" opacity="0.8"/>
         <polygon points="36,36 44,42 36,48 28,42" fill="#7c3aed" opacity="0.8"/>
       </svg>
     </div>
 
-    <h1 class="logo-title">MyLauncher</h1>
-    <p class="logo-subtitle">Private Launcher</p>
+    <h1 class="logo-title">VoID Cube</h1>
+    <p class="logo-subtitle">Приватный лаунчер</p>
 
     <div class="login-form">
       <div class="input-wrap">
         <input
           id="nickname-input"
           type="text"
-          placeholder="Enter your nickname"
+          placeholder="Введи никнейм"
           maxlength="16"
           autocomplete="off"
           spellcheck="false"
@@ -65,7 +59,7 @@
       </div>
 
       <button id="btn-enter" class="btn-primary btn-full">
-        <span>ENTER THE WORLD</span>
+        <span>ВОЙТИ В МИР</span>
       </button>
     </div>
   </div>
@@ -73,9 +67,9 @@
   <div class="version-tag">v1.0.0</div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ INSTALL SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════ ЭКРАН УСТАНОВКИ -->
 <div id="screen-install" class="screen">
-  <!-- Titlebar for install screen -->
+  <!-- Тайтлбар экрана установки -->
   <div class="titlebar" id="install-titlebar">
     <div class="titlebar-left">
       <svg width="18" height="18" viewBox="0 0 72 72" style="margin-right:6px;opacity:.7">
@@ -85,13 +79,13 @@
         <polygon points="36,4 64,20 64,52 36,68 8,52 8,20" fill="url(#lg_tb2)"/>
         <polygon points="36,26 44,32 44,42 36,48 28,42 28,32" fill="#a855f7" opacity="0.8"/>
       </svg>
-      <span class="titlebar-name">MyLauncher — Setup</span>
+      <span class="titlebar-name">VoID Cube — Установка</span>
     </div>
     <div class="titlebar-controls">
-      <button class="tb-btn" id="install-btn-minimize" title="Minimize">
+      <button class="tb-btn" id="install-btn-minimize" title="Свернуть">
         <svg width="12" height="2" viewBox="0 0 12 2"><rect width="12" height="2" fill="currentColor"/></svg>
       </button>
-      <button class="tb-btn tb-close" id="install-btn-close" title="Close">
+      <button class="tb-btn tb-close" id="install-btn-close" title="Закрыть">
         <svg width="10" height="10" viewBox="0 0 10 10">
           <line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.5"/>
           <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.5"/>
@@ -101,7 +95,7 @@
   </div>
 
   <div class="install-container">
-    <!-- Logo small -->
+    <!-- Логотип -->
     <div class="install-logo">
       <svg width="48" height="48" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -114,15 +108,15 @@
         <polygon points="36,26 44,32 44,42 36,48 28,42 28,32" fill="#a855f7" opacity="0.7"/>
         <polygon points="36,26 44,32 36,36" fill="#c084fc" opacity="0.8"/>
       </svg>
-      <span>First Launch Setup</span>
+      <span>Первый запуск</span>
     </div>
 
     <div id="install-steps">
-      <!-- Steps populated by JS -->
+      <!-- Шаги заполняются из JS -->
     </div>
 
     <div class="install-progress-wrap">
-      <div class="install-progress-label" id="install-progress-label">Preparing...</div>
+      <div class="install-progress-label" id="install-progress-label">Подготовка...</div>
       <div class="progress-bar-track">
         <div class="progress-bar-fill" id="install-progress-bar"></div>
       </div>
@@ -131,15 +125,15 @@
 
     <div id="install-error" class="install-error hidden">
       <span id="install-error-msg"></span>
-      <button id="btn-retry" class="btn-secondary">Retry</button>
+      <button id="btn-retry" class="btn-secondary">Повторить</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ MAIN SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════ ГЛАВНЫЙ ЭКРАН -->
 <div id="screen-main" class="screen">
 
-  <!-- Custom title bar -->
+  <!-- Тайтлбар -->
   <div class="titlebar" id="titlebar">
     <div class="titlebar-left">
       <svg width="18" height="18" viewBox="0 0 72 72" style="margin-right:6px;opacity:.7">
@@ -149,13 +143,13 @@
         <polygon points="36,4 64,20 64,52 36,68 8,52 8,20" fill="url(#lg3)"/>
         <polygon points="36,26 44,32 44,42 36,48 28,42 28,32" fill="#a855f7" opacity="0.8"/>
       </svg>
-      <span class="titlebar-name">MyLauncher</span>
+      <span class="titlebar-name">VoID Cube</span>
     </div>
     <div class="titlebar-controls">
-      <button class="tb-btn" id="btn-minimize" title="Minimize">
+      <button class="tb-btn" id="btn-minimize" title="Свернуть">
         <svg width="12" height="2" viewBox="0 0 12 2"><rect width="12" height="2" fill="currentColor"/></svg>
       </button>
-      <button class="tb-btn tb-close" id="btn-close" title="Close">
+      <button class="tb-btn tb-close" id="btn-close" title="Закрыть">
         <svg width="10" height="10" viewBox="0 0 10 10">
           <line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.5"/>
           <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.5"/>
@@ -164,24 +158,24 @@
     </div>
   </div>
 
-  <!-- App layout -->
+  <!-- Разметка приложения -->
   <div class="app-layout">
 
-    <!-- Sidebar -->
+    <!-- Боковая панель -->
     <nav class="sidebar">
-      <button class="sidebar-icon active" id="nav-home" data-tab="home" title="Home">
+      <button class="sidebar-icon active" id="nav-home" data-tab="home" title="Главная">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
           <polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
       </button>
-      <button class="sidebar-icon" id="nav-settings" data-tab="settings" title="Settings">
+      <button class="sidebar-icon" id="nav-settings" data-tab="settings" title="Настройки">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
         </svg>
       </button>
-      <button class="sidebar-icon" id="nav-console" data-tab="console" title="Console">
+      <button class="sidebar-icon" id="nav-console" data-tab="console" title="Консоль">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <polyline points="4 17 10 11 4 5"/>
           <line x1="12" y1="19" x2="20" y2="19"/>
@@ -189,29 +183,29 @@
       </button>
     </nav>
 
-    <!-- Content area -->
+    <!-- Область контента -->
     <div class="content-area">
 
-      <!-- ── TAB: HOME ───────────────────────────────────────────────────────── -->
+      <!-- ── ВКЛАДКА: ГЛАВНАЯ ─────────────────────────────────────────────── -->
       <div id="tab-home" class="tab-pane active">
-        <!-- Top bar -->
+        <!-- Верхняя панель -->
         <div class="top-bar">
           <div class="player-info">
             <div class="player-avatar" id="player-avatar">P</div>
             <div class="player-meta">
-              <div class="player-name" id="player-name">Player</div>
-              <div class="player-label">Offline Mode</div>
+              <div class="player-name" id="player-name">Игрок</div>
+              <div class="player-label">Оффлайн режим</div>
             </div>
           </div>
           <div class="server-status" id="server-status">
             <span class="status-dot offline"></span>
-            <span class="status-text" id="status-text">Checking...</span>
+            <span class="status-text" id="status-text">Проверка...</span>
           </div>
         </div>
 
-        <!-- Hero + News row -->
+        <!-- Герой + Новости -->
         <div class="home-body">
-          <!-- Hero -->
+          <!-- Герой -->
           <div class="hero-area">
             <div class="version-badge">NeoForge 1.21.1</div>
 
@@ -221,27 +215,27 @@
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="5,3 19,12 5,21"/>
                 </svg>
-                PLAY
+                ИГРАТЬ
               </button>
             </div>
 
-            <div class="mods-info" id="mods-info">Loading mods...</div>
+            <div class="mods-info" id="mods-info">Загрузка...</div>
           </div>
 
-          <!-- News -->
+          <!-- Новости -->
           <div class="news-panel">
-            <div class="news-header">Latest News</div>
+            <div class="news-header">Последние новости</div>
             <div class="news-list" id="news-list">
-              <div class="news-loading">Loading...</div>
+              <div class="news-loading">Загрузка...</div>
             </div>
           </div>
         </div>
 
-        <!-- Mod sync progress (shown during sync) -->
+        <!-- Синхронизация модов (показывается при синхронизации) -->
         <div id="sync-overlay" class="sync-overlay hidden">
           <div class="sync-box">
-            <div class="sync-title">Syncing Mods...</div>
-            <div class="sync-mod-name" id="sync-mod-name">Checking mods list</div>
+            <div class="sync-title">Синхронизация модов...</div>
+            <div class="sync-mod-name" id="sync-mod-name">Проверка списка модов</div>
             <div class="progress-bar-track">
               <div class="progress-bar-fill" id="sync-progress-bar"></div>
             </div>
@@ -250,76 +244,76 @@
         </div>
       </div>
 
-      <!-- ── TAB: SETTINGS ──────────────────────────────────────────────────── -->
+      <!-- ── ВКЛАДКА: НАСТРОЙКИ ──────────────────────────────────────────── -->
       <div id="tab-settings" class="tab-pane">
         <div class="settings-wrap">
-          <h2 class="settings-title">Settings</h2>
+          <h2 class="settings-title">Настройки</h2>
 
-          <!-- RAM -->
+          <!-- ОЗУ -->
           <div class="setting-group">
-            <label class="setting-label">Allocated RAM</label>
+            <label class="setting-label">Оперативная память</label>
             <div class="ram-row">
               <input type="range" id="setting-ram" min="2" max="16" step="1" value="4" class="range-input">
-              <span class="ram-value" id="ram-value">4 GB</span>
+              <span class="ram-value" id="ram-value">4 ГБ</span>
             </div>
           </div>
 
-          <!-- Resolution -->
+          <!-- Разрешение -->
           <div class="setting-group">
-            <label class="setting-label">Resolution</label>
+            <label class="setting-label">Разрешение экрана</label>
             <div class="resolution-row">
-              <input type="number" id="setting-width"  class="text-input small" value="1280" min="640"  max="7680" placeholder="Width">
+              <input type="number" id="setting-width"  class="text-input small" value="1280" min="640"  max="7680" placeholder="Ширина">
               <span class="res-x">×</span>
-              <input type="number" id="setting-height" class="text-input small" value="720"  min="480"  max="4320" placeholder="Height">
+              <input type="number" id="setting-height" class="text-input small" value="720"  min="480"  max="4320" placeholder="Высота">
             </div>
           </div>
 
-          <!-- Game folder -->
+          <!-- Папка игры -->
           <div class="setting-group">
-            <label class="setting-label">Game Folder</label>
+            <label class="setting-label">Папка игры</label>
             <div class="folder-row">
-              <input type="text" id="setting-gamedir" class="text-input" placeholder="Game directory" readonly>
-              <button class="btn-secondary" id="btn-browse">Browse</button>
+              <input type="text" id="setting-gamedir" class="text-input" placeholder="Директория игры" readonly>
+              <button class="btn-secondary" id="btn-browse">Обзор</button>
             </div>
           </div>
 
-          <!-- Java path -->
+          <!-- Путь к Java -->
           <div class="setting-group">
-            <label class="setting-label">Java Path</label>
+            <label class="setting-label">Путь к Java</label>
             <div class="folder-row">
-              <input type="text" id="setting-java" class="text-input" placeholder="auto">
-              <button class="btn-secondary" id="btn-detect-java">Auto-detect</button>
+              <input type="text" id="setting-java" class="text-input" placeholder="авто">
+              <button class="btn-secondary" id="btn-detect-java">Определить</button>
             </div>
           </div>
 
-          <!-- Nickname change -->
+          <!-- Никнейм -->
           <div class="setting-group">
-            <label class="setting-label">Nickname</label>
+            <label class="setting-label">Никнейм</label>
             <div class="folder-row">
-              <input type="text" id="setting-nickname" class="text-input" placeholder="Nickname" maxlength="16" readonly>
-              <button class="btn-secondary" id="btn-change-nick">Change</button>
+              <input type="text" id="setting-nickname" class="text-input" placeholder="Никнейм" maxlength="16" readonly>
+              <button class="btn-secondary" id="btn-change-nick">Изменить</button>
             </div>
           </div>
 
-          <!-- About -->
+          <!-- О лаунчере -->
           <div class="setting-group about-group">
-            <label class="setting-label">About</label>
+            <label class="setting-label">О лаунчере</label>
             <div class="about-rows">
-              <div class="about-row"><span>Launcher Version</span><span id="about-launcher-ver">1.0.0</span></div>
-              <div class="about-row"><span>Minecraft Version</span><span>1.21.1 — NeoForge 21.1.172</span></div>
+              <div class="about-row"><span>Версия лаунчера</span><span id="about-launcher-ver">1.0.0</span></div>
+              <div class="about-row"><span>Версия Minecraft</span><span>1.21.1 — NeoForge 21.1.172</span></div>
             </div>
           </div>
 
-          <button class="btn-primary" id="btn-save-settings">Save Settings</button>
-          <div class="settings-saved hidden" id="settings-saved">✓ Settings saved</div>
+          <button class="btn-primary" id="btn-save-settings">Сохранить настройки</button>
+          <div class="settings-saved hidden" id="settings-saved">✓ Настройки сохранены</div>
         </div>
       </div>
 
-      <!-- ── TAB: CONSOLE ───────────────────────────────────────────────────── -->
+      <!-- ── ВКЛАДКА: КОНСОЛЬ ────────────────────────────────────────────── -->
       <div id="tab-console" class="tab-pane">
         <div class="console-header">
-          <span class="console-title">Console Log</span>
-          <button class="btn-secondary btn-sm" id="btn-clear-console">Clear</button>
+          <span class="console-title">Журнал консоли</span>
+          <button class="btn-secondary btn-sm" id="btn-clear-console">Очистить</button>
         </div>
         <div class="console-output" id="console-output"></div>
       </div>
@@ -328,7 +322,7 @@
   </div><!-- /app-layout -->
 </div><!-- /screen-main -->
 
-<!-- ═══════════════════════════════════════════════════════════════ ERROR MODAL -->
+<!-- ═══════════════════════════════════════════════════════════════ МОДАЛЬНОЕ ОКНО ОШИБКИ -->
 <div id="error-modal" class="modal-backdrop hidden">
   <div class="modal-box">
     <div class="modal-icon">
@@ -338,11 +332,11 @@
         <line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
     </div>
-    <div class="modal-title">Error</div>
+    <div class="modal-title">Ошибка</div>
     <div class="modal-msg" id="modal-msg"></div>
     <div class="modal-actions">
-      <button class="btn-secondary" id="modal-retry" style="display:none">Retry</button>
-      <button class="btn-primary"   id="modal-ok">OK</button>
+      <button class="btn-secondary" id="modal-retry" style="display:none">Повторить</button>
+      <button class="btn-primary"   id="modal-ok">ОК</button>
     </div>
   </div>
 </div>

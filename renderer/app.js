@@ -105,10 +105,10 @@ function initLoginScreen() {
   const NICK_RE = /^[a-zA-Z0-9_]{3,16}$/;
 
   function validateNick(val) {
-    if (!val) return 'Nickname is required.';
-    if (val.length < 3)  return 'Minimum 3 characters.';
-    if (val.length > 16) return 'Maximum 16 characters.';
-    if (!NICK_RE.test(val)) return 'Only letters, numbers and underscore (_) allowed.';
+    if (!val) return 'Никнейм обязателен.';
+    if (val.length < 3)  return 'Минимум 3 символа.';
+    if (val.length > 16) return 'Максимум 16 символов.';
+    if (!NICK_RE.test(val)) return 'Только буквы, цифры и символ подчёркивания (_).';
     return null;
   }
 
@@ -148,9 +148,9 @@ function initLoginScreen() {
 
 /* ─────────────────────────────────────────────────────────────── Install Screen */
 const STEPS = [
-  { id: 'java',      label: 'Java 21 Runtime'      },
-  { id: 'minecraft', label: 'Minecraft 1.21.1'      },
-  { id: 'neoforge',  label: 'NeoForge 21.1.172'    }
+  { id: 'java',      label: 'Java 21 Runtime'   },
+  { id: 'minecraft', label: 'Minecraft 1.21.1'  },
+  { id: 'neoforge',  label: 'NeoForge 21.1.172' }
 ];
 
 let stepStatus = {};
@@ -236,7 +236,7 @@ async function runInstallation() {
   showScreen('install');
   stepStatus = { java: 'pending', minecraft: 'pending', neoforge: 'pending' };
   renderInstallSteps();
-  setInstallProgress(0, 'Starting installation...', '');
+  setInstallProgress(0, 'Начало установки...', '');
   $('install-error').classList.add('hidden');
 
   window.api.removeAllListeners('install-progress');
@@ -248,7 +248,7 @@ async function runInstallation() {
   });
 
   if (!result.success) {
-    $('install-error-msg').textContent = result.error || 'Installation failed.';
+    $('install-error-msg').textContent = result.error || 'Установка завершилась с ошибкой.';
     $('install-error').classList.remove('hidden');
     $('btn-retry').onclick = () => runInstallation();
     return false;
@@ -268,15 +268,15 @@ function updateServerStatus(res) {
   const text = $('status-text');
   dot.className = 'status-dot ' + (res.online ? 'online' : 'offline');
   if (res.online) {
-    text.textContent = `ONLINE  ${res.players.online}/${res.players.max} players  ${res.ping}ms`;
+    text.textContent = `ОНЛАЙН  ${res.players.online}/${res.players.max} игроков  ${res.ping}мс`;
   } else {
-    text.textContent = 'OFFLINE';
+    text.textContent = 'ОФФЛАЙН';
   }
 }
 
 async function pingServer() {
   qs('#server-status .status-dot').className = 'status-dot checking';
-  $('status-text').textContent = 'Checking...';
+  $('status-text').textContent = 'Проверка...';
   try {
     const res = await window.api.pingServer();
     updateServerStatus(res);
@@ -290,7 +290,7 @@ async function loadNews() {
   const list = $('news-list');
   try {
     const news = await window.api.getNews();
-    if (!news.length) { list.innerHTML = '<div class="news-loading">No news yet.</div>'; return; }
+    if (!news.length) { list.innerHTML = '<div class="news-loading">Новостей пока нет.</div>'; return; }
     list.innerHTML = '';
     for (const item of news) {
       const el = document.createElement('div');
@@ -303,7 +303,7 @@ async function loadNews() {
       list.appendChild(el);
     }
   } catch (_) {
-    list.innerHTML = '<div class="news-loading">Failed to load news.</div>';
+    list.innerHTML = '<div class="news-loading">Ошибка загрузки новостей.</div>';
   }
 }
 
@@ -313,9 +313,9 @@ async function loadModsInfo() {
   try {
     const mods = await window.api.getModsList();
     state.modsList = mods;
-    el.textContent = `${mods.length} mod${mods.length !== 1 ? 's' : ''} in pack`;
+    el.textContent = `${mods.length} ${mods.length === 1 ? 'мод' : mods.length >= 2 && mods.length <= 4 ? 'мода' : 'модов'} в сборке`;
   } catch (_) {
-    el.textContent = '0 mods';
+    el.textContent = '0 модов в сборке';
   }
 }
 
@@ -345,7 +345,7 @@ function initConsole() {
   window.api.onGameExit((code) => {
     state.isGameRunning = false;
     $('btn-play').disabled = false;
-    appendConsole(`\n[Launcher] Game process exited (code ${code})\n`, 'system');
+    appendConsole(`\n[Лаунчер] Игра завершена (код ${code})\n`, 'system');
   });
 }
 
@@ -386,7 +386,7 @@ async function startGame() {
   const overlay = $('sync-overlay');
   $('btn-play').disabled = true;
   $('sync-progress-bar').style.width = '0%';
-  $('sync-mod-name').textContent = 'Preparing...';
+  $('sync-mod-name').textContent = 'Подготовка...';
   $('sync-detail').textContent   = '';
 
   window.api.removeAllListeners('mod-sync-progress');
@@ -400,14 +400,14 @@ async function startGame() {
   if (!syncResult.success) {
     $('btn-play').disabled = false;
     showError(
-      `Mod sync failed: ${syncResult.error}\n\nCheck your internet connection and try again.`,
+      `Ошибка синхронизации модов: ${syncResult.error}\n\nПроверь подключение к интернету и попробуй ещё раз.`,
       () => startGame()
     );
     return;
   }
 
   // Launch
-  appendConsole('[Launcher] Starting Minecraft...\n', 'system');
+  appendConsole('[Лаунчер] Запуск Minecraft...\n', 'system');
   showTab('console');
 
   const result = await window.api.launchGame({
@@ -421,7 +421,7 @@ async function startGame() {
 
   if (!result.success) {
     $('btn-play').disabled = false;
-    showError(`Failed to launch Minecraft:\n${result.error}`);
+    showError(`Не удалось запустить Minecraft:\n${result.error}`);
     return;
   }
 
@@ -433,7 +433,7 @@ async function loadSettings() {
   const s = state.settings;
   $('setting-ram').max    = state.systemRam;
   $('setting-ram').value  = s.ram;
-  $('ram-value').textContent = `${s.ram} GB`;
+  $('ram-value').textContent = `${s.ram} ГБ`;
   $('setting-width').value   = s.width;
   $('setting-height').value  = s.height;
   $('setting-gamedir').value = s.gameDir;
@@ -444,7 +444,7 @@ async function loadSettings() {
 function initSettingsUI() {
   // RAM slider live update
   $('setting-ram').addEventListener('input', () => {
-    $('ram-value').textContent = `${$('setting-ram').value} GB`;
+    $('ram-value').textContent = `${$('setting-ram').value} ГБ`;
   });
 
   // Browse folder
@@ -455,14 +455,14 @@ function initSettingsUI() {
 
   // Detect Java
   $('btn-detect-java').addEventListener('click', async () => {
-    $('btn-detect-java').textContent = 'Detecting...';
+    $('btn-detect-java').textContent = 'Поиск...';
     $('btn-detect-java').disabled    = true;
     try {
       const java = await window.api.detectJava(state.settings.gameDir);
       $('setting-java').value = java || '';
-      if (!java) showError('Java 21 not found. Install Java 21 or run the game installer.');
+      if (!java) showError('Java 21 не найдена. Установи Java 21 или запусти установку игры.');
     } finally {
-      $('btn-detect-java').textContent = 'Auto-detect';
+      $('btn-detect-java').textContent = 'Определить';
       $('btn-detect-java').disabled    = false;
     }
   });
@@ -577,5 +577,5 @@ async function boot() {
 
 boot().catch(err => {
   console.error('Boot error:', err);
-  showError(`Launcher failed to start:\n${err.message}`);
+  showError(`Лаунчер не смог запуститься:\n${err.message}`);
 });
