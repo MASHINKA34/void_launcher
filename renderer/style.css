@@ -390,6 +390,11 @@ body {
   color: var(--purple-accent);
   box-shadow: 0 0 14px rgba(168, 85, 247, 0.2);
 }
+/* Lucide SVG внутри кнопок сайдбара */
+.sidebar-icon svg {
+  width: 22px; height: 22px;
+  stroke-width: 1.8px;
+}
 /* Tooltip */
 .sidebar-icon::after {
   content: attr(title);
@@ -518,12 +523,13 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid rgba(168, 85, 247, 0.3);
+  border: 2px solid rgba(168, 85, 247, 0.25);
+  pointer-events: none; /* ← НЕ перехватывает клики */
   animation: ring-pulse 2.5s ease-in-out infinite;
 }
 @keyframes ring-pulse {
-  0%, 100% { transform: scale(1);    opacity: 0.6; }
-  50%       { transform: scale(1.08); opacity: 0.2; }
+  0%, 100% { transform: scale(1);    opacity: 0.5; }
+  50%       { transform: scale(1.1);  opacity: 0.15; }
 }
 
 .btn-play {
@@ -539,30 +545,42 @@ body {
   cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 6px;
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
-  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
-  animation: glow-pulse 3s ease-in-out infinite;
+  /* Спокойное состояние — без анимации, лёгкая тень */
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
   outline: none;
+  position: relative;
+  z-index: 1; /* выше .play-ring */
 }
+
+/* ── Hover — кнопка "загорается" ─────────────────────── */
 .btn-play:hover:not(:disabled) {
   box-shadow:
-    0 0 30px rgba(168, 85, 247, 0.8),
-    0 0 60px rgba(168, 85, 247, 0.5),
-    0 0 100px rgba(168, 85, 247, 0.2);
+    0 0 25px  rgba(168, 85, 247, 0.9),
+    0 0 55px  rgba(168, 85, 247, 0.6),
+    0 0 100px rgba(168, 85, 247, 0.25);
   transform: scale(1.07);
   background: linear-gradient(135deg, #7c3aed, #c084fc);
+  animation: glow-pulse 1.2s ease-in-out infinite;
+}
+.btn-play:active:not(:disabled) {
+  transform: scale(0.97);
   animation: none;
 }
-.btn-play:active:not(:disabled) { transform: scale(0.97); }
 .btn-play:disabled {
-  opacity: 0.6; cursor: not-allowed;
+  opacity: 0.55; cursor: not-allowed;
   transform: none; animation: none;
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+  box-shadow: none;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 25px rgba(168,85,247,0.9), 0 0 55px rgba(168,85,247,0.5); }
+  50%       { box-shadow: 0 0 40px rgba(168,85,247,1),   0 0 80px rgba(168,85,247,0.7), 0 0 120px rgba(168,85,247,0.3); }
 }
 
 /* Спиннер внутри кнопки ИГРАТЬ */
 .play-spinner {
-  width: 22px; height: 22px;
+  width: 20px; height: 20px;
   border: 2px solid rgba(255,255,255,0.25);
   border-top-color: #fff;
   border-radius: 50%;
@@ -570,10 +588,6 @@ body {
   flex-shrink: 0;
 }
 
-@keyframes glow-pulse {
-  0%,100% { box-shadow: 0 0 30px rgba(168,85,247,0.4); }
-  50%      { box-shadow: 0 0 50px rgba(168,85,247,0.65); }
-}
 
 .mods-info { font-size: 12px; color: var(--text-muted); }
 

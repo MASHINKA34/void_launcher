@@ -202,32 +202,11 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
   });
 
   launcher.setExitCallback((code) => {
-    if (tray) {
-      tray.destroy();
-      tray = null;
-    }
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.webContents.send('game-exit', code);
-    }
+    if (mainWindow) mainWindow.webContents.send('game-exit', code);
   });
 
   try {
     await launcher.launch(launchOptions);
-
-    mainWindow.hide();
-
-    // Minimal tray so the app stays alive while game runs
-    try {
-      const emptyIcon = nativeImage.createEmpty();
-      tray = new Tray(emptyIcon);
-      tray.setToolTip(config.LAUNCHER_NAME);
-      tray.setContextMenu(Menu.buildFromTemplate([
-        { label: 'Show Launcher', click: () => { if (mainWindow) mainWindow.show(); } },
-        { label: 'Quit', click: () => app.quit() }
-      ]));
-    } catch (_) {}
-
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };

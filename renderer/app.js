@@ -370,23 +370,24 @@ function handleModSyncProgress(data) {
   const bar      = $('sync-progress-bar');
   const detail   = $('sync-detail');
 
-  overlay.classList.remove('hidden');
-
   switch (data.type) {
     case 'status':
+      overlay.classList.remove('hidden');
       modName.textContent = data.message || '';
       break;
     case 'mod-check':
+      overlay.classList.remove('hidden');
       modName.textContent = `(${data.current}/${data.total}) ${data.modName}`;
       bar.style.width = `${Math.round((data.current / data.total) * 100)}%`;
       break;
     case 'mod-download':
+      overlay.classList.remove('hidden');
       detail.textContent = `${fmtBytes(data.received)} / ${fmtBytes(data.total)}  ${fmtSpeed(data.speed)}`;
       bar.style.width = `${data.percent}%`;
       break;
     case 'done':
-      modName.textContent = data.message;
       bar.style.width = '100%';
+      overlay.classList.add('hidden');
       break;
     case 'error':
       overlay.classList.add('hidden');
@@ -468,7 +469,7 @@ async function startGame() {
       return;
     }
 
-    appendConsole('[Лаунчер] Процесс запущен, скрываем лаунчер...\n', 'system');
+    appendConsole('[Лаунчер] Minecraft запущен!\n', 'system');
     state.isGameRunning = true;
 
   } catch (err) {

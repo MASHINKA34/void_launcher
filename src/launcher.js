@@ -5,7 +5,8 @@
 
 const path = require('path');
 const fs   = require('fs');
-const { Client, Authenticator } = require('minecraft-launcher-core');
+const { Client } = require('minecraft-launcher-core');
+const crypto = require('crypto');
 const config = require('../config');
 
 let outputCallback = null;
@@ -43,7 +44,11 @@ async function launch(opts) {
   const launcher = new Client();
 
   const launchOptions = {
-    authorization: Authenticator.getOfflineAuth(username),
+    authorization: (() => {
+      const hash = crypto.createHash('md5').update(`OfflinePlayer:${username}`).digest('hex');
+      const uuid = `${hash.slice(0,8)}-${hash.slice(8,12)}-${hash.slice(12,16)}-${hash.slice(16,20)}-${hash.slice(20)}`;
+      return { access_token: 'null', client_token: 'null', uuid, username, user_properties: '{}' };
+    })(),
     root:    gameDir,
     version: {
       number: config.MC_VERSION,
@@ -60,6 +65,10 @@ async function launch(opts) {
     },
     javaPath: javaPath !== 'auto' ? javaPath : undefined,
     customArgs: [
+      '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED',
+      '--add-opens', 'java.base/java.util.jar=ALL-UNNAMED',
+      '--add-opens', 'java.base/sun.security.util=ALL-UNNAMED',
+      '--add-opens', 'java.base/java.net=ALL-UNNAMED',
       '-XX:+UseG1GC',
       '-XX:+ParallelRefProcEnabled',
       '-XX:MaxGCPauseMillis=200',
