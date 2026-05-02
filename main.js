@@ -175,7 +175,8 @@ ipcMain.handle('browse-folder', async () => {
 
 // ─── Content ──────────────────────────────────────────────────────────────────
 
-const NEWS_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/news.json';
+const NEWS_URL     = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/news.json';
+const MODS_LIST_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/mods-list.json';
 
 ipcMain.handle('get-news', async () => {
   try {
@@ -224,10 +225,28 @@ ipcMain.handle('detect-java', async (_, gameDir) => {
 
 ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   const modSync = require('./src/modSync');
+  const fetch   = require('node-fetch');
+
   modSync.setProgressCallback((progress) => {
     if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
   });
-  return await modSync.sync(gameDir, path.join(__dirname, 'mods-list.json'));
+
+  // Пытаемся получить свежий список модов с GitHub
+  const localModsListPath = path.join(__dirname, 'mods-list.json');
+  try {
+    const res = await fetch(`${MODS_LIST_URL}?t=${Date.now()}`, { timeout: 10_000 });
+    if (res.ok) {
+      const remoteList = await res.text();
+      const cachePath  = path.join(app.getPath('userData'), 'mods-list-cache.json');
+      fs.writeFileSync(cachePath, remoteList, 'utf8');
+      return await modSync.sync(gameDir, cachePath);
+    }
+  } catch (_) {}
+
+  // Fallback: кэш с прошлого запуска → локальный файл
+  const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
+  const fallback  = fs.existsSync(cachePath) ? cachePath : localModsListPath;
+  return await modSync.sync(gameDir, fallback);
 });
 
 // ─── Game launch ─────────────────────────────────────────────────────────────

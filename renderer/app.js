@@ -96,13 +96,13 @@ function initParticles() {
 }
 
 /* ─────────────────────────────────────────────────────────────── Login Screen */
-const NICK_RE = /^[a-zA-Zа-яА-ЯёЁ0-9_]{3,16}$/;
+const NICK_RE = /^[a-zA-Z0-9_]{3,16}$/;
 
 function validateNick(val) {
   if (!val) return 'Никнейм обязателен.';
   if (val.length < 3)  return 'Минимум 3 символа.';
   if (val.length > 16) return 'Максимум 16 символов.';
-  if (!NICK_RE.test(val)) return 'Только буквы, цифры и символ подчёркивания (_).';
+  if (!NICK_RE.test(val)) return 'Только латинские буквы, цифры и _ (кириллица не поддерживается).';
   return null;
 }
 
