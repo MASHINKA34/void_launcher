@@ -368,12 +368,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ─────────────────────────────────────────────────────────────── Mods info */
+function modsWord(n) {
+  return n === 1 ? 'мод' : (n >= 2 && n <= 4) ? 'мода' : 'модов';
+}
+
+function renderModsTab(mods) {
+  const list  = $('mods-tab-list');
+  const count = $('mods-tab-count');
+  count.textContent = `${mods.length} ${modsWord(mods.length)}`;
+
+  if (!mods.length) {
+    list.innerHTML = '<div class="mods-tab-empty">Модов в сборке нет</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  mods.forEach(mod => {
+    const card = document.createElement('div');
+    card.className = 'mod-card';
+    card.innerHTML = `
+      <div class="mod-card-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        </svg>
+      </div>
+      <div class="mod-card-info">
+        <div class="mod-card-name">${mod.name || mod.filename}</div>
+        <div class="mod-card-file">${mod.filename}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
 async function loadModsInfo() {
   const el = $('mods-info');
   try {
     const mods = await window.api.getModsList();
     state.modsList = mods;
-    el.textContent = `${mods.length} ${mods.length === 1 ? 'мод' : mods.length >= 2 && mods.length <= 4 ? 'мода' : 'модов'} в сборке`;
+    el.textContent = `${mods.length} ${modsWord(mods.length)} в сборке`;
+    renderModsTab(mods);
   } catch (_) {
     el.textContent = '0 модов в сборке';
   }
@@ -554,9 +588,11 @@ async function loadSettings() {
 }
 
 function initSettingsUI() {
-  // RAM slider live update
+  // RAM slider — обновляем и UI и state сразу
   $('setting-ram').addEventListener('input', () => {
-    $('ram-value').textContent = `${$('setting-ram').value} ГБ`;
+    const val = parseInt($('setting-ram').value, 10);
+    $('ram-value').textContent = `${val} ГБ`;
+    state.settings.ram = val;
   });
 
   // Browse folder

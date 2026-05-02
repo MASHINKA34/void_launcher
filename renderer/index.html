@@ -129,6 +129,9 @@
       <button class="sidebar-icon" id="nav-console" data-tab="console" title="Консоль">
         <i data-lucide="terminal" width="22" height="22"></i>
       </button>
+      <button class="sidebar-icon" id="nav-mods" data-tab="mods" title="Моды">
+        <i data-lucide="package" width="22" height="22"></i>
+      </button>
     </nav>
 
     <!-- Область контента -->
@@ -280,6 +283,17 @@
           </div>
         </div>
         <div class="console-output" id="console-output"></div>
+      </div>
+
+      <!-- ── ВКЛАДКА: МОДЫ ──────────────────────────────────────────────── -->
+      <div id="tab-mods" class="tab-pane">
+        <div class="mods-tab-header">
+          <span class="mods-tab-title">Сборка модов</span>
+          <span class="mods-tab-count" id="mods-tab-count"></span>
+        </div>
+        <div class="mods-tab-list" id="mods-tab-list">
+          <div class="mods-tab-empty">Загрузка...</div>
+        </div>
       </div>
 
     </div><!-- /content-area -->

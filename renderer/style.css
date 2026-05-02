@@ -694,6 +694,92 @@ body {
 }
 .news-modal-close:hover { background: rgba(168, 85, 247, 0.3); }
 
+/* Mods tab */
+.mods-tab-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(168,85,247,0.1);
+  flex-shrink: 0;
+}
+.mods-tab-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.mods-tab-count {
+  font-size: 11px;
+  background: rgba(168,85,247,0.15);
+  color: rgba(168,85,247,0.9);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.mods-tab-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mods-tab-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 40px;
+}
+.mod-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(168,85,247,0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color var(--transition);
+}
+.mod-card:hover { border-color: rgba(168,85,247,0.3); }
+.mod-card-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(168,85,247,0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(168,85,247,0.8);
+}
+.mod-card-info { flex: 1; min-width: 0; }
+.mod-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mod-card-file {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mod-card-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: rgba(34,197,94,0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.2);
+}
+
 /* Nick dropdown */
 .nick-dropdown {
   position: absolute;
