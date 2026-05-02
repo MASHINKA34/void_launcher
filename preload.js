@@ -11,9 +11,11 @@ contextBridge.exposeInMainWorld('api', {
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
 
   // ── Profile ─────────────────────────────────────────────────────────────────
-  getProfile:    ()        => ipcRenderer.invoke('get-profile'),
-  saveProfile:   (profile) => ipcRenderer.invoke('save-profile', profile),
-  deleteProfile: ()        => ipcRenderer.invoke('delete-profile'),
+  getProfile:               ()         => ipcRenderer.invoke('get-profile'),
+  saveProfile:              (profile)  => ipcRenderer.invoke('save-profile', profile),
+  deleteProfile:            ()         => ipcRenderer.invoke('delete-profile'),
+  getProfiles:              ()         => ipcRenderer.invoke('get-profiles'),
+  deleteProfileFromHistory: (username) => ipcRenderer.invoke('delete-profile-from-history', username),
 
   // ── System ──────────────────────────────────────────────────────────────────
   getSystemRam: () => ipcRenderer.invoke('get-system-ram'),

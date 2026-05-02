@@ -24,7 +24,7 @@
     <p class="logo-subtitle">Приватный лаунчер</p>
 
     <div class="login-form">
-      <div class="input-wrap">
+      <div class="input-wrap" style="position:relative">
         <input
           id="nickname-input"
           type="text"
@@ -33,6 +33,7 @@
           autocomplete="off"
           spellcheck="false"
         >
+        <div id="nick-dropdown" class="nick-dropdown hidden"></div>
         <div id="nickname-error" class="input-error hidden"></div>
       </div>
 
@@ -300,6 +301,26 @@
     <div class="modal-actions">
       <button class="btn-secondary" id="modal-retry" style="display:none">Повторить</button>
       <button class="btn-primary"   id="modal-ok">ОК</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ МОДАЛЬНОЕ ОКНО ВЫБОРА НИКА -->
+<div id="profiles-modal" class="modal-backdrop hidden">
+  <div class="modal-box profiles-modal-box">
+    <div class="modal-title">Выбор никнейма</div>
+
+    <div id="profiles-list" class="profiles-list"></div>
+
+    <div id="profiles-new-wrap" class="profiles-new-wrap hidden">
+      <input id="profiles-new-input" type="text" class="text-input" placeholder="Введи новый никнейм" maxlength="16" autocomplete="off" spellcheck="false">
+      <div id="profiles-new-error" class="input-error hidden"></div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn-secondary" id="profiles-btn-new">+ Новый ник</button>
+      <button class="btn-secondary" id="profiles-btn-cancel">Отмена</button>
+      <button class="btn-primary"   id="profiles-btn-confirm" style="display:none">Применить</button>
     </div>
   </div>
 </div>

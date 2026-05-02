@@ -82,7 +82,10 @@ body {
 }
 
 .logo-wrap { margin-bottom: 16px; }
-.logo-svg  { filter: drop-shadow(0 0 12px rgba(168,85,247,0.6)); }
+.logo-svg  {
+  border-radius: 50%;
+  filter: drop-shadow(0 0 16px rgba(168,85,247,0.8));
+}
 
 .logo-title {
   font-size: 28px;
@@ -690,6 +693,83 @@ body {
   transition: background var(--transition);
 }
 .news-modal-close:hover { background: rgba(168, 85, 247, 0.3); }
+
+/* Nick dropdown */
+.nick-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: #1a0d2e;
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 10px;
+  overflow-y: auto;
+  max-height: 180px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.nick-dropdown.hidden { display: none; }
+.nick-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.nick-dropdown-item:hover { background: rgba(168,85,247,0.12); }
+.nick-dropdown-item .nick-delete {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.5;
+  transition: opacity var(--transition), color var(--transition);
+}
+.nick-dropdown-item:hover .nick-delete { opacity: 1; color: #ef4444; }
+
+/* Profiles modal */
+.profiles-modal-box { width: 360px; }
+.profiles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 12px 0 0;
+}
+.profiles-list:empty::after {
+  content: 'Нет сохранённых никнеймов';
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px 0;
+}
+.profile-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(168,85,247,0.12);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+.profile-item:hover { border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.08); }
+.profile-item.active { border-color: rgba(168,85,247,0.6); background: rgba(168,85,247,0.12); }
+.profile-item-name { font-size: 13px; color: var(--text-primary); }
+.profile-item-del {
+  font-size: 16px;
+  color: var(--text-muted);
+  opacity: 0.4;
+  padding: 0 2px;
+  transition: opacity var(--transition), color var(--transition);
+}
+.profile-item:hover .profile-item-del { opacity: 1; color: #ef4444; }
+.profiles-new-wrap { margin-top: 10px; }
+.profiles-new-wrap .input-error { margin-top: 4px; }
 
 /* Sync overlay */
 .sync-overlay {

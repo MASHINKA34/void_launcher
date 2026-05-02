@@ -96,36 +96,67 @@ function initParticles() {
 }
 
 /* ─────────────────────────────────────────────────────────────── Login Screen */
+const NICK_RE = /^[a-zA-Zа-яА-ЯёЁ0-9_]{3,16}$/;
+
+function validateNick(val) {
+  if (!val) return 'Никнейм обязателен.';
+  if (val.length < 3)  return 'Минимум 3 символа.';
+  if (val.length > 16) return 'Максимум 16 символов.';
+  if (!NICK_RE.test(val)) return 'Только буквы, цифры и символ подчёркивания (_).';
+  return null;
+}
+
 function initLoginScreen() {
   initParticles();
-  const input   = $('nickname-input');
-  const errEl   = $('nickname-error');
+  const input    = $('nickname-input');
+  const errEl    = $('nickname-error');
   const btnEnter = $('btn-enter');
+  const dropdown = $('nick-dropdown');
 
-  const NICK_RE = /^[a-zA-Z0-9_]{3,16}$/;
+  async function renderDropdown() {
+    const profiles = await window.api.getProfiles();
+    if (!profiles.length) { dropdown.classList.add('hidden'); return; }
 
-  function validateNick(val) {
-    if (!val) return 'Никнейм обязателен.';
-    if (val.length < 3)  return 'Минимум 3 символа.';
-    if (val.length > 16) return 'Максимум 16 символов.';
-    if (!NICK_RE.test(val)) return 'Только буквы, цифры и символ подчёркивания (_).';
-    return null;
+    dropdown.innerHTML = '';
+    profiles.forEach(nick => {
+      const item = document.createElement('div');
+      item.className = 'nick-dropdown-item';
+      item.innerHTML = `<span class="nick-label">${nick}</span><span class="nick-delete" title="Удалить">×</span>`;
+
+      item.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('nick-delete')) return;
+        e.preventDefault();
+        input.value = nick;
+        dropdown.classList.add('hidden');
+        errEl.classList.add('hidden');
+        input.classList.remove('error');
+        input.focus();
+      });
+
+      item.querySelector('.nick-delete').addEventListener('mousedown', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await window.api.deleteProfileFromHistory(nick);
+        renderDropdown();
+      });
+
+      dropdown.appendChild(item);
+    });
+    dropdown.classList.remove('hidden');
   }
 
+  input.addEventListener('focus', renderDropdown);
+  input.addEventListener('blur', () => setTimeout(() => dropdown.classList.add('hidden'), 150));
   input.addEventListener('input', () => {
+    renderDropdown();
     const err = validateNick(input.value.trim());
-    if (err) {
-      input.classList.add('error');
-      errEl.textContent = err;
-      errEl.classList.remove('hidden');
-    } else {
-      input.classList.remove('error');
-      errEl.classList.add('hidden');
-    }
+    if (err) { input.classList.add('error'); errEl.textContent = err; errEl.classList.remove('hidden'); }
+    else     { input.classList.remove('error'); errEl.classList.add('hidden'); }
   });
 
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') btnEnter.click();
+    if (e.key === 'Escape') dropdown.classList.add('hidden');
   });
 
   btnEnter.addEventListener('click', async () => {
@@ -568,7 +599,6 @@ function initSettingsUI() {
   // Change nickname
   $('btn-change-nick').addEventListener('click', async () => {
     await window.api.deleteProfile();
-    // Stop ping interval
     if (state.serverPingInterval) {
       clearInterval(state.serverPingInterval);
       state.serverPingInterval = null;
@@ -580,6 +610,90 @@ function initSettingsUI() {
     showScreen('login');
     initLoginScreen();
   });
+}
+
+/* ─────────────────────────────────────────────────────────────── Profiles modal */
+async function openProfilesModal() {
+  const modal       = $('profiles-modal');
+  const list        = $('profiles-list');
+  const newWrap     = $('profiles-new-wrap');
+  const newInput    = $('profiles-new-input');
+  const newError    = $('profiles-new-error');
+  const btnNew      = $('profiles-btn-new');
+  const btnCancel   = $('profiles-btn-cancel');
+  const btnConfirm  = $('profiles-btn-confirm');
+
+  let selectedNick = null;
+
+  newWrap.classList.add('hidden');
+  btnConfirm.style.display = 'none';
+  newInput.value = '';
+  newError.classList.add('hidden');
+
+  async function renderList() {
+    const profiles = await window.api.getProfiles();
+    list.innerHTML = '';
+    selectedNick = null;
+    btnConfirm.style.display = 'none';
+
+    profiles.forEach(nick => {
+      const item = document.createElement('div');
+      item.className = 'profile-item' + (nick === state.profile?.username ? ' active' : '');
+      item.innerHTML = `<span class="profile-item-name">${nick}</span><span class="profile-item-del" title="Удалить">×</span>`;
+
+      item.querySelector('.profile-item-name').addEventListener('click', () => {
+        document.querySelectorAll('.profile-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+        selectedNick = nick;
+        newWrap.classList.add('hidden');
+        btnConfirm.style.display = '';
+      });
+
+      item.querySelector('.profile-item-del').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await window.api.deleteProfileFromHistory(nick);
+        renderList();
+      });
+
+      list.appendChild(item);
+    });
+  }
+
+  await renderList();
+  modal.classList.remove('hidden');
+
+  btnNew.onclick = () => {
+    document.querySelectorAll('.profile-item').forEach(el => el.classList.remove('active'));
+    selectedNick = null;
+    newWrap.classList.remove('hidden');
+    newInput.focus();
+    btnConfirm.style.display = '';
+  };
+
+  newInput.oninput = () => {
+    const err = validateNick(newInput.value.trim());
+    if (err) { newError.textContent = err; newError.classList.remove('hidden'); }
+    else     { newError.classList.add('hidden'); }
+  };
+
+  btnCancel.onclick = () => modal.classList.add('hidden');
+
+  btnConfirm.onclick = async () => {
+    let nick = selectedNick;
+
+    if (!nick) {
+      nick = newInput.value.trim();
+      const err = validateNick(nick);
+      if (err) { newError.textContent = err; newError.classList.remove('hidden'); return; }
+    }
+
+    state.profile = { username: nick };
+    await window.api.saveProfile(state.profile);
+    $('player-name').textContent   = nick;
+    $('player-avatar').textContent = nick.charAt(0).toUpperCase();
+    $('setting-nickname').value    = nick;
+    modal.classList.add('hidden');
+  };
 }
 
 /* ─────────────────────────────────────────────────────────────── Title bar */

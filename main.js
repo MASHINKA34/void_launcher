@@ -113,9 +113,35 @@ ipcMain.handle('get-profile', () => {
 });
 
 ipcMain.handle('save-profile', (_, profile) => {
-  const profilePath = path.join(app.getPath('userData'), 'profile.json');
+  const profilePath  = path.join(app.getPath('userData'), 'profile.json');
+  const historyPath  = path.join(app.getPath('userData'), 'profiles-history.json');
   try {
     fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2), 'utf8');
+    let history = [];
+    try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch (_) {}
+    history = [profile.username, ...history.filter(n => n !== profile.username)].slice(0, 20);
+    fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf8');
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('get-profiles', () => {
+  const historyPath = path.join(app.getPath('userData'), 'profiles-history.json');
+  try {
+    if (fs.existsSync(historyPath)) return JSON.parse(fs.readFileSync(historyPath, 'utf8'));
+  } catch (_) {}
+  return [];
+});
+
+ipcMain.handle('delete-profile-from-history', (_, username) => {
+  const historyPath = path.join(app.getPath('userData'), 'profiles-history.json');
+  try {
+    let history = [];
+    try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch (_) {}
+    history = history.filter(n => n !== username);
+    fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf8');
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
