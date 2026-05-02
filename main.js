@@ -4,6 +4,9 @@ const fs = require('fs');
 const os = require('os');
 const config = require('./config');
 
+app.commandLine.appendSwitch('disable-gpu-disk-cache');
+app.commandLine.appendSwitch('no-sandbox');
+
 let mainWindow = null;
 let tray = null;
 
@@ -146,11 +149,20 @@ ipcMain.handle('browse-folder', async () => {
 
 // ─── Content ──────────────────────────────────────────────────────────────────
 
-ipcMain.handle('get-news', () => {
+const NEWS_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/news.json';
+
+ipcMain.handle('get-news', async () => {
   try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'news.json'), 'utf8'));
+    const fetch = require('node-fetch');
+    const res = await fetch(NEWS_URL, { timeout: 5000 });
+    if (!res.ok) throw new Error('fetch failed');
+    return await res.json();
   } catch (_) {
-    return [];
+    try {
+      return JSON.parse(fs.readFileSync(path.join(__dirname, 'news.json'), 'utf8'));
+    } catch (__) {
+      return [];
+    }
   }
 });
 

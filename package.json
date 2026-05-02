@@ -29,6 +29,7 @@
       "config.js",
       "mods-list.json",
       "news.json",
+      "assets/**/*",
       "renderer/**/*",
       "src/**/*",
       "node_modules/**/*",
