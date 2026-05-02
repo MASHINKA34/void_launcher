@@ -301,8 +301,13 @@ async function loadNews() {
   const list = $('news-list');
   try {
     const news = await window.api.getNews();
-    if (!news.length) { list.innerHTML = '<div class="news-loading">Новостей пока нет.</div>'; return; }
-    list.innerHTML = '';
+    if (!news.length) {
+      if (!list.querySelector('.news-item')) {
+        list.innerHTML = '<div class="news-loading">Новостей пока нет.</div>';
+      }
+      return;
+    }
+    const fragment = document.createDocumentFragment();
     for (const item of news) {
       const el = document.createElement('div');
       el.className = 'news-item';
@@ -312,10 +317,15 @@ async function loadNews() {
         <div class="news-body">${item.body || ''}</div>
       `;
       el.addEventListener('click', () => openNewsModal(item));
-      list.appendChild(el);
+      fragment.appendChild(el);
     }
+    list.innerHTML = '';
+    list.appendChild(fragment);
   } catch (_) {
-    list.innerHTML = '<div class="news-loading">Ошибка загрузки новостей.</div>';
+    // не трогаем список если уже есть новости
+    if (!list.querySelector('.news-item')) {
+      list.innerHTML = '<div class="news-loading">Ошибка загрузки новостей.</div>';
+    }
   }
 }
 
