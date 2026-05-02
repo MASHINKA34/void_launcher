@@ -286,6 +286,17 @@ async function pingServer() {
 }
 
 /* ─────────────────────────────────────────────────────────────── News */
+function openNewsModal(item) {
+  $('news-modal-date').textContent  = item.date  || '';
+  $('news-modal-title').textContent = item.title || '';
+  $('news-modal-body').textContent  = item.body  || '';
+  $('news-modal-overlay').classList.remove('hidden');
+}
+
+function closeNewsModal() {
+  $('news-modal-overlay').classList.add('hidden');
+}
+
 async function loadNews() {
   const list = $('news-list');
   try {
@@ -300,12 +311,20 @@ async function loadNews() {
         <div class="news-title">${item.title || ''}</div>
         <div class="news-body">${item.body || ''}</div>
       `;
+      el.addEventListener('click', () => openNewsModal(item));
       list.appendChild(el);
     }
   } catch (_) {
     list.innerHTML = '<div class="news-loading">Ошибка загрузки новостей.</div>';
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('news-modal-close').addEventListener('click', closeNewsModal);
+  $('news-modal-overlay').addEventListener('click', (e) => {
+    if (e.target === $('news-modal-overlay')) closeNewsModal();
+  });
+});
 
 /* ─────────────────────────────────────────────────────────────── Mods info */
 async function loadModsInfo() {
