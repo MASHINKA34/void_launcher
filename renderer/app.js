@@ -603,6 +603,7 @@ async function enterMain() {
 
   // Load content
   await Promise.all([loadNews(), loadModsInfo()]);
+  setInterval(loadNews, 60_000);
 
   // Server ping
   await pingServer();

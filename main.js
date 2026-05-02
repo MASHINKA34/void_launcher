@@ -154,7 +154,7 @@ const NEWS_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/mai
 ipcMain.handle('get-news', async () => {
   try {
     const fetch = require('node-fetch');
-    const res = await fetch(NEWS_URL, { timeout: 5000 });
+    const res = await fetch(`${NEWS_URL}?t=${Date.now()}`, { timeout: 5000 });
     if (!res.ok) throw new Error('fetch failed');
     return await res.json();
   } catch (_) {
