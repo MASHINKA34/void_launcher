@@ -19,13 +19,43 @@ function emit(type, data) {
   if (outputCallback) outputCallback(type, data);
 }
 
-// Find the installed NeoForge version ID in the versions directory
 function findNeoForgeVersionId(gameDir) {
   const versionsDir = path.join(gameDir, 'versions');
   if (!fs.existsSync(versionsDir)) return null;
   const dirs = fs.readdirSync(versionsDir);
-  const nf = dirs.find(d => d.toLowerCase().includes('neoforge'));
-  return nf || null;
+  return dirs.find(d => d.toLowerCase().includes('neoforge')) || null;
+}
+
+// Read the NeoForge version JSON and extract the JVM args it requires,
+// substituting the ${variable} placeholders MCLC doesn't handle.
+function buildNeoForgeJvmArgs(gameDir, versionId) {
+  const jsonPath = path.join(gameDir, 'versions', versionId, `${versionId}.json`);
+  if (!fs.existsSync(jsonPath)) return [];
+
+  let versionData;
+  try { versionData = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); }
+  catch (_) { return []; }
+
+  const jvmArgs = versionData.arguments?.jvm || [];
+  const libDir  = path.join(gameDir, 'libraries');
+  const sep     = process.platform === 'win32' ? ';' : ':';
+
+  const vars = {
+    '${library_directory}': libDir,
+    '${version_name}':      versionId,
+    '${classpath_separator}': sep,
+  };
+
+  const result = [];
+  for (const arg of jvmArgs) {
+    if (typeof arg !== 'string') continue; // skip conditional rule-objects
+    let s = arg;
+    for (const [k, v] of Object.entries(vars)) {
+      s = s.split(k).join(v);
+    }
+    result.push(s);
+  }
+  return result;
 }
 
 async function launch(opts) {
@@ -41,13 +71,16 @@ async function launch(opts) {
   const neoforgeId = findNeoForgeVersionId(gameDir);
   if (!neoforgeId) throw new Error('NeoForge is not installed. Please run installation first.');
 
+  // NeoForge version JSON JVM args (module path, add-modules, add-opens, etc.)
+  const neoforgeJvmArgs = buildNeoForgeJvmArgs(gameDir, neoforgeId);
+
   const launcher = new Client();
 
   const launchOptions = {
     authorization: (() => {
       const hash = crypto.createHash('md5').update(`OfflinePlayer:${username}`).digest('hex');
       const uuid = `${hash.slice(0,8)}-${hash.slice(8,12)}-${hash.slice(12,16)}-${hash.slice(16,20)}-${hash.slice(20)}`;
-      return { access_token: 'null', client_token: 'null', uuid, username, user_properties: '{}' };
+      return { access_token: 'null', client_token: 'null', uuid, name: username, user_properties: '{}' };
     })(),
     root:    gameDir,
     version: {
@@ -65,10 +98,9 @@ async function launch(opts) {
     },
     javaPath: javaPath !== 'auto' ? javaPath : undefined,
     customArgs: [
-      '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED',
-      '--add-opens', 'java.base/java.util.jar=ALL-UNNAMED',
-      '--add-opens', 'java.base/sun.security.util=ALL-UNNAMED',
-      '--add-opens', 'java.base/java.net=ALL-UNNAMED',
+      // NeoForge-required JVM args (module path, add-modules, add-opens, add-exports)
+      ...neoforgeJvmArgs,
+      // G1GC performance flags
       '-XX:+UseG1GC',
       '-XX:+ParallelRefProcEnabled',
       '-XX:MaxGCPauseMillis=200',
@@ -88,13 +120,27 @@ async function launch(opts) {
     ]
   };
 
-  // If using bundled Java, resolve the path
+  // Use bundled Java if available and no explicit path given
   const bundledJava = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
-  if ((!launchOptions.javaPath) && fs.existsSync(bundledJava)) {
+  if (!launchOptions.javaPath && fs.existsSync(bundledJava)) {
     launchOptions.javaPath = bundledJava;
   }
 
-  return new Promise((resolve, reject) => {
+  // Ensure Russian language is set in options.txt
+  const optionsPath = path.join(gameDir, 'options.txt');
+  try {
+    let options = fs.existsSync(optionsPath) ? fs.readFileSync(optionsPath, 'utf8') : '';
+    if (!options.includes('lang:')) {
+      options = options.trimEnd();
+      options += (options ? '\n' : '') + 'lang:ru_ru\n';
+      fs.writeFileSync(optionsPath, options, 'utf8');
+    } else if (!options.includes('lang:ru_ru')) {
+      options = options.replace(/^lang:.+$/m, 'lang:ru_ru');
+      fs.writeFileSync(optionsPath, options, 'utf8');
+    }
+  } catch (_) {}
+
+  return new Promise((resolve) => {
     launcher.launch(launchOptions);
 
     launcher.on('debug', (msg) => {
@@ -114,16 +160,14 @@ async function launch(opts) {
     launcher.on('error', (err) => {
       const msg = typeof err === 'string' ? err : JSON.stringify(err);
       emit('stderr', `[ERROR] ${msg}\n`);
-      // Don't reject — the game may still be launching
     });
 
-    // Resolve promise once the process starts (data first arrives)
     let started = false;
     launcher.on('data', () => {
       if (!started) { started = true; resolve(0); }
     });
 
-    // Fallback: resolve after 5s so the launcher window can hide
+    // Fallback resolve after 5s if no data event fires
     setTimeout(() => { if (!started) { started = true; resolve(0); } }, 5000);
   });
 }
