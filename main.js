@@ -276,3 +276,24 @@ ipcMain.handle('ping-server', async () => {
   const serverPing = require('./src/serverPing');
   return await serverPing.ping(config.SERVER_IP, config.SERVER_PORT);
 });
+
+// ─── Auto-update ──────────────────────────────────────────────────────────────
+
+ipcMain.handle('check-update', async () => {
+  const updater = require('./src/updater');
+  return await updater.checkForUpdates(app.getVersion());
+});
+
+ipcMain.handle('download-update', async (_, { downloadUrl, assetName }) => {
+  const updater = require('./src/updater');
+  updater.setProgressCallback((data) => {
+    if (mainWindow) mainWindow.webContents.send('update-progress', data);
+  });
+  return await updater.downloadUpdate(downloadUrl, assetName);
+});
+
+ipcMain.handle('install-update', (_, filePath) => {
+  const updater = require('./src/updater');
+  updater.installUpdate(filePath);
+  setTimeout(() => app.quit(), 800);
+});

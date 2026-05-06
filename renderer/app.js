@@ -756,6 +756,59 @@ function initSidebar() {
   });
 }
 
+/* ─────────────────────────────────────────────────────────────── Auto-update */
+async function checkAndShowUpdate() {
+  try {
+    const info = await window.api.checkUpdate();
+    if (!info.hasUpdate) return;
+
+    const banner  = $('update-banner');
+    const text    = $('update-banner-text');
+    const btn     = $('btn-update-launcher');
+    const progWrap = $('update-progress-wrap');
+    const progFill = $('update-progress-fill');
+    const progPct  = $('update-progress-pct');
+
+    text.textContent = `Доступно обновление v${info.latestVersion}`;
+    banner.classList.remove('hidden');
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Скачивание...';
+      progWrap.classList.remove('hidden');
+
+      // Слушаем прогресс скачивания
+      window.api.onUpdateProgress((data) => {
+        progFill.style.width = `${data.percent}%`;
+        progPct.textContent  = `${data.percent}%`;
+      });
+
+      const result = await window.api.downloadUpdate({
+        downloadUrl: info.downloadUrl,
+        assetName:   info.assetName
+      });
+
+      if (!result.success) {
+        btn.disabled = false;
+        btn.textContent = 'Повторить';
+        progWrap.classList.add('hidden');
+        text.textContent = `Ошибка загрузки: ${result.error}`;
+        return;
+      }
+
+      // Скачано — запускаем установщик и закрываем лаунчер
+      progFill.style.width = '100%';
+      progPct.textContent  = '100%';
+      btn.textContent = 'Установка...';
+      text.textContent = 'Запуск установщика...';
+
+      setTimeout(() => window.api.installUpdate(result.filePath), 600);
+    });
+  } catch (_) {
+    // Тихо игнорируем — обновление не критично
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────── Enter main */
 async function enterMain() {
   // Load settings
@@ -779,6 +832,9 @@ async function enterMain() {
 
   showScreen('main');
   showTab('home');
+
+  // Проверяем обновления лаунчера (тихо, в фоне)
+  checkAndShowUpdate();
 
   // Load content
   await Promise.all([loadNews(), loadModsInfo()]);

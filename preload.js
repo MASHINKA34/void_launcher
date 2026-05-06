@@ -39,12 +39,18 @@ contextBridge.exposeInMainWorld('api', {
   // ── Server ──────────────────────────────────────────────────────────────────
   pingServer: () => ipcRenderer.invoke('ping-server'),
 
+  // ── Updates ─────────────────────────────────────────────────────────────────
+  checkUpdate:    ()     => ipcRenderer.invoke('check-update'),
+  downloadUpdate: (opts) => ipcRenderer.invoke('download-update', opts),
+  installUpdate:  (path) => ipcRenderer.invoke('install-update', path),
+
   // ── Events: main → renderer ─────────────────────────────────────────────────
   onInstallProgress: (cb) => ipcRenderer.on('install-progress',  (_, d) => cb(d)),
   onModSyncProgress: (cb) => ipcRenderer.on('mod-sync-progress', (_, d) => cb(d)),
   onGameStdout:      (cb) => ipcRenderer.on('game-stdout',       (_, d) => cb(d)),
   onGameStderr:      (cb) => ipcRenderer.on('game-stderr',       (_, d) => cb(d)),
   onGameExit:        (cb) => ipcRenderer.on('game-exit',         (_, code) => cb(code)),
+  onUpdateProgress:  (cb) => ipcRenderer.on('update-progress',   (_, d) => cb(d)),
 
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
 });
