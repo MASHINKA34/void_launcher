@@ -32,12 +32,18 @@ async function checkForUpdates(currentVersion) {
 
   try {
     const res = await fetch(
-      `https://api.github.com/repos/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/latest`,
+      `https://api.github.com/repos/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases`,
       { headers: { 'User-Agent': config.LAUNCHER_NAME } }
     );
     if (!res.ok) return { hasUpdate: false };
 
-    const release = await res.json();
+    const releases = await res.json();
+    const release = releases
+      .filter(r => /^v\d+\.\d+\.\d+$/.test(r.tag_name || ''))
+      .find(r => r.assets.some(a => a.name.toLowerCase().endsWith('.exe')));
+
+    if (!release) return { hasUpdate: false };
+
     const latest  = release.tag_name.replace(/^v/, '');
 
     if (compareVersions(latest, currentVersion) > 0) {

@@ -10,8 +10,7 @@ module.exports = {
   GAME_DIR_NAME:    'mylauncher-minecraft',
 
   // GitHub репозиторий для авто-обновлений лаунчера.
-  // Создай публичный репо на GitHub и укажи owner/repo.
   // Теги релизов должны быть вида: v1.0.1, v1.0.2 и т.д.
-  GITHUB_OWNER: 'YOUR_GITHUB_OWNER',
-  GITHUB_REPO:  'YOUR_GITHUB_REPO'
+  GITHUB_OWNER: 'MASHINKA34',
+  GITHUB_REPO:  'void_launcher'
 };
