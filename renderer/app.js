@@ -63,7 +63,12 @@ $('modal-retry').addEventListener('click', () => {
 });
 
 /* ─────────────────────────────────────────────────────────────── Particles */
+let particlesStarted = false;
+
 function initParticles() {
+  if (particlesStarted) return;
+  particlesStarted = true;
+
   const canvas = $('particles-canvas');
   const ctx    = canvas.getContext('2d');
   canvas.width  = 900;
@@ -97,6 +102,9 @@ function initParticles() {
 
 /* ─────────────────────────────────────────────────────────────── Login Screen */
 const NICK_RE = /^[a-zA-Z0-9_]{3,16}$/;
+const PASSWORD_MIN = 4;
+let authMode = 'login';
+let loginScreenInitialized = false;
 
 function validateNick(val) {
   if (!val) return 'Никнейм обязателен.';
@@ -106,12 +114,51 @@ function validateNick(val) {
   return null;
 }
 
-function initLoginScreen() {
+function validatePassword(val) {
+  if (!val) return 'Пароль обязателен.';
+  if (val.length < PASSWORD_MIN) return `Минимум ${PASSWORD_MIN} символа.`;
+  if (val.length > 128) return 'Максимум 128 символов.';
+  return null;
+}
+
+function setFieldError(input, errEl, message) {
+  if (message) {
+    input.classList.add('error');
+    errEl.textContent = message;
+    errEl.classList.remove('hidden');
+  } else {
+    input.classList.remove('error');
+    errEl.classList.add('hidden');
+  }
+}
+
+function initLoginScreen(prefillNick = '') {
   initParticles();
   const input    = $('nickname-input');
   const errEl    = $('nickname-error');
+  const passInput = $('password-input');
+  const passErrEl = $('password-error');
+  const passToggle = $('password-toggle');
   const btnEnter = $('btn-enter');
+  const btnToggle = $('btn-auth-toggle');
   const dropdown = $('nick-dropdown');
+
+  function setPasswordVisible(visible) {
+    passInput.type = visible ? 'text' : 'password';
+    passToggle.title = visible ? 'Скрыть пароль' : 'Показать пароль';
+    passToggle.setAttribute('aria-label', passToggle.title);
+    passToggle.innerHTML = `<i data-lucide="${visible ? 'eye-off' : 'eye'}" width="18" height="18"></i>`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    btnEnter.querySelector('span').textContent = mode === 'register' ? 'ЗАРЕГИСТРИРОВАТЬ' : 'ВОЙТИ В МИР';
+    btnToggle.textContent = mode === 'register' ? 'Уже есть аккаунт? Войти' : 'Создать аккаунт';
+    passInput.autocomplete = mode === 'register' ? 'new-password' : 'current-password';
+    setFieldError(input, errEl, null);
+    setFieldError(passInput, passErrEl, null);
+  }
 
   async function renderDropdown() {
     const profiles = await window.api.getProfiles();
@@ -130,7 +177,7 @@ function initLoginScreen() {
         dropdown.classList.add('hidden');
         errEl.classList.add('hidden');
         input.classList.remove('error');
-        input.focus();
+        passInput.focus();
       });
 
       item.querySelector('.nick-delete').addEventListener('mousedown', async (e) => {
@@ -145,36 +192,86 @@ function initLoginScreen() {
     dropdown.classList.remove('hidden');
   }
 
+  async function submitAuth() {
+    const nick = input.value.trim();
+    const password = passInput.value;
+    const nickErr = validateNick(nick);
+    const passErr = validatePassword(password);
+
+    setFieldError(input, errEl, nickErr);
+    setFieldError(passInput, passErrEl, passErr);
+
+    if (nickErr) { input.focus(); return; }
+    if (passErr) { passInput.focus(); return; }
+
+    btnEnter.disabled = true;
+    try {
+      const request = { username: nick, password };
+      const result = authMode === 'register'
+        ? await window.api.registerAccount(request)
+        : await window.api.loginAccount(request);
+
+      if (!result.success) {
+        setFieldError(passInput, passErrEl, result.error || 'Не удалось войти.');
+        passInput.focus();
+        return;
+      }
+
+      state.profile = result.profile || { username: nick };
+      passInput.value = '';
+      await enterMain();
+    } finally {
+      btnEnter.disabled = false;
+    }
+  }
+
+  if (prefillNick) input.value = prefillNick;
+  passInput.value = '';
+  setPasswordVisible(false);
+  setAuthMode('login');
+
+  if (loginScreenInitialized) {
+    setTimeout(() => (input.value ? passInput : input).focus(), 0);
+    return;
+  }
+  loginScreenInitialized = true;
+
   input.addEventListener('focus', renderDropdown);
   input.addEventListener('blur', () => setTimeout(() => dropdown.classList.add('hidden'), 150));
   input.addEventListener('input', () => {
     renderDropdown();
-    const err = validateNick(input.value.trim());
-    if (err) { input.classList.add('error'); errEl.textContent = err; errEl.classList.remove('hidden'); }
-    else     { input.classList.remove('error'); errEl.classList.add('hidden'); }
+    setFieldError(input, errEl, validateNick(input.value.trim()));
   });
 
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') btnEnter.click();
+    if (e.key === 'Enter') {
+      if (passInput.value) submitAuth();
+      else passInput.focus();
+    }
     if (e.key === 'Escape') dropdown.classList.add('hidden');
   });
 
-  btnEnter.addEventListener('click', async () => {
-    const nick = input.value.trim();
-    const err  = validateNick(nick);
-    if (err) {
-      input.classList.add('error');
-      errEl.textContent = err;
-      errEl.classList.remove('hidden');
-      input.focus();
-      return;
-    }
-    state.profile = { username: nick };
-    await window.api.saveProfile(state.profile);
-    await enterMain();
+  passInput.addEventListener('input', () => {
+    if (!passInput.value) setFieldError(passInput, passErrEl, null);
+    else setFieldError(passInput, passErrEl, validatePassword(passInput.value));
   });
 
-  input.focus();
+  passInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitAuth();
+  });
+
+  passToggle.addEventListener('click', () => {
+    setPasswordVisible(passInput.type === 'password');
+    passInput.focus();
+  });
+
+  btnEnter.addEventListener('click', submitAuth);
+  btnToggle.addEventListener('click', () => {
+    setAuthMode(authMode === 'register' ? 'login' : 'register');
+    passInput.focus();
+  });
+
+  setTimeout(() => (input.value ? passInput : input).focus(), 0);
 }
 
 /* ─────────────────────────────────────────────────────────────── Install Screen */
@@ -490,6 +587,8 @@ function handleModSyncProgress(data) {
 }
 
 /* ─────────────────────────────────────────────────────────────── Play */
+let playButtonBound = false;
+
 function setPlayBtnState(state_) {
   const btn = $('btn-play');
   if (state_ === 'loading') {
@@ -634,6 +733,7 @@ function initSettingsUI() {
 
   // Change nickname
   $('btn-change-nick').addEventListener('click', async () => {
+    await window.api.logoutAccount();
     await window.api.deleteProfile();
     if (state.serverPingInterval) {
       clearInterval(state.serverPingInterval);
@@ -723,17 +823,19 @@ async function openProfilesModal() {
       if (err) { newError.textContent = err; newError.classList.remove('hidden'); return; }
     }
 
-    state.profile = { username: nick };
-    await window.api.saveProfile(state.profile);
-    $('player-name').textContent   = nick;
-    $('player-avatar').textContent = nick.charAt(0).toUpperCase();
-    $('setting-nickname').value    = nick;
     modal.classList.add('hidden');
+    await window.api.logoutAccount();
+    state.profile = null;
+    showScreen('login');
+    initLoginScreen(nick);
   };
 }
 
 /* ─────────────────────────────────────────────────────────────── Title bar */
 function initTitleBar() {
+  $('login-btn-minimize').addEventListener('click', () => window.api.minimize());
+  $('login-btn-close').addEventListener('click',    () => window.api.close());
+
   $('btn-minimize').addEventListener('click', () => window.api.minimize());
   $('btn-close').addEventListener('click',    () => window.api.close());
 
@@ -845,7 +947,10 @@ async function enterMain() {
   state.serverPingInterval = setInterval(pingServer, 30_000);
 
   // PLAY button
-  $('btn-play').addEventListener('click', startGame);
+  if (!playButtonBound) {
+    $('btn-play').addEventListener('click', startGame);
+    playButtonBound = true;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────── Boot */
@@ -857,13 +962,8 @@ async function boot() {
 
   const profile = await window.api.getProfile();
 
-  if (profile && profile.username) {
-    state.profile = profile;
-    await enterMain();
-  } else {
-    showScreen('login');
-    initLoginScreen();
-  }
+  showScreen('login');
+  initLoginScreen(profile?.username || '');
 }
 
 // Инициализация Lucide иконок

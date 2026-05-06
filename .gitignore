@@ -25,6 +25,7 @@ runtime/
 # Settings and profile (machine-specific)
 settings.json
 profile.json
+accounts.json
 
 # OS files
 .DS_Store

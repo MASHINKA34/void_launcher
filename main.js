@@ -3,12 +3,14 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const config = require('./config');
+const auth = require('./src/auth');
 
 app.commandLine.appendSwitch('disable-gpu-disk-cache');
 app.commandLine.appendSwitch('no-sandbox');
 
 let mainWindow = null;
 let tray = null;
+let activeAuthProfile = null;
 
 // ─── Window ───────────────────────────────────────────────────────────────────
 
@@ -102,8 +104,24 @@ ipcMain.handle('save-settings', (_, settings) => {
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
+function getUserDataPath(...parts) {
+  return path.join(app.getPath('userData'), ...parts);
+}
+
+function saveProfileSnapshot(profile) {
+  const profilePath = getUserDataPath('profile.json');
+  const historyPath = getUserDataPath('profiles-history.json');
+
+  fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2), 'utf8');
+
+  let history = [];
+  try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch (_) {}
+  history = [profile.username, ...history.filter(n => n !== profile.username)].slice(0, 20);
+  fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf8');
+}
+
 ipcMain.handle('get-profile', () => {
-  const profilePath = path.join(app.getPath('userData'), 'profile.json');
+  const profilePath = getUserDataPath('profile.json');
   try {
     if (fs.existsSync(profilePath)) {
       return JSON.parse(fs.readFileSync(profilePath, 'utf8'));
@@ -113,14 +131,12 @@ ipcMain.handle('get-profile', () => {
 });
 
 ipcMain.handle('save-profile', (_, profile) => {
-  const profilePath  = path.join(app.getPath('userData'), 'profile.json');
-  const historyPath  = path.join(app.getPath('userData'), 'profiles-history.json');
   try {
-    fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2), 'utf8');
-    let history = [];
-    try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch (_) {}
-    history = [profile.username, ...history.filter(n => n !== profile.username)].slice(0, 20);
-    fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf8');
+    if (!activeAuthProfile?.username || profile?.username !== activeAuthProfile.username) {
+      return { success: false, error: 'Сначала войдите в аккаунт с паролем.' };
+    }
+
+    saveProfileSnapshot(activeAuthProfile);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
@@ -128,7 +144,7 @@ ipcMain.handle('save-profile', (_, profile) => {
 });
 
 ipcMain.handle('get-profiles', () => {
-  const historyPath = path.join(app.getPath('userData'), 'profiles-history.json');
+  const historyPath = getUserDataPath('profiles-history.json');
   try {
     if (fs.existsSync(historyPath)) return JSON.parse(fs.readFileSync(historyPath, 'utf8'));
   } catch (_) {}
@@ -136,7 +152,7 @@ ipcMain.handle('get-profiles', () => {
 });
 
 ipcMain.handle('delete-profile-from-history', (_, username) => {
-  const historyPath = path.join(app.getPath('userData'), 'profiles-history.json');
+  const historyPath = getUserDataPath('profiles-history.json');
   try {
     let history = [];
     try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch (_) {}
@@ -149,13 +165,53 @@ ipcMain.handle('delete-profile-from-history', (_, username) => {
 });
 
 ipcMain.handle('delete-profile', () => {
-  const profilePath = path.join(app.getPath('userData'), 'profile.json');
+  const profilePath = getUserDataPath('profile.json');
   try {
+    activeAuthProfile = null;
     if (fs.existsSync(profilePath)) fs.unlinkSync(profilePath);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
   }
+});
+
+ipcMain.handle('auth-register', (_, credentials) => {
+  try {
+    const result = auth.register(
+      app.getPath('userData'),
+      credentials?.username,
+      credentials?.password
+    );
+    if (!result.success) return result;
+
+    activeAuthProfile = result.profile;
+    saveProfileSnapshot(result.profile);
+    return result;
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('auth-login', (_, credentials) => {
+  try {
+    const result = auth.login(
+      app.getPath('userData'),
+      credentials?.username,
+      credentials?.password
+    );
+    if (!result.success) return result;
+
+    activeAuthProfile = result.profile;
+    saveProfileSnapshot(result.profile);
+    return result;
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('auth-logout', () => {
+  activeAuthProfile = null;
+  return { success: true };
 });
 
 // ─── System info ──────────────────────────────────────────────────────────────
@@ -252,7 +308,19 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
 // ─── Game launch ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('launch-game', async (_, launchOptions) => {
+  if (!activeAuthProfile?.username) {
+    return { success: false, error: 'Сначала войдите в аккаунт с паролем.' };
+  }
+
+  if (launchOptions?.username !== activeAuthProfile.username) {
+    return { success: false, error: 'Ник запуска не совпадает с авторизованным аккаунтом.' };
+  }
+
   const launcher = require('./src/launcher');
+  const safeLaunchOptions = {
+    ...launchOptions,
+    username: activeAuthProfile.username
+  };
 
   launcher.setOutputCallback((type, data) => {
     if (mainWindow) mainWindow.webContents.send(`game-${type}`, data);
@@ -263,7 +331,7 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
   });
 
   try {
-    await launcher.launch(launchOptions);
+    await launcher.launch(safeLaunchOptions);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };

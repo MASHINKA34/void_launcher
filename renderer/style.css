@@ -68,6 +68,15 @@ body {
   height: 100%;
 }
 
+.login-window-controls {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  gap: 6px;
+}
+
 .login-card {
   position: relative;
   z-index: 2;
@@ -132,6 +141,39 @@ body {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
+.password-wrap input { padding-right: 46px; }
+.password-toggle {
+  position: absolute;
+  top: 23px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  transform: translateY(-50%);
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+.password-toggle:hover {
+  color: var(--text-secondary);
+  background: rgba(168, 85, 247, 0.12);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.18);
+}
+.password-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.9px;
+}
+
 .input-error {
   margin-top: 6px;
   font-size: 12px;
@@ -162,6 +204,21 @@ body {
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
 .btn-full { width: 100%; }
+
+.auth-switch {
+  align-self: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color var(--transition), text-shadow var(--transition);
+}
+.auth-switch:hover {
+  color: var(--text-secondary);
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+}
 
 .btn-secondary {
   padding: 8px 16px;

@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('api', {
   deleteProfile:            ()         => ipcRenderer.invoke('delete-profile'),
   getProfiles:              ()         => ipcRenderer.invoke('get-profiles'),
   deleteProfileFromHistory: (username) => ipcRenderer.invoke('delete-profile-from-history', username),
+  loginAccount:             (creds)    => ipcRenderer.invoke('auth-login', creds),
+  registerAccount:          (creds)    => ipcRenderer.invoke('auth-register', creds),
+  logoutAccount:            ()         => ipcRenderer.invoke('auth-logout'),
 
   // ── System ──────────────────────────────────────────────────────────────────
   getSystemRam: () => ipcRenderer.invoke('get-system-ram'),
