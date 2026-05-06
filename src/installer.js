@@ -26,19 +26,81 @@ function emit(data) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function downloadFile(url, destPath, label) {
-  const res = await fetch(url);
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function removeFileIfExists(filePath) {
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch (_) {}
+}
+
+async function fetchWithTimeout(url, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Connection timed out after ${Math.round(timeoutMs / 1000)}s: ${url}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function downloadFileOnce(url, partPath, label, opts) {
+  const res = await fetchWithTimeout(url, opts.requestTimeoutMs);
   if (!res.ok) throw new Error(`Download failed (HTTP ${res.status}): ${url}`);
 
   const total   = parseInt(res.headers.get('content-length') || '0', 10);
   let received  = 0;
   const start   = Date.now();
-  const writer  = fs.createWriteStream(destPath);
+  const writer  = fs.createWriteStream(partPath);
 
   await new Promise((resolve, reject) => {
+    let settled = false;
+    let idleTimer = null;
+
+    const cleanup = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+    };
+
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      try { res.body.destroy(); } catch (_) {}
+      try { writer.destroy(); } catch (_) {}
+      reject(err);
+    };
+
+    const resetIdleTimer = () => {
+      cleanup();
+      idleTimer = setTimeout(() => {
+        fail(new Error(`${label} download stalled for ${Math.round(opts.idleTimeoutMs / 1000)}s`));
+      }, opts.idleTimeoutMs);
+    };
+
+    const finish = () => {
+      if (settled) return;
+      if (total > 0 && received !== total) {
+        fail(new Error(`${label} download incomplete (${received} / ${total} bytes)`));
+        return;
+      }
+      settled = true;
+      cleanup();
+      resolve();
+    };
+
+    resetIdleTimer();
+
     res.body.on('data', (chunk) => {
       received += chunk.length;
-      writer.write(chunk);
+      resetIdleTimer();
       if (total > 0) {
         const elapsed = (Date.now() - start) / 1000 || 0.001;
         emit({
@@ -51,10 +113,53 @@ async function downloadFile(url, destPath, label) {
         });
       }
     });
-    res.body.on('end',   () => { writer.end(); resolve(); });
-    res.body.on('error', reject);
-    writer.on('error',   reject);
+    res.body.on('error', fail);
+    writer.on('error',   fail);
+    writer.on('finish',  finish);
+    res.body.pipe(writer);
   });
+}
+
+async function downloadFile(url, destPath, label, options = {}) {
+  const opts = {
+    retries:          options.retries || 3,
+    requestTimeoutMs: options.requestTimeoutMs || 30_000,
+    idleTimeoutMs:    options.idleTimeoutMs || 45_000,
+    retryDelayMs:     options.retryDelayMs || 1_500,
+    step:             options.step || null
+  };
+
+  const partPath = `${destPath}.part`;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= opts.retries; attempt++) {
+    removeFileIfExists(partPath);
+
+    if (attempt > 1) {
+      emit({
+        type:    'step',
+        step:    opts.step,
+        status:  'downloading',
+        message: `${label}: retry ${attempt}/${opts.retries}...`
+      });
+    }
+
+    try {
+      await downloadFileOnce(url, partPath, label, opts);
+      removeFileIfExists(destPath);
+      fs.renameSync(partPath, destPath);
+      return;
+    } catch (err) {
+      lastError = err;
+      removeFileIfExists(partPath);
+
+      if (attempt < opts.retries) {
+        await sleep(opts.retryDelayMs * attempt);
+      }
+    }
+  }
+
+  throw new Error(`${label} download failed after ${opts.retries} attempts: ${lastError.message}`);
 }
 
 function ensureDir(dir) {
@@ -164,7 +269,7 @@ async function installJava(gameDir) {
   const downloadUrl  = release.binary.package.link;
   const tmpZip       = path.join(runtimeDir, 'java21.zip');
 
-  await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE');
+  await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE', { step: 'java' });
 
   emit({ type: 'step', step: 'java', status: 'extracting', message: 'Extracting Java 21...' });
 
@@ -284,7 +389,7 @@ async function installNeoForge(gameDir, javaExe) {
   const installerUrl = `https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/neoforge-${nfVersion}-installer.jar`;
   const installerJar = path.join(gameDir, `neoforge-${nfVersion}-installer.jar`);
 
-  await downloadFile(installerUrl, installerJar, 'NeoForge Installer');
+  await downloadFile(installerUrl, installerJar, 'NeoForge Installer', { step: 'neoforge' });
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Installing NeoForge (this may take a few minutes)...' });
 
@@ -296,18 +401,44 @@ async function installNeoForge(gameDir, javaExe) {
     );
 
     let output = '';
+    let settled = false;
+    const timeoutMs = 10 * 60 * 1000;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      try { proc.kill(); } catch (_) {}
+      reject(new Error(`NeoForge installer timed out after ${Math.round(timeoutMs / 60000)} minutes`));
+    }, timeoutMs);
+
+    const finish = (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (err) reject(err);
+      else resolve();
+    };
+
     proc.stdout.on('data', (d) => {
-      output += d.toString();
-      emit({ type: 'step', step: 'neoforge', status: 'installing', message: d.toString().trim() });
+      const message = d.toString();
+      output += message;
+      if (message.trim()) {
+        emit({ type: 'step', step: 'neoforge', status: 'installing', message: message.trim() });
+      }
     });
-    proc.stderr.on('data', (d) => { output += d.toString(); });
+    proc.stderr.on('data', (d) => {
+      const message = d.toString();
+      output += message;
+      if (message.trim()) {
+        emit({ type: 'step', step: 'neoforge', status: 'installing', message: message.trim() });
+      }
+    });
 
     proc.on('close', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`NeoForge installer exited with code ${code}\n${output.slice(-500)}`));
+      if (code === 0) finish();
+      else finish(new Error(`NeoForge installer exited with code ${code}\n${output.slice(-500)}`));
     });
 
-    proc.on('error', reject);
+    proc.on('error', finish);
   });
 
   // Clean up installer jar
@@ -329,7 +460,14 @@ async function checkInstallation(gameDir) {
   let neoforgeInstalled = false;
   if (fs.existsSync(versionsDir)) {
     const dirs = fs.readdirSync(versionsDir);
-    neoforgeInstalled = dirs.some(d => d.toLowerCase().includes('neoforge'));
+    neoforgeInstalled = dirs.some(d => {
+      const lower = d.toLowerCase();
+      return (
+        lower.includes('neoforge') &&
+        d.includes(nfVersion) &&
+        fs.existsSync(path.join(versionsDir, d, `${d}.json`))
+      );
+    });
   }
 
   // Check for vanilla Minecraft assets
