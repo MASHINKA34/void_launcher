@@ -387,46 +387,97 @@ async function downloadMinecraft(gameDir) {
 // ─── NeoForge installation ────────────────────────────────────────────────────
 
 async function installNeoForge(gameDir, javaExe) {
-  emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Downloading NeoForge installer...' });
+  // launcher_profiles.json is expected by the NeoForge installer (Mojang launcher format).
+  ensureLauncherProfiles(gameDir);
 
-  // NeoForge installer requires launcher_profiles.json to exist (Mojang launcher format)
-  const profilesPath = path.join(gameDir, 'launcher_profiles.json');
-  if (!fs.existsSync(profilesPath)) {
-    const profiles = {
-      profiles: {
-        '(Default)': {
-          name: '(Default)',
-          type: 'latest-release',
-          created: new Date().toISOString(),
-          lastUsed: new Date().toISOString(),
-          icon: 'Grass',
-          lastVersionId: 'latest-release'
-        }
-      },
-      settings: {
-        enableSnapshots: false,
-        enableAdvancedSettings: false,
-        keepLauncherOpen: false,
-        profileSorting: 'ByLastPlayed',
-        showGameLog: false,
-        showMenu: false,
-        soundOn: false
-      },
-      selectedProfile: '(Default)',
-      authenticationDatabase: {},
-      clientToken: '00000000-0000-0000-0000-000000000000',
-      launcherVersion: { format: 21, name: '2.2.1476', profilesFormat: 2 }
-    };
-    fs.writeFileSync(profilesPath, JSON.stringify(profiles, null, 2), 'utf8');
+  const nfVersion = config.NEOFORGE_VERSION;
+  const hasMirror = config.GITHUB_OWNER && config.GITHUB_REPO &&
+                    config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER';
+
+  // Preferred path: download a pre-installed NeoForge archive from our GitHub mirror and
+  // unpack it. This avoids maven.neoforged.net entirely (it is often blocked/throttled),
+  // so no installer needs to run and no libraries are fetched at install time.
+  if (hasMirror) {
+    try {
+      await installNeoForgeFromArchive(gameDir, nfVersion);
+      ensureDir(path.join(gameDir, 'mods'));
+      emit({ type: 'step', step: 'neoforge', status: 'done', message: 'NeoForge installed.' });
+      return;
+    } catch (err) {
+      emit({
+        type:    'step',
+        step:    'neoforge',
+        status:  'downloading',
+        message: `Готовый NeoForge недоступен (${err.message}). Перехожу на официальный установщик...`
+      });
+    }
   }
 
-  const nfVersion     = config.NEOFORGE_VERSION;
-  const installerName  = `neoforge-${nfVersion}-installer.jar`;
-  const installerJar   = path.join(gameDir, installerName);
+  // Fallback: the official installer (requires access to maven.neoforged.net).
+  await installNeoForgeViaInstaller(gameDir, javaExe, nfVersion);
+  ensureDir(path.join(gameDir, 'mods'));
+  emit({ type: 'step', step: 'neoforge', status: 'done', message: 'NeoForge installed.' });
+}
 
-  // Источники по приоритету:
-  //  1) своё зеркало в GitHub Releases (тег "neoforge") — GitHub доступен почти везде;
-  //  2) официальный maven.neoforged.net — на случай, если зеркало не залито/устарело.
+// Pre-installed NeoForge: a zip with versions/<neoforge> + the neoforged-hosted libraries,
+// produced once on a machine where maven.neoforged.net is reachable, then served from GitHub.
+async function installNeoForgeFromArchive(gameDir, nfVersion) {
+  const archiveName = `neoforge-${nfVersion}-offline.zip`;
+  const archiveUrl  = `https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/download/neoforge/${archiveName}`;
+  const archivePath = path.join(gameDir, archiveName);
+
+  emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Загрузка готового NeoForge...' });
+  await downloadFile(archiveUrl, archivePath, 'NeoForge (offline)', { step: 'neoforge' });
+
+  emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Распаковка NeoForge...' });
+  await extractZip(archivePath, gameDir);
+  try { fs.unlinkSync(archivePath); } catch (_) {}
+
+  // Verify the version manifest landed where the launcher expects it.
+  const versionJson = path.join(gameDir, 'versions', `neoforge-${nfVersion}`, `neoforge-${nfVersion}.json`);
+  if (!fs.existsSync(versionJson)) {
+    throw new Error('архив распакован, но манифест версии не найден');
+  }
+}
+
+function ensureLauncherProfiles(gameDir) {
+  const profilesPath = path.join(gameDir, 'launcher_profiles.json');
+  if (fs.existsSync(profilesPath)) return;
+  const profiles = {
+    profiles: {
+      '(Default)': {
+        name: '(Default)',
+        type: 'latest-release',
+        created: new Date().toISOString(),
+        lastUsed: new Date().toISOString(),
+        icon: 'Grass',
+        lastVersionId: 'latest-release'
+      }
+    },
+    settings: {
+      enableSnapshots: false,
+      enableAdvancedSettings: false,
+      keepLauncherOpen: false,
+      profileSorting: 'ByLastPlayed',
+      showGameLog: false,
+      showMenu: false,
+      soundOn: false
+    },
+    selectedProfile: '(Default)',
+    authenticationDatabase: {},
+    clientToken: '00000000-0000-0000-0000-000000000000',
+    launcherVersion: { format: 21, name: '2.2.1476', profilesFormat: 2 }
+  };
+  fs.writeFileSync(profilesPath, JSON.stringify(profiles, null, 2), 'utf8');
+}
+
+async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
+  emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Downloading NeoForge installer...' });
+
+  const installerName = `neoforge-${nfVersion}-installer.jar`;
+  const installerJar  = path.join(gameDir, installerName);
+
+  // Источники по приоритету: своё зеркало в GitHub Releases (тег "neoforge") → официальный maven.
   const sources = [];
   if (config.GITHUB_OWNER && config.GITHUB_REPO &&
       config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER') {
@@ -488,11 +539,6 @@ async function installNeoForge(gameDir, javaExe) {
 
   // Clean up installer jar
   try { fs.unlinkSync(installerJar); } catch (_) {}
-
-  // Ensure mods folder exists
-  ensureDir(path.join(gameDir, 'mods'));
-
-  emit({ type: 'step', step: 'neoforge', status: 'done', message: 'NeoForge installed.' });
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
