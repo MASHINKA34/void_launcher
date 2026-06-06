@@ -4,5 +4,17 @@
     "filename": "xaeroworldmap-neoforge-1.21.1-1.40.11.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.40.11.jar",
     "sha256": "A00363399C1672E5BFA399889D128F5BA60F42200EE97312038924DF6CBEBCB6"
+  },
+  {
+    "name": "GeckoLib",
+    "filename": "geckolib-neoforge-1.21.1-4.7.4.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/geckolib-neoforge-1.21.1-4.7.4.jar",
+    "sha256": "766EDDE81AA4C4375514C0527361360028DB787AC78683663A93615C1B0CE210"
+  },
+  {
+    "name": "Hookah Mod",
+    "filename": "hookahmod-1.0.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.0.jar",
+    "sha256": "D16B7D09DD6F3D24E413A46AE83880CA813258A5DBE46EA741DC9C99D724F7D8"
   }
 ]
