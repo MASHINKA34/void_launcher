@@ -162,6 +162,41 @@ async function downloadFile(url, destPath, label, options = {}) {
   throw new Error(`${label} download failed after ${opts.retries} attempts: ${lastError.message}`);
 }
 
+/**
+ * Tries several URLs in order until one succeeds.
+ * Use for files available from a primary mirror + an official fallback.
+ */
+async function downloadFromSources(urls, destPath, label, options = {}) {
+  const sources = urls.filter(Boolean);
+  let lastError = null;
+
+  for (let i = 0; i < sources.length; i++) {
+    const isLast = i === sources.length - 1;
+
+    if (i > 0) {
+      emit({
+        type:    'step',
+        step:    options.step || null,
+        status:  'downloading',
+        message: `${label}: основной источник недоступен, пробую запасной (${i + 1}/${sources.length})...`
+      });
+    }
+
+    try {
+      // Non-final mirrors get fewer retries so we fall back to the next source quickly.
+      await downloadFile(sources[i], destPath, label, {
+        ...options,
+        retries: isLast ? (options.retries || 3) : (options.mirrorRetries || 2)
+      });
+      return;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error(`${label}: все источники недоступны`);
+}
+
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
@@ -385,11 +420,21 @@ async function installNeoForge(gameDir, javaExe) {
     fs.writeFileSync(profilesPath, JSON.stringify(profiles, null, 2), 'utf8');
   }
 
-  const nfVersion    = config.NEOFORGE_VERSION;
-  const installerUrl = `https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/neoforge-${nfVersion}-installer.jar`;
-  const installerJar = path.join(gameDir, `neoforge-${nfVersion}-installer.jar`);
+  const nfVersion     = config.NEOFORGE_VERSION;
+  const installerName  = `neoforge-${nfVersion}-installer.jar`;
+  const installerJar   = path.join(gameDir, installerName);
 
-  await downloadFile(installerUrl, installerJar, 'NeoForge Installer', { step: 'neoforge' });
+  // Источники по приоритету:
+  //  1) своё зеркало в GitHub Releases (тег "neoforge") — GitHub доступен почти везде;
+  //  2) официальный maven.neoforged.net — на случай, если зеркало не залито/устарело.
+  const sources = [];
+  if (config.GITHUB_OWNER && config.GITHUB_REPO &&
+      config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER') {
+    sources.push(`https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/download/neoforge/${installerName}`);
+  }
+  sources.push(`https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/${installerName}`);
+
+  await downloadFromSources(sources, installerJar, 'NeoForge Installer', { step: 'neoforge' });
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Installing NeoForge (this may take a few minutes)...' });
 
