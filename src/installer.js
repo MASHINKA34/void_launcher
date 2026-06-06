@@ -465,10 +465,13 @@ async function installNeoForgeFromArchive(gameDir, nfVersion) {
   await extractZip(archivePath, gameDir);
   try { fs.unlinkSync(archivePath); } catch (_) {}
 
-  // Verify the version manifest landed where the launcher expects it.
-  const versionJson = path.join(gameDir, 'versions', `neoforge-${nfVersion}`, `neoforge-${nfVersion}.json`);
-  if (!fs.existsSync(versionJson)) {
-    throw new Error('архив распакован, но манифест версии не найден');
+  // Verify the unpacked archive is complete: the version manifest AND the universal jar
+  // that registers the neoforge/minecraft mod providers. If either is missing, throw so
+  // the caller falls back to the official installer.
+  const versionJson  = path.join(gameDir, 'versions', `neoforge-${nfVersion}`, `neoforge-${nfVersion}.json`);
+  const universalJar = path.join(gameDir, 'libraries', 'net', 'neoforged', 'neoforge', nfVersion, `neoforge-${nfVersion}-universal.jar`);
+  if (!fs.existsSync(versionJson) || !fs.existsSync(universalJar)) {
+    throw new Error('архив распакован, но неполный (нет манифеста или universal.jar)');
   }
 }
 
@@ -578,10 +581,17 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
 async function checkInstallation(gameDir) {
   const nfVersion = config.NEOFORGE_VERSION;
 
-  // Check for NeoForge version JSON
-  const versionsDir = path.join(gameDir, 'versions');
+  // NeoForge counts as installed only if BOTH its version manifest AND the universal jar
+  // exist. The universal jar registers the `neoforge`/`minecraft` mod providers — without
+  // it mods fail with "neoforge [MISSING]". Requiring it here also forces a clean re-install
+  // for anyone who received an earlier, incomplete offline archive.
+  const versionsDir  = path.join(gameDir, 'versions');
+  const universalJar = path.join(
+    gameDir, 'libraries', 'net', 'neoforged', 'neoforge', nfVersion,
+    `neoforge-${nfVersion}-universal.jar`
+  );
   let neoforgeInstalled = false;
-  if (fs.existsSync(versionsDir)) {
+  if (fs.existsSync(versionsDir) && fs.existsSync(universalJar)) {
     const dirs = fs.readdirSync(versionsDir);
     neoforgeInstalled = dirs.some(d => {
       const lower = d.toLowerCase();
