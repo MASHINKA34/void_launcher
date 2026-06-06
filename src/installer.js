@@ -235,6 +235,26 @@ async function testJavaExe(exePath) {
   }
 }
 
+// Returns the major Java version of an executable (8, 17, 21, ...), or null if unknown.
+// `java -version` prints e.g. `version "21.0.10"` (modern) or `version "1.8.0_401"` (Java 8),
+// usually to stderr and with exit code 0.
+async function getJavaMajor(exePath) {
+  const parse = (text) => {
+    if (!text) return null;
+    const m = text.match(/version "(\d+)(?:\.(\d+))?/);
+    if (!m) return null;
+    let major = parseInt(m[1], 10);
+    if (major === 1 && m[2]) major = parseInt(m[2], 10); // 1.8 → 8
+    return Number.isNaN(major) ? null : major;
+  };
+  try {
+    const { stdout, stderr } = await execAsync(`"${exePath}" -version`, { timeout: 5000 });
+    return parse(`${stderr || ''}\n${stdout || ''}`);
+  } catch (err) {
+    return parse(`${err.stderr || ''}\n${err.stdout || ''}`);
+  }
+}
+
 async function findJavaInDir(baseDir, minVersion) {
   if (!fs.existsSync(baseDir)) return null;
   const entries = fs.readdirSync(baseDir);
@@ -257,28 +277,40 @@ async function findJavaInDir(baseDir, minVersion) {
   return null;
 }
 
+const REQUIRED_JAVA_MAJOR = 21;
+
 async function findJava(gameDir) {
-  // 1. Bundled runtime in game dir
+  // 1. Bundled runtime in game dir — this is always the Java 21 we install ourselves.
   const bundled = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
   if (fs.existsSync(bundled)) return bundled;
 
-  // 2. JAVA_HOME
+  // Accept a candidate only if it is actually Java 21+ (a system Java 8 must be rejected,
+  // otherwise NeoForge fails at launch with "Unrecognized option: -p").
+  const accept = async (exe) => {
+    if (!exe || !fs.existsSync(exe)) return false;
+    const major = await getJavaMajor(exe);
+    return major !== null && major >= REQUIRED_JAVA_MAJOR;
+  };
+
+  // 2. JAVA_HOME (only if Java 21+)
   if (process.env.JAVA_HOME) {
     const exe = path.join(process.env.JAVA_HOME, 'bin', 'java.exe');
-    if (fs.existsSync(exe)) return exe;
+    if (await accept(exe)) return exe;
   }
 
-  // 3. PATH
+  // 3. PATH (check every entry, skip older Javas like a system-wide Java 8)
   try {
     const { stdout } = await execAsync('where java', { timeout: 5000 });
-    const first = stdout.trim().split('\n')[0].trim();
-    if (first && fs.existsSync(first)) return first;
+    for (const line of stdout.trim().split(/\r?\n/)) {
+      const cand = line.trim();
+      if (await accept(cand)) return cand;
+    }
   } catch (_) {}
 
   // 4. Common Windows install directories
   for (const base of WIN_JAVA_DIRS) {
     const found = await findJavaInDir(base, '21');
-    if (found) return found;
+    if (await accept(found)) return found;
   }
 
   return null;
@@ -610,4 +642,4 @@ async function install(gameDir, javaPathOverride) {
   }
 }
 
-module.exports = { checkInstallation, install, findJava, setProgressCallback };
+module.exports = { checkInstallation, install, findJava, getJavaMajor, setProgressCallback };

@@ -8,6 +8,7 @@ const fs   = require('fs');
 const { Client } = require('minecraft-launcher-core');
 const crypto = require('crypto');
 const config = require('../config');
+const installer = require('./installer');
 
 let outputCallback = null;
 let exitCallback   = null;
@@ -120,11 +121,18 @@ async function launch(opts) {
     ]
   };
 
-  // Use bundled Java if available and no explicit path given
-  const bundledJava = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
-  if (!launchOptions.javaPath && fs.existsSync(bundledJava)) {
-    launchOptions.javaPath = bundledJava;
+  // Resolve a Java 21+ runtime. NeoForge 1.21.1 requires Java 21 — launching with an
+  // older system Java (e.g. Java 8) fails with "Unrecognized option: -p".
+  let resolvedJava = null;
+  if (javaPath && javaPath !== 'auto') {
+    const major = await installer.getJavaMajor(javaPath);
+    if (major !== null && major >= 21) resolvedJava = javaPath;
   }
+  if (!resolvedJava) resolvedJava = await installer.findJava(gameDir);
+  if (!resolvedJava) {
+    throw new Error('Java 21 не найдена. Перезапустите лаунчер — он установит её автоматически.');
+  }
+  launchOptions.javaPath = resolvedJava;
 
   // Ensure Russian language is set in options.txt
   const optionsPath = path.join(gameDir, 'options.txt');
