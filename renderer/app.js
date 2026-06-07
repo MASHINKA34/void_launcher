@@ -965,6 +965,12 @@ async function boot() {
   initConsole();
   initSettingsUI();
 
+  try {
+    const version = await window.api.getAppVersion();
+    $('login-version-tag').textContent = `v${version}`;
+    $('about-launcher-ver').textContent = version;
+  } catch (_) {}
+
   const profile = await window.api.getProfile();
 
   showScreen('login');

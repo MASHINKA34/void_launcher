@@ -220,6 +220,8 @@ ipcMain.handle('get-system-ram', () => {
   return Math.floor(os.totalmem() / 1024 / 1024 / 1024);
 });
 
+ipcMain.handle('get-app-version', () => app.getVersion());
+
 ipcMain.handle('browse-folder', async () => {
   if (!mainWindow) return null;
   const result = await dialog.showOpenDialog(mainWindow, {

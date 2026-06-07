@@ -103,7 +103,7 @@ async function downloadUpdate(downloadUrl, assetName) {
 
 function installUpdate(filePath) {
   const { spawn } = require('child_process');
-  spawn(filePath, [], { detached: true, stdio: 'ignore' }).unref();
+  spawn(filePath, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref();
 }
 
 module.exports = { checkForUpdates, downloadUpdate, installUpdate, setProgressCallback };
