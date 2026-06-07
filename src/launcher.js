@@ -27,6 +27,26 @@ function findNeoForgeVersionId(gameDir) {
   return dirs.find(d => d.toLowerCase().includes('neoforge')) || null;
 }
 
+function ensureFmlConfig(gameDir) {
+  const configDir = path.join(gameDir, 'config');
+  const fmlPath   = path.join(configDir, 'fml.toml');
+  try {
+    if (!fs.existsSync(fmlPath)) {
+      if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(fmlPath, 'earlyWindowControl = false\n', 'utf8');
+      return;
+    }
+    let content = fs.readFileSync(fmlPath, 'utf8');
+    if (/^\s*earlyWindowControl\s*=\s*false\s*$/m.test(content)) return;
+    if (/^\s*earlyWindowControl\s*=/m.test(content)) {
+      content = content.replace(/^\s*earlyWindowControl\s*=.*$/m, 'earlyWindowControl = false');
+    } else {
+      content = content.trimEnd() + '\nearlyWindowControl = false\n';
+    }
+    fs.writeFileSync(fmlPath, content, 'utf8');
+  } catch (_) {}
+}
+
 // Read the NeoForge version JSON and extract the JVM args it requires,
 // substituting the ${variable} placeholders MCLC doesn't handle.
 function buildNeoForgeJvmArgs(gameDir, versionId) {
@@ -147,6 +167,8 @@ async function launch(opts) {
       fs.writeFileSync(optionsPath, options, 'utf8');
     }
   } catch (_) {}
+
+  ensureFmlConfig(gameDir);
 
   return new Promise((resolve) => {
     launcher.launch(launchOptions);
