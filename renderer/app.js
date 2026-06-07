@@ -694,6 +694,11 @@ function initSettingsUI() {
     state.settings.ram = val;
   });
 
+  $('setting-ram').addEventListener('change', () => {
+    state.settings.ram = parseInt($('setting-ram').value, 10);
+    window.api.saveSettings(state.settings);
+  });
+
   // Browse folder
   $('btn-browse').addEventListener('click', async () => {
     const folder = await window.api.browseFolder();
@@ -925,7 +930,7 @@ async function enterMain() {
   showScreen('main');
 
   // Check installation
-  const installed = await window.api.checkInstallation(state.settings.gameDir);
+  const installed = await window.api.checkInstallation(state.settings.gameDir, state.settings.javaPath);
 
   if (!installed.fullyInstalled) {
     const ok = await runInstallation();

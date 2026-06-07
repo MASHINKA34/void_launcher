@@ -259,9 +259,9 @@ ipcMain.handle('get-mods-list', () => {
 
 // ─── Installation ─────────────────────────────────────────────────────────────
 
-ipcMain.handle('check-installation', async (_, gameDir) => {
+ipcMain.handle('check-installation', async (_, gameDir, javaPath) => {
   const installer = require('./src/installer');
-  return await installer.checkInstallation(gameDir);
+  return await installer.checkInstallation(gameDir, javaPath);
 });
 
 ipcMain.handle('install-game', async (_, { gameDir, javaPath }) => {

@@ -30,7 +30,7 @@ contextBridge.exposeInMainWorld('api', {
   getModsList: () => ipcRenderer.invoke('get-mods-list'),
 
   // ── Installation ────────────────────────────────────────────────────────────
-  checkInstallation: (gameDir) => ipcRenderer.invoke('check-installation', gameDir),
+  checkInstallation: (gameDir, javaPath) => ipcRenderer.invoke('check-installation', gameDir, javaPath),
   installGame:       (opts)    => ipcRenderer.invoke('install-game', opts),
 
   // ── Mod sync ────────────────────────────────────────────────────────────────

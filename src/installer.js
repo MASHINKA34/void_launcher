@@ -578,44 +578,45 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-async function checkInstallation(gameDir) {
-  const nfVersion = config.NEOFORGE_VERSION;
+function isMinecraftInstalled(gameDir) {
+  return fs.existsSync(path.join(gameDir, 'versions', config.MC_VERSION));
+}
 
-  // NeoForge counts as installed only if BOTH its version manifest AND the universal jar
-  // exist. The universal jar registers the `neoforge`/`minecraft` mod providers — without
-  // it mods fail with "neoforge [MISSING]". Requiring it here also forces a clean re-install
-  // for anyone who received an earlier, incomplete offline archive.
-  const versionsDir  = path.join(gameDir, 'versions');
+function isNeoForgeInstalled(gameDir) {
+  const nfVersion = config.NEOFORGE_VERSION;
   const universalJar = path.join(
     gameDir, 'libraries', 'net', 'neoforged', 'neoforge', nfVersion,
     `neoforge-${nfVersion}-universal.jar`
   );
-  let neoforgeInstalled = false;
-  if (fs.existsSync(versionsDir) && fs.existsSync(universalJar)) {
-    const dirs = fs.readdirSync(versionsDir);
-    neoforgeInstalled = dirs.some(d => {
-      const lower = d.toLowerCase();
-      return (
-        lower.includes('neoforge') &&
-        d.includes(nfVersion) &&
-        fs.existsSync(path.join(versionsDir, d, `${d}.json`))
-      );
-    });
+  if (!fs.existsSync(universalJar)) return false;
+
+  const versionsDir = path.join(gameDir, 'versions');
+  if (!fs.existsSync(versionsDir)) return false;
+
+  return fs.readdirSync(versionsDir).some(d => {
+    const lower = d.toLowerCase();
+    return lower.includes('neoforge') &&
+           d.includes(nfVersion) &&
+           fs.existsSync(path.join(versionsDir, d, `${d}.json`));
+  });
+}
+
+async function checkInstallation(gameDir, savedJavaPath) {
+  const neoforgeInstalled = isNeoForgeInstalled(gameDir);
+  const mcInstalled       = isMinecraftInstalled(gameDir);
+
+  let javaPath = await findJava(gameDir);
+  if (!javaPath && savedJavaPath && savedJavaPath !== 'auto' && fs.existsSync(savedJavaPath)) {
+    const major = await getJavaMajor(savedJavaPath);
+    if (major !== null && major >= REQUIRED_JAVA_MAJOR) javaPath = savedJavaPath;
   }
 
-  // Check for vanilla Minecraft assets
-  const mcVersionDir = path.join(gameDir, 'versions', config.MC_VERSION);
-  const mcInstalled  = fs.existsSync(mcVersionDir);
-
-  // Check Java
-  const javaPath = await findJava(gameDir);
-
   return {
-    javaInstalled:      !!javaPath,
-    javaPath:           javaPath || null,
+    javaInstalled:  !!javaPath,
+    javaPath:       javaPath || null,
     mcInstalled,
     neoforgeInstalled,
-    fullyInstalled:     !!javaPath && mcInstalled && neoforgeInstalled
+    fullyInstalled: !!javaPath && mcInstalled && neoforgeInstalled
   };
 }
 
@@ -637,11 +638,20 @@ async function install(gameDir, javaPathOverride) {
 
     // ── Step 2: Minecraft ─────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'minecraft', message: 'Downloading Minecraft 1.21.1...' });
-    await downloadMinecraft(gameDir);
+    if (isMinecraftInstalled(gameDir)) {
+      emit({ type: 'step', step: 'minecraft', status: 'done', message: 'Minecraft 1.21.1 ready.' });
+    } else {
+      await downloadMinecraft(gameDir);
+    }
 
     // ── Step 3: NeoForge ──────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'neoforge', message: 'Installing NeoForge...' });
-    await installNeoForge(gameDir, javaExe);
+    if (isNeoForgeInstalled(gameDir)) {
+      ensureDir(path.join(gameDir, 'mods'));
+      emit({ type: 'step', step: 'neoforge', status: 'done', message: 'NeoForge installed.' });
+    } else {
+      await installNeoForge(gameDir, javaExe);
+    }
 
     emit({ type: 'done', message: 'Installation complete!' });
     return { success: true, javaPath: javaExe };
