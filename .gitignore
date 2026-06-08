@@ -59,5 +59,8 @@ temp/
 # Mod upload staging (generated, ~268MB)
 tools/staging-mods/
 
+# Built NeoForge offline artifacts (generated, hosted in Releases)
+tools/*.zip
+
 # Windows shortcuts
 *.lnk

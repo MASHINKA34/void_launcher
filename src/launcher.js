@@ -24,6 +24,8 @@ function findNeoForgeVersionId(gameDir) {
   const versionsDir = path.join(gameDir, 'versions');
   if (!fs.existsSync(versionsDir)) return null;
   const dirs = fs.readdirSync(versionsDir);
+  const preferred = dirs.find(d => d.toLowerCase().includes('neoforge') && d.includes(config.NEOFORGE_VERSION));
+  if (preferred) return preferred;
   return dirs.find(d => d.toLowerCase().includes('neoforge')) || null;
 }
 
