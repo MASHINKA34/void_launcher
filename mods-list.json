@@ -192,12 +192,6 @@
     "sha256": "4A8E1F4D5702937A707861E478829695E432286BCD9E58F5834D82C6D998EEA8"
   },
   {
-    "name": "atmospherica",
-    "filename": "atmospherica-1.0.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/atmospherica-1.0.0.jar",
-    "sha256": "910F82351FFFF98920FDD7E17694340A8018985BD66BF415CF5284772C6A9AED"
-  },
-  {
     "name": "bellsandwhistles",
     "filename": "bellsandwhistles-0.4.7-1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/bellsandwhistles-0.4.7-1.21.1.jar",
@@ -385,9 +379,9 @@
   },
   {
     "name": "hookahmod",
-    "filename": "hookahmod-1.0.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.0.jar",
-    "sha256": "62AAA7842D823A4A175ED048E394E02FC1032886061C13C7A70C57ACF3D50459"
+    "filename": "hookahmod-1.0.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.1.jar",
+    "sha256": "AD0274A7D41543AE0D2B958E13316ECE97A570F974D480A675DE294CE8F812B2"
   },
   {
     "name": "immersive melodies",
