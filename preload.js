@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('api', {
   // ── System ──────────────────────────────────────────────────────────────────
   getSystemRam: () => ipcRenderer.invoke('get-system-ram'),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  getVersions:   () => ipcRenderer.invoke('get-versions'),
   browseFolder: () => ipcRenderer.invoke('browse-folder'),
   detectJava:   (gameDir) => ipcRenderer.invoke('detect-java', gameDir),
 

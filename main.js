@@ -268,6 +268,12 @@ ipcMain.handle('get-system-ram', () => {
 
 ipcMain.handle('get-app-version', () => app.getVersion());
 
+ipcMain.handle('get-versions', () => ({
+  mc:       config.MC_VERSION,
+  neoforge: config.NEOFORGE_VERSION,
+  launcher: app.getVersion()
+}));
+
 ipcMain.handle('browse-folder', async () => {
   if (!mainWindow) return null;
   const result = await dialog.showOpenDialog(mainWindow, {

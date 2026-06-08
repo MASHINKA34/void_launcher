@@ -988,9 +988,14 @@ async function boot() {
   initSettingsUI();
 
   try {
-    const version = await window.api.getAppVersion();
-    $('login-version-tag').textContent = `v${version}`;
-    $('about-launcher-ver').textContent = version;
+    const v = await window.api.getVersions();
+    $('login-version-tag').textContent  = `v${v.launcher}`;
+    $('about-launcher-ver').textContent = v.launcher;
+    $('about-mc-ver').textContent       = `${v.mc} — NeoForge ${v.neoforge}`;
+    const badge = $('home-version-badge');
+    if (badge) badge.textContent = `NeoForge ${v.mc}`;
+    STEPS[1].label = `Minecraft ${v.mc}`;
+    STEPS[2].label = `NeoForge ${v.neoforge}`;
   } catch (_) {}
 
   const session = await window.api.restoreSession();
