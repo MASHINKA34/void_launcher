@@ -205,6 +205,24 @@ body {
 
 .btn-full { width: 100%; }
 
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.remember-row input {
+  width: 15px;
+  height: 15px;
+  accent-color: #a855f7;
+  cursor: pointer;
+}
+.remember-row:hover { color: var(--text-secondary); }
+
 .auth-switch {
   align-self: center;
   border: none;

@@ -129,10 +129,18 @@ function login(userDataDir, username, password) {
   return { success: true, profile: { username: account.username || cleanUsername } };
 }
 
+function hasAccount(userDataDir, username) {
+  const key = normalizeUsername(username);
+  if (!key) return false;
+  const store = readStore(userDataDir);
+  return !!store.accounts[key];
+}
+
 module.exports = {
   login,
   register,
   validateUsername,
   validatePassword,
-  normalizeUsername
+  normalizeUsername,
+  hasAccount
 };

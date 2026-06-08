@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('api', {
   loginAccount:             (creds)    => ipcRenderer.invoke('auth-login', creds),
   registerAccount:          (creds)    => ipcRenderer.invoke('auth-register', creds),
   logoutAccount:            ()         => ipcRenderer.invoke('auth-logout'),
+  restoreSession:           ()         => ipcRenderer.invoke('auth-restore-session'),
 
   // ── System ──────────────────────────────────────────────────────────────────
   getSystemRam: () => ipcRenderer.invoke('get-system-ram'),

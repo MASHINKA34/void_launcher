@@ -206,7 +206,8 @@ function initLoginScreen(prefillNick = '') {
 
     btnEnter.disabled = true;
     try {
-      const request = { username: nick, password };
+      const remember = $('remember-me')?.checked ?? true;
+      const request = { username: nick, password, remember };
       const result = authMode === 'register'
         ? await window.api.registerAccount(request)
         : await window.api.loginAccount(request);
@@ -970,6 +971,13 @@ async function boot() {
     $('login-version-tag').textContent = `v${version}`;
     $('about-launcher-ver').textContent = version;
   } catch (_) {}
+
+  const session = await window.api.restoreSession();
+  if (session.success) {
+    state.profile = session.profile;
+    await enterMain();
+    return;
+  }
 
   const profile = await window.api.getProfile();
 

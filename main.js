@@ -120,6 +120,19 @@ function saveProfileSnapshot(profile) {
   fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf8');
 }
 
+function writeSession(username) {
+  try {
+    fs.writeFileSync(getUserDataPath('session.json'), JSON.stringify({ username }, null, 2), 'utf8');
+  } catch (_) {}
+}
+
+function clearSession() {
+  try {
+    const sessionPath = getUserDataPath('session.json');
+    if (fs.existsSync(sessionPath)) fs.unlinkSync(sessionPath);
+  } catch (_) {}
+}
+
 ipcMain.handle('get-profile', () => {
   const profilePath = getUserDataPath('profile.json');
   try {
@@ -168,6 +181,7 @@ ipcMain.handle('delete-profile', () => {
   const profilePath = getUserDataPath('profile.json');
   try {
     activeAuthProfile = null;
+    clearSession();
     if (fs.existsSync(profilePath)) fs.unlinkSync(profilePath);
     return { success: true };
   } catch (err) {
@@ -186,6 +200,8 @@ ipcMain.handle('auth-register', (_, credentials) => {
 
     activeAuthProfile = result.profile;
     saveProfileSnapshot(result.profile);
+    if (credentials?.remember) writeSession(result.profile.username);
+    else clearSession();
     return result;
   } catch (err) {
     return { success: false, error: err.message };
@@ -203,6 +219,8 @@ ipcMain.handle('auth-login', (_, credentials) => {
 
     activeAuthProfile = result.profile;
     saveProfileSnapshot(result.profile);
+    if (credentials?.remember) writeSession(result.profile.username);
+    else clearSession();
     return result;
   } catch (err) {
     return { success: false, error: err.message };
@@ -211,7 +229,23 @@ ipcMain.handle('auth-login', (_, credentials) => {
 
 ipcMain.handle('auth-logout', () => {
   activeAuthProfile = null;
+  clearSession();
   return { success: true };
+});
+
+ipcMain.handle('auth-restore-session', () => {
+  const sessionPath = getUserDataPath('session.json');
+  try {
+    if (!fs.existsSync(sessionPath)) return { success: false };
+    const session = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+    if (!session?.username) return { success: false };
+    if (!auth.hasAccount(app.getPath('userData'), session.username)) return { success: false };
+
+    activeAuthProfile = { username: session.username };
+    return { success: true, profile: { username: session.username } };
+  } catch (_) {
+    return { success: false };
+  }
 });
 
 // ─── System info ──────────────────────────────────────────────────────────────
