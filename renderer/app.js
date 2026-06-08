@@ -415,10 +415,27 @@ async function pingServer() {
 }
 
 /* ─────────────────────────────────────────────────────────────── News */
+function escapeHtml(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function linkify(text) {
+  return escapeHtml(text).replace(/(https?:\/\/[^\s<]+)/g, (match) => {
+    const clean = match.replace(/[.,!?;:)]+$/, '');
+    const trail = match.slice(clean.length);
+    return `<a href="${clean}" target="_blank" rel="noopener noreferrer" class="news-link">${clean}</a>${trail}`;
+  });
+}
+
 function openNewsModal(item) {
   $('news-modal-date').textContent  = item.date  || '';
   $('news-modal-title').textContent = item.title || '';
-  $('news-modal-body').textContent  = item.body  || '';
+  $('news-modal-body').innerHTML    = linkify(item.body || '');
   $('news-modal-overlay').classList.remove('hidden');
 }
 
@@ -441,11 +458,15 @@ async function loadNews() {
       const el = document.createElement('div');
       el.className = 'news-item';
       el.innerHTML = `
-        <div class="news-date">${item.date || ''}</div>
-        <div class="news-title">${item.title || ''}</div>
-        <div class="news-body">${item.body || ''}</div>
+        <div class="news-date">${escapeHtml(item.date || '')}</div>
+        <div class="news-title">${escapeHtml(item.title || '')}</div>
+        <div class="news-body">${linkify(item.body || '')}</div>
       `;
-      el.addEventListener('click', () => openNewsModal(item));
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        if (window.getSelection().toString()) return;
+        openNewsModal(item);
+      });
       fragment.appendChild(el);
     }
     list.innerHTML = '';

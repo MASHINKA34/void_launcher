@@ -730,6 +730,8 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* News modal */
@@ -765,7 +767,21 @@ body {
   overflow-y: auto;
   flex: 1;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
+
+.news-link {
+  color: #c084fc;
+  text-decoration: underline;
+  cursor: pointer;
+  user-select: text;
+  -webkit-user-select: text;
+  word-break: break-all;
+}
+.news-link:hover { color: #d8b4fe; }
 .news-modal-close {
   align-self: flex-end;
   background: rgba(168, 85, 247, 0.15);
