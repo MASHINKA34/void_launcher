@@ -56,5 +56,8 @@ temp/
 *.jar
 !mods-list.json
 
+# Mod upload staging (generated, ~268MB)
+tools/staging-mods/
+
 # Windows shortcuts
 *.lnk
