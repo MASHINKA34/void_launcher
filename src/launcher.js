@@ -30,20 +30,30 @@ function findNeoForgeVersionId(gameDir) {
 function ensureFmlConfig(gameDir) {
   const configDir = path.join(gameDir, 'config');
   const fmlPath   = path.join(configDir, 'fml.toml');
+  const keyRe     = /^\s*earlyWindowControl\s*=/;
   try {
-    if (!fs.existsSync(fmlPath)) {
-      if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
-      fs.writeFileSync(fmlPath, 'earlyWindowControl = false\n', 'utf8');
-      return;
+    if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
+
+    let lines = [];
+    if (fs.existsSync(fmlPath)) {
+      lines = fs.readFileSync(fmlPath, 'utf8').replace(/\r\n?/g, '\n').split('\n');
     }
-    let content = fs.readFileSync(fmlPath, 'utf8');
-    if (/^\s*earlyWindowControl\s*=\s*false\s*$/m.test(content)) return;
-    if (/^\s*earlyWindowControl\s*=/m.test(content)) {
-      content = content.replace(/^\s*earlyWindowControl\s*=.*$/m, 'earlyWindowControl = false');
-    } else {
-      content = content.trimEnd() + '\nearlyWindowControl = false\n';
+
+    let replaced = false;
+    const out = [];
+    for (const line of lines) {
+      if (keyRe.test(line)) {
+        if (!replaced) {
+          out.push('earlyWindowControl = false');
+          replaced = true;
+        }
+        continue;
+      }
+      out.push(line);
     }
-    fs.writeFileSync(fmlPath, content, 'utf8');
+    if (!replaced) out.push('earlyWindowControl = false');
+
+    fs.writeFileSync(fmlPath, out.join('\n') + '\n', 'utf8');
   } catch (_) {}
 }
 
