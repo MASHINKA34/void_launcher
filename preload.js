@@ -55,7 +55,7 @@ contextBridge.exposeInMainWorld('api', {
   onModSyncProgress: (cb) => ipcRenderer.on('mod-sync-progress', (_, d) => cb(d)),
   onGameStdout:      (cb) => ipcRenderer.on('game-stdout',       (_, d) => cb(d)),
   onGameStderr:      (cb) => ipcRenderer.on('game-stderr',       (_, d) => cb(d)),
-  onGameExit:        (cb) => ipcRenderer.on('game-exit',         (_, code) => cb(code)),
+  onGameExit:        (cb) => ipcRenderer.on('game-exit',         (_, d) => cb(d)),
   onUpdateProgress:  (cb) => ipcRenderer.on('update-progress',   (_, d) => cb(d)),
 
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)

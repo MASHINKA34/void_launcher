@@ -501,11 +501,51 @@ function renderModsTab(mods) {
     return;
   }
 
+  const disabledSet  = new Set((state.settings?.disabledMods || []).map(f => String(f).toLowerCase()));
+  const clientMods   = mods.filter(m => m.client === true);
+  const requiredMods = mods.filter(m => m.client !== true);
+
   list.innerHTML = '';
-  mods.forEach(mod => {
-    const card = document.createElement('div');
-    card.className = 'mod-card';
-    card.innerHTML = `
+
+  if (clientMods.length) {
+    list.appendChild(buildModsSectionHeader(
+      'Клиентские моды',
+      'не нужны серверу — можно выключать; нажми на мод, чтобы узнать, что он делает'
+    ));
+    clientMods.forEach(mod => list.appendChild(buildModCard(mod, true, disabledSet)));
+  }
+
+  if (requiredMods.length) {
+    list.appendChild(buildModsSectionHeader(
+      'Обязательные моды',
+      'нужны для игры на сервере — отключить нельзя'
+    ));
+    requiredMods.forEach(mod => list.appendChild(buildModCard(mod, false, disabledSet)));
+  }
+}
+
+function buildModsSectionHeader(title, hint) {
+  const header = document.createElement('div');
+  header.className = 'mods-section-header';
+  header.innerHTML = `<span class="mods-section-title">${title}</span><span class="mods-section-hint">${hint}</span>`;
+  return header;
+}
+
+function buildModCard(mod, toggleable, disabledSet) {
+  const fileKey = String(mod.filename).toLowerCase();
+  const isOff   = toggleable && disabledSet.has(fileKey);
+  const card = document.createElement('div');
+  card.className = isOff ? 'mod-card mod-card-disabled' : 'mod-card';
+
+  const rightHtml = toggleable
+    ? `<label class="mod-toggle" title="Включить или отключить мод на этом компьютере">
+         <input type="checkbox" ${isOff ? '' : 'checked'}>
+         <span class="mod-toggle-slider"></span>
+       </label>`
+    : `<span class="mod-card-badge">Обязательный</span>`;
+
+  card.innerHTML = `
+    <div class="mod-card-row">
       <div class="mod-card-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
@@ -515,9 +555,30 @@ function renderModsTab(mods) {
         <div class="mod-card-name">${mod.name || mod.filename}</div>
         <div class="mod-card-file">${mod.filename}</div>
       </div>
-    `;
-    list.appendChild(card);
+      ${rightHtml}
+    </div>
+    <div class="mod-card-desc hidden">${mod.description || 'Обязательный мод сборки — нужен для игры на сервере.'}</div>
+  `;
+
+  const desc = card.querySelector('.mod-card-desc');
+  card.querySelector('.mod-card-row').addEventListener('click', (e) => {
+    if (e.target.closest('.mod-toggle')) return;
+    desc.classList.toggle('hidden');
   });
+
+  if (toggleable) {
+    const checkbox = card.querySelector('.mod-toggle input');
+    checkbox.addEventListener('change', () => {
+      const set = new Set((state.settings.disabledMods || []).map(f => String(f).toLowerCase()));
+      if (checkbox.checked) set.delete(fileKey);
+      else set.add(fileKey);
+      state.settings.disabledMods = [...set];
+      card.classList.toggle('mod-card-disabled', !checkbox.checked);
+      window.api.saveSettings(state.settings);
+    });
+  }
+
+  return card;
 }
 
 async function loadModsInfo() {
@@ -569,10 +630,16 @@ function initConsole() {
 
   window.api.onGameStdout((data) => appendConsole(data, 'stdout'));
   window.api.onGameStderr((data) => appendConsole(data, 'stderr'));
-  window.api.onGameExit((code) => {
+  window.api.onGameExit((data) => {
+    const code  = (data && typeof data === 'object') ? data.code  : data;
+    const crash = (data && typeof data === 'object') ? data.crash : null;
     state.isGameRunning = false;
     setPlayBtnState('idle');
     appendConsole(`\n[Лаунчер] Игра завершена (код ${code})\n`, 'system');
+    if (crash) {
+      appendConsole(`[Лаунчер] ${crash}\n`, 'stderr');
+      showError(crash);
+    }
   });
 }
 
@@ -744,6 +811,7 @@ function initSettingsUI() {
   // Save settings
   $('btn-save-settings').addEventListener('click', async () => {
     const newSettings = {
+      ...state.settings,
       ram:     parseInt($('setting-ram').value,    10),
       width:   parseInt($('setting-width').value,  10),
       height:  parseInt($('setting-height').value, 10),

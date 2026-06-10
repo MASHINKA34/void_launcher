@@ -8,6 +8,7 @@ const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
 const fetch  = require('node-fetch');
+const { pipeline } = require('stream/promises');
 
 let progressCallback = null;
 
@@ -40,33 +41,60 @@ async function downloadMod(mod, destPath) {
   const total  = parseInt(res.headers.get('content-length') || '0', 10);
   let received = 0;
   const start  = Date.now();
-  const writer = fs.createWriteStream(destPath);
 
-  await new Promise((resolve, reject) => {
-    res.body.on('data', (chunk) => {
-      received += chunk.length;
-      writer.write(chunk);
-      if (total > 0) {
-        const elapsed = (Date.now() - start) / 1000 || 0.001;
-        emit({
-          type:     'mod-download',
-          modName:  mod.name,
-          percent:  Math.round((received / total) * 100),
-          received,
-          total,
-          speed:    Math.round(received / elapsed)
-        });
-      }
-    });
-    res.body.on('end',   () => { writer.end(); resolve(); });
-    res.body.on('error', reject);
-    writer.on('error',   reject);
+  res.body.on('data', (chunk) => {
+    received += chunk.length;
+    if (total > 0) {
+      const elapsed = (Date.now() - start) / 1000 || 0.001;
+      emit({
+        type:     'mod-download',
+        modName:  mod.name,
+        percent:  Math.round((received / total) * 100),
+        received,
+        total,
+        speed:    Math.round(received / elapsed)
+      });
+    }
   });
+
+  await pipeline(res.body, fs.createWriteStream(destPath));
+}
+
+const DOWNLOAD_ATTEMPTS = 3;
+
+async function downloadAndVerify(mod, destPath) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= DOWNLOAD_ATTEMPTS; attempt++) {
+    try {
+      emit({
+        type:    'status',
+        message: attempt === 1
+          ? `Downloading ${mod.name}...`
+          : `Retrying ${mod.name} (${attempt}/${DOWNLOAD_ATTEMPTS})...`
+      });
+
+      await downloadMod(mod, destPath);
+
+      if (mod.sha256) {
+        const hash = await getFileSHA256(destPath);
+        if (hash.toLowerCase() !== mod.sha256.toLowerCase()) {
+          throw new Error(`Hash verification failed for ${mod.name} after download`);
+        }
+      }
+      return;
+    } catch (err) {
+      lastError = err;
+      try { if (fs.existsSync(destPath)) fs.unlinkSync(destPath); } catch (_) {}
+    }
+  }
+
+  throw lastError;
 }
 
 // ─── Main sync ────────────────────────────────────────────────────────────────
 
-async function sync(gameDir, modsListPath) {
+async function sync(gameDir, modsListPath, disabledMods = []) {
   try {
     const modsDir = path.join(gameDir, 'mods');
     if (!fs.existsSync(modsDir)) fs.mkdirSync(modsDir, { recursive: true });
@@ -79,6 +107,9 @@ async function sync(gameDir, modsListPath) {
       emit({ type: 'done', message: 'No mods list found — skipping sync.' });
       return { success: true };
     }
+
+    const disabled = new Set((disabledMods || []).map(f => String(f).toLowerCase()));
+    modsList = modsList.filter(m => !(m.client === true && disabled.has(String(m.filename).toLowerCase())));
 
     const expectedFilenames = new Set(modsList.map(m => m.filename));
 
@@ -122,18 +153,7 @@ async function sync(gameDir, modsListPath) {
       }
 
       if (needsDownload) {
-        emit({ type: 'status', message: `Downloading ${mod.name}...` });
-        await downloadMod(mod, modPath);
-
-        // Verify hash after download
-        if (mod.sha256) {
-          const hash = await getFileSHA256(modPath);
-          if (hash.toLowerCase() !== mod.sha256.toLowerCase()) {
-            fs.unlinkSync(modPath);
-            throw new Error(`Hash verification failed for ${mod.name} after download`);
-          }
-        }
-
+        await downloadAndVerify(mod, modPath);
         emit({ type: 'mod-done', modName: mod.name });
       }
     }

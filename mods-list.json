@@ -1,12 +1,16 @@
 [
   {
     "name": "Advancement Plaques",
+    "client": true,
+    "description": "Красивые плашки при получении достижений вместо стандартных уведомлений.",
     "filename": "AdvancementPlaques-1.21.1-neoforge-1.6.8.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/AdvancementPlaques-1.21.1-neoforge-1.6.8.jar",
     "sha256": "A24674330B8DE59A02E0EBE4DD81FCFF15D90E8C1CDCC32980D73C1CAB050933"
   },
   {
     "name": "Better Advancements",
+    "client": true,
+    "description": "Улучшенный экран достижений: удобная навигация и поиск.",
     "filename": "BetterAdvancements-NeoForge-1.21.1-0.4.3.21.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/BetterAdvancements-NeoForge-1.21.1-0.4.3.21.jar",
     "sha256": "60B548BEF04A2F0E1DA686EE9035C2E3D4ED0459A17D7A4836FC26AF6DE6B60E"
@@ -49,12 +53,16 @@
   },
   {
     "name": "Fps Reducer2",
+    "client": true,
+    "description": "Снижает нагрузку на компьютер, когда окно игры свёрнуто или ты отошёл.",
     "filename": "FpsReducer2-neoforge-1.21-2.10.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/FpsReducer2-neoforge-1.21-2.10.jar",
     "sha256": "F3AFA8A76AE8F320610D6E50970881722A758C1C23DED4831293D1C81ADBCE21"
   },
   {
     "name": "Fuel Info",
+    "client": true,
+    "description": "Показывает в печке, сколько предметов переплавит загруженное топливо.",
     "filename": "FuelInfo-2.1.1.21.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/FuelInfo-2.1.1.21.jar",
     "sha256": "0641C9ACE483DF7DF82AA7F84376EBC9FFA7EC2CF75E8B51D6F9117A4FFB9830"
@@ -73,30 +81,40 @@
   },
   {
     "name": "Immediately Fast",
+    "client": true,
+    "description": "Оптимизация отрисовки интерфейса и текста, повышает FPS.",
     "filename": "ImmediatelyFast-NeoForge-1.6.10.1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ImmediatelyFast-NeoForge-1.6.10.1.21.1.jar",
     "sha256": "9FBB8DCE1BB72FEACDC3B75C6FCBF689865AD3793A19649443D76BE20993DDD0"
   },
   {
     "name": "Jade",
+    "client": true,
+    "description": "Панель сверху экрана: показывает, на какой блок или моба ты смотришь.",
     "filename": "Jade-1.21.1-NeoForge-15.10.5.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/Jade-1.21.1-NeoForge-15.10.5.jar",
     "sha256": "067BB4B007E1D6F6B79F0AFE99C91252AA825472B99A76D33A60D24442F9E92D"
   },
   {
     "name": "Just Enough Resources",
+    "client": true,
+    "description": "Дополнение к JEI: показывает дроп с мобов и где искать руды.",
     "filename": "JustEnoughResources-NeoForge-1.21.1-1.6.0.17.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/JustEnoughResources-NeoForge-1.21.1-1.6.0.17.jar",
     "sha256": "7A47D69B5530704690D5A5F0726CD74A2D6C57DF17DD4A8589C4AB5212F91460"
   },
   {
     "name": "Keybind Atlas",
+    "client": true,
+    "description": "Удобный список всех горячих клавиш игры и модов.",
     "filename": "KeybindAtlas-v1.4.0-mc1.21.1-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/KeybindAtlas-v1.4.0-mc1.21.1-neoforge.jar",
     "sha256": "D14E872D8201D474D05D2F0B5B513C791C048C43B5412536E9AA79015423C985"
   },
   {
     "name": "Mouse Tweaks",
+    "client": true,
+    "description": "Удобное перетаскивание предметов мышкой в инвентаре и сундуках.",
     "filename": "MouseTweaks-neoforge-mc1.21-2.26.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/MouseTweaks-neoforge-mc1.21-2.26.1.jar",
     "sha256": "68E6F4201C5DE97B77929A7215C9552495696CA6A3BF3AE4EACC34E135F6CC8B"
@@ -127,6 +145,8 @@
   },
   {
     "name": "Subtle Effects",
+    "client": true,
+    "description": "Мелкие визуальные эффекты и частицы для красоты.",
     "filename": "SubtleEffects-neoforge-1.21.1-1.14.3.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/SubtleEffects-neoforge-1.21.1-1.14.3.jar",
     "sha256": "78FD24ECAADEE01746ECC4CF598284923E762E25964311E86A67AA30CD3C2B67"
@@ -151,6 +171,8 @@
   },
   {
     "name": "appleskin",
+    "client": true,
+    "description": "Показывает сытость и сколько голода восстановит еда.",
     "filename": "appleskin-neoforge-mc1.21-3.0.9.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/appleskin-neoforge-mc1.21-3.0.9.jar",
     "sha256": "38B48DD6231341C9F964CE6E42C57EC866C6CC8F72BEC938390A59BAFB3922DF"
@@ -205,6 +227,8 @@
   },
   {
     "name": "clientsort",
+    "client": true,
+    "description": "Сортировка инвентаря и сундуков одной кнопкой.",
     "filename": "clientsort-neoforge-2.2.2.1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/clientsort-neoforge-2.2.2.1.21.1.jar",
     "sha256": "2844D0F7374EBFB0DD0782A675EF53311BB3CEDACB1CF6258C35025EB809225F"
@@ -313,6 +337,8 @@
   },
   {
     "name": "entityculling",
+    "client": true,
+    "description": "Оптимизация: не отрисовывает мобов, которых не видно. Повышает FPS.",
     "filename": "entityculling-neoforge-1.10.2-mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.2-mc1.21.1.jar",
     "sha256": "20014DF18EDB983B2C8EB764E70209EF84A4AC5AEFD29EF25502FB102B0306CD"
@@ -457,6 +483,8 @@
   },
   {
     "name": "particular",
+    "client": true,
+    "description": "Дополнительные красивые частицы: листья, водопады, светлячки и т.п.",
     "filename": "particular-1.21.1-NeoForge-1.1.7.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/particular-1.21.1-NeoForge-1.1.7.jar",
     "sha256": "2DD32F2104CD789773E43700C315EEC3D2BC1B35F70D6C4F87A12ABD50B6609D"
@@ -523,12 +551,16 @@
   },
   {
     "name": "sable",
+    "client": true,
+    "description": "Переделывает освещение и шейдеры игры (объёмный свет). Известны проблемы на видеокартах AMD — если у тебя чёрный экран, отключи этот мод.",
     "filename": "sable-neoforge-1.21.1-1.2.2.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sable-neoforge-1.21.1-1.2.2.jar",
     "sha256": "15FB660A0D368204B37F3967BFCC48137397B7174CA2945C5635CC4539C755F8"
   },
   {
     "name": "shine",
+    "client": true,
+    "description": "Цветное динамическое освещение и свечение (bloom). Чисто визуальный мод, при проблемах с графикой можно отключить.",
     "filename": "shine-2.0.1.1.21.1-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/shine-2.0.1.1.21.1-neoforge.jar",
     "sha256": "C881FF8B9670ED8DB13A62DA2F5C14C37E8D37414B0A7C5F7AD9FD29859806A3"
@@ -547,6 +579,8 @@
   },
   {
     "name": "sodium",
+    "client": true,
+    "description": "Главная оптимизация рендера, сильно повышает FPS. Отключай только если глючит графика.",
     "filename": "sodium-neoforge-0.6.13.mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sodium-neoforge-0.6.13.mc1.21.1.jar",
     "sha256": "7ACD7AF2EF75EC883A6872C17494EAD65E38025151EB08A1D60E36D34377F403"
@@ -607,24 +641,32 @@
   },
   {
     "name": "voicechat",
+    "client": true,
+    "description": "Голосовой чат на сервере. Если выключишь — не сможешь слышать и говорить с другими.",
     "filename": "voicechat-neoforge-1.21.1-2.6.18.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/voicechat-neoforge-1.21.1-2.6.18.jar",
     "sha256": "FB0DC1F4BB36F471FAFC86FEE12B963F036DDF8D4622653509D884BBED96B1E5"
   },
   {
     "name": "watut",
+    "client": true,
+    "description": "Показывает, что делают другие игроки: печатают в чате, сидят в инвентаре.",
     "filename": "watut-neoforge-1.21.0-1.2.7.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/watut-neoforge-1.21.0-1.2.7.jar",
     "sha256": "B1AAC4B9832E16439EE86F27814F7B6A42F2F6BEA0EA6949DFFFFFCD0599D88C"
   },
   {
     "name": "xaerominimap",
+    "client": true,
+    "description": "Миникарта в углу экрана.",
     "filename": "xaerominimap-neoforge-1.21.1-25.3.13.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaerominimap-neoforge-1.21.1-25.3.13.jar",
     "sha256": "05FB78259566983B1E66501F46D6695BFAB087E9630F3B65E82677B88244A1C2"
   },
   {
     "name": "xaeroworldmap",
+    "client": true,
+    "description": "Полная карта мира (открывается на клавишу M).",
     "filename": "xaeroworldmap-neoforge-1.21.1-1.40.16.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.40.16.jar",
     "sha256": "73B1447333E467D23645CE7B2C319F3CA951B393B44B3A6ED0F41F06927D42BB"

@@ -59,6 +59,50 @@ function ensureFmlConfig(gameDir) {
   } catch (_) {}
 }
 
+const GPU_DRIVER_DLLS = [
+  { re: /\bati[og]\w*\.dll/i,  vendor: 'AMD' },
+  { re: /\bamdxc\w*\.dll/i,    vendor: 'AMD' },
+  { re: /\bnvoglv\w*\.dll/i,   vendor: 'NVIDIA' },
+  { re: /\big\d+icd\d+\.dll/i, vendor: 'Intel' }
+];
+
+function createCrashDetector() {
+  const state = { nativeCrash: false, gpuVendor: null, hsErrPath: null };
+
+  function inspect(text) {
+    if (typeof text !== 'string') return;
+    if (text.includes('EXCEPTION_ACCESS_VIOLATION') ||
+        text.includes('A fatal error has been detected by the Java Runtime Environment')) {
+      state.nativeCrash = true;
+    }
+    if (!state.gpuVendor) {
+      for (const { re, vendor } of GPU_DRIVER_DLLS) {
+        if (re.test(text)) { state.gpuVendor = vendor; break; }
+      }
+    }
+    if (!state.hsErrPath) {
+      const m = text.match(/[A-Za-z]:\\\S*hs_err_pid\d+\.log/);
+      if (m) state.hsErrPath = m[0];
+    }
+  }
+
+  function buildMessage(exitCode) {
+    if (exitCode === 0 || !state.nativeCrash) return null;
+    let msg;
+    if (state.gpuVendor) {
+      msg = `Minecraft аварийно завершился из-за сбоя видеодрайвера ${state.gpuVendor}. ` +
+            `Обновите драйвер видеокарты до последней версии и попробуйте снова.`;
+    } else {
+      msg = 'Minecraft аварийно завершился из-за ошибки в нативном коде. ' +
+            'Чаще всего это вызвано устаревшим драйвером видеокарты — обновите его и попробуйте снова.';
+    }
+    if (state.hsErrPath) msg += `\n\nОтчёт о краше: ${state.hsErrPath}`;
+    return msg;
+  }
+
+  return { inspect, buildMessage };
+}
+
 // Read the NeoForge version JSON and extract the JVM args it requires,
 // substituting the ${variable} placeholders MCLC doesn't handle.
 function buildNeoForgeJvmArgs(gameDir, versionId) {
@@ -183,6 +227,8 @@ async function launch(opts) {
   ensureFmlConfig(gameDir);
 
   return new Promise((resolve) => {
+    const crashDetector = createCrashDetector();
+
     launcher.launch(launchOptions);
 
     launcher.on('debug', (msg) => {
@@ -190,12 +236,13 @@ async function launch(opts) {
     });
 
     launcher.on('data', (msg) => {
+      crashDetector.inspect(msg);
       emit('stdout', msg + '\n');
     });
 
     launcher.on('close', (code) => {
       emit('stdout', `\n[Launcher] Game exited with code ${code}\n`);
-      if (exitCallback) exitCallback(code);
+      if (exitCallback) exitCallback(code, crashDetector.buildMessage(code));
       resolve(code);
     });
 

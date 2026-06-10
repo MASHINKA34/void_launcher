@@ -88,7 +88,8 @@ function getDefaultSettings() {
     width: 1280,
     height: 720,
     gameDir: path.join(app.getPath('userData'), config.GAME_DIR_NAME),
-    javaPath: 'auto'
+    javaPath: 'auto',
+    disabledMods: []
   };
 }
 
@@ -304,11 +305,16 @@ ipcMain.handle('get-news', async () => {
 });
 
 ipcMain.handle('get-mods-list', () => {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'mods-list.json'), 'utf8'));
-  } catch (_) {
-    return [];
+  const candidates = [
+    path.join(app.getPath('userData'), 'mods-list-cache.json'),
+    path.join(__dirname, 'mods-list.json')
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+    } catch (_) {}
   }
+  return [];
 });
 
 // ─── Installation ─────────────────────────────────────────────────────────────
@@ -333,6 +339,15 @@ ipcMain.handle('detect-java', async (_, gameDir) => {
 
 // ─── Mod sync ─────────────────────────────────────────────────────────────────
 
+function readDisabledMods() {
+  try {
+    const saved = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'settings.json'), 'utf8'));
+    return Array.isArray(saved.disabledMods) ? saved.disabledMods : [];
+  } catch (_) {
+    return [];
+  }
+}
+
 ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   const modSync = require('./src/modSync');
   const fetch   = require('node-fetch');
@@ -340,6 +355,8 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   modSync.setProgressCallback((progress) => {
     if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
   });
+
+  const disabledMods = readDisabledMods();
 
   // Пытаемся получить свежий список модов с GitHub
   const localModsListPath = path.join(__dirname, 'mods-list.json');
@@ -349,14 +366,14 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
       const remoteList = await res.text();
       const cachePath  = path.join(app.getPath('userData'), 'mods-list-cache.json');
       fs.writeFileSync(cachePath, remoteList, 'utf8');
-      return await modSync.sync(gameDir, cachePath);
+      return await modSync.sync(gameDir, cachePath, disabledMods);
     }
   } catch (_) {}
 
   // Fallback: кэш с прошлого запуска → локальный файл
   const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
   const fallback  = fs.existsSync(cachePath) ? cachePath : localModsListPath;
-  return await modSync.sync(gameDir, fallback);
+  return await modSync.sync(gameDir, fallback, disabledMods);
 });
 
 // ─── Game launch ─────────────────────────────────────────────────────────────
@@ -380,8 +397,8 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
     if (mainWindow) mainWindow.webContents.send(`game-${type}`, data);
   });
 
-  launcher.setExitCallback((code) => {
-    if (mainWindow) mainWindow.webContents.send('game-exit', code);
+  launcher.setExitCallback((code, crash) => {
+    if (mainWindow) mainWindow.webContents.send('game-exit', { code, crash: crash || null });
   });
 
   try {
