@@ -304,6 +304,30 @@ ipcMain.handle('get-news', async () => {
   }
 });
 
+function mergeModMetadata(list) {
+  if (!Array.isArray(list)) throw new Error('mods list is not an array');
+
+  let bundled = [];
+  try { bundled = JSON.parse(fs.readFileSync(path.join(__dirname, 'mods-list.json'), 'utf8')); } catch (_) {}
+
+  const byFile = new Map();
+  const byName = new Map();
+  for (const m of bundled) {
+    if (m?.filename) byFile.set(String(m.filename).toLowerCase(), m);
+    if (m?.name)     byName.set(String(m.name).toLowerCase(), m);
+  }
+
+  return list.map(m => {
+    const ref = byFile.get(String(m?.filename || '').toLowerCase())
+             || byName.get(String(m?.name || '').toLowerCase());
+    if (!ref) return m;
+    const merged = { ...m };
+    if (merged.client !== true && ref.client === true) merged.client = true;
+    if (!merged.description && ref.description) merged.description = ref.description;
+    return merged;
+  });
+}
+
 ipcMain.handle('get-mods-list', () => {
   const candidates = [
     path.join(app.getPath('userData'), 'mods-list-cache.json'),
@@ -311,7 +335,7 @@ ipcMain.handle('get-mods-list', () => {
   ];
   for (const p of candidates) {
     try {
-      if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (fs.existsSync(p)) return mergeModMetadata(JSON.parse(fs.readFileSync(p, 'utf8')));
     } catch (_) {}
   }
   return [];
@@ -360,20 +384,25 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
 
   // Пытаемся получить свежий список модов с GitHub
   const localModsListPath = path.join(__dirname, 'mods-list.json');
+  const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
   try {
     const res = await fetch(`${MODS_LIST_URL}?t=${Date.now()}`, { timeout: 10_000 });
     if (res.ok) {
-      const remoteList = await res.text();
-      const cachePath  = path.join(app.getPath('userData'), 'mods-list-cache.json');
-      fs.writeFileSync(cachePath, remoteList, 'utf8');
+      const remoteList = mergeModMetadata(JSON.parse(await res.text()));
+      fs.writeFileSync(cachePath, JSON.stringify(remoteList, null, 2), 'utf8');
       return await modSync.sync(gameDir, cachePath, disabledMods);
     }
   } catch (_) {}
 
   // Fallback: кэш с прошлого запуска → локальный файл
-  const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
-  const fallback  = fs.existsSync(cachePath) ? cachePath : localModsListPath;
-  return await modSync.sync(gameDir, fallback, disabledMods);
+  if (fs.existsSync(cachePath)) {
+    try {
+      const cached = mergeModMetadata(JSON.parse(fs.readFileSync(cachePath, 'utf8')));
+      fs.writeFileSync(cachePath, JSON.stringify(cached, null, 2), 'utf8');
+      return await modSync.sync(gameDir, cachePath, disabledMods);
+    } catch (_) {}
+  }
+  return await modSync.sync(gameDir, localModsListPath, disabledMods);
 });
 
 // ─── Game launch ─────────────────────────────────────────────────────────────

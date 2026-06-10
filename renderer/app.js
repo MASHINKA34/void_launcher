@@ -729,6 +729,7 @@ async function startGame() {
     }
 
     appendConsole('[Лаунчер] Моды синхронизированы ✓\n', 'system');
+    loadModsInfo();
 
     // ── Запуск игры ─────────────────────────────────────────────────
     setPlayBtnState('loading');
