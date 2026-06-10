@@ -1,6 +1,6 @@
 {
   "name": "voidcube",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "VoID Cube — Приватный лаунчер Minecraft",
   "main": "main.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "build": {
     "appId": "com.mylauncher.app",
     "productName": "VoID Cube",
-    "copyright": "Copyright © 2025",
+    "copyright": "Copyright © 2026",
     "directories": {
       "output": "dist"
     },
