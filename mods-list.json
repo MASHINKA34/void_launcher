@@ -1,16 +1,12 @@
 [
   {
     "name": "Advancement Plaques",
-    "client": true,
-    "description": "Красивые плашки при получении достижений вместо стандартных уведомлений.",
     "filename": "AdvancementPlaques-1.21.1-neoforge-1.6.8.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/AdvancementPlaques-1.21.1-neoforge-1.6.8.jar",
     "sha256": "A24674330B8DE59A02E0EBE4DD81FCFF15D90E8C1CDCC32980D73C1CAB050933"
   },
   {
     "name": "Better Advancements",
-    "client": true,
-    "description": "Улучшенный экран достижений: удобная навигация и поиск.",
     "filename": "BetterAdvancements-NeoForge-1.21.1-0.4.3.21.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/BetterAdvancements-NeoForge-1.21.1-0.4.3.21.jar",
     "sha256": "60B548BEF04A2F0E1DA686EE9035C2E3D4ED0459A17D7A4836FC26AF6DE6B60E"
@@ -34,6 +30,12 @@
     "sha256": "B524CCDACE2EF8FD19F5B2074F7DE1103AC5065C52553F064C00E098346C293E"
   },
   {
+    "name": "Create Aeronautics Curios Linked Typewriter",
+    "filename": "CreateAeronauticsCuriosLinkedTypewriter-1.21.1-1.0.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/CreateAeronauticsCuriosLinkedTypewriter-1.21.1-1.0.1.jar",
+    "sha256": "D827F52694EA7C2BFEBA5E6FA55B19232DD61111CFA4206468DFCFEB1AA7B846"
+  },
+  {
     "name": "Create Numismatics",
     "filename": "CreateNumismatics-1.0.19integration.neoforge-mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/CreateNumismatics-1.0.19integration.neoforge-mc1.21.1.jar",
@@ -53,16 +55,12 @@
   },
   {
     "name": "Fps Reducer2",
-    "client": true,
-    "description": "Снижает нагрузку на компьютер, когда окно игры свёрнуто или ты отошёл.",
     "filename": "FpsReducer2-neoforge-1.21-2.10.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/FpsReducer2-neoforge-1.21-2.10.jar",
     "sha256": "F3AFA8A76AE8F320610D6E50970881722A758C1C23DED4831293D1C81ADBCE21"
   },
   {
     "name": "Fuel Info",
-    "client": true,
-    "description": "Показывает в печке, сколько предметов переплавит загруженное топливо.",
     "filename": "FuelInfo-2.1.1.21.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/FuelInfo-2.1.1.21.jar",
     "sha256": "0641C9ACE483DF7DF82AA7F84376EBC9FFA7EC2CF75E8B51D6F9117A4FFB9830"
@@ -81,40 +79,30 @@
   },
   {
     "name": "Immediately Fast",
-    "client": true,
-    "description": "Оптимизация отрисовки интерфейса и текста, повышает FPS.",
     "filename": "ImmediatelyFast-NeoForge-1.6.10.1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ImmediatelyFast-NeoForge-1.6.10.1.21.1.jar",
     "sha256": "9FBB8DCE1BB72FEACDC3B75C6FCBF689865AD3793A19649443D76BE20993DDD0"
   },
   {
     "name": "Jade",
-    "client": true,
-    "description": "Панель сверху экрана: показывает, на какой блок или моба ты смотришь.",
     "filename": "Jade-1.21.1-NeoForge-15.10.5.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/Jade-1.21.1-NeoForge-15.10.5.jar",
     "sha256": "067BB4B007E1D6F6B79F0AFE99C91252AA825472B99A76D33A60D24442F9E92D"
   },
   {
     "name": "Just Enough Resources",
-    "client": true,
-    "description": "Дополнение к JEI: показывает дроп с мобов и где искать руды.",
     "filename": "JustEnoughResources-NeoForge-1.21.1-1.6.0.17.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/JustEnoughResources-NeoForge-1.21.1-1.6.0.17.jar",
     "sha256": "7A47D69B5530704690D5A5F0726CD74A2D6C57DF17DD4A8589C4AB5212F91460"
   },
   {
     "name": "Keybind Atlas",
-    "client": true,
-    "description": "Удобный список всех горячих клавиш игры и модов.",
     "filename": "KeybindAtlas-v1.4.0-mc1.21.1-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/KeybindAtlas-v1.4.0-mc1.21.1-neoforge.jar",
     "sha256": "D14E872D8201D474D05D2F0B5B513C791C048C43B5412536E9AA79015423C985"
   },
   {
     "name": "Mouse Tweaks",
-    "client": true,
-    "description": "Удобное перетаскивание предметов мышкой в инвентаре и сундуках.",
     "filename": "MouseTweaks-neoforge-mc1.21-2.26.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/MouseTweaks-neoforge-mc1.21-2.26.1.jar",
     "sha256": "68E6F4201C5DE97B77929A7215C9552495696CA6A3BF3AE4EACC34E135F6CC8B"
@@ -145,23 +133,27 @@
   },
   {
     "name": "Subtle Effects",
-    "client": true,
-    "description": "Мелкие визуальные эффекты и частицы для красоты.",
     "filename": "SubtleEffects-neoforge-1.21.1-1.14.3.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/SubtleEffects-neoforge-1.21.1-1.14.3.jar",
     "sha256": "78FD24ECAADEE01746ECC4CF598284923E762E25964311E86A67AA30CD3C2B67"
   },
   {
     "name": "Terralith",
-    "filename": "Terralith_1.21.x_v2.5.8.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/Terralith_1.21.x_v2.5.8.jar",
-    "sha256": "00333A130AC38B7B9CA93700098D5E02E0612BDC2D3522AADA2F36E5600621BF"
+    "filename": "Terralith_1.21.x_v2.6.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/Terralith_1.21.x_v2.6.2.jar",
+    "sha256": "D38BD304897731B42F6C013CDC07E082E74411E80C74AABCEE385251BEB3B546"
   },
   {
     "name": "Yungs Api",
     "filename": "YungsApi-1.21.1-NeoForge-5.1.6.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/YungsApi-1.21.1-NeoForge-5.1.6.jar",
     "sha256": "08E1D21690D3213A4C62DE6B6CF79F3527AFB2E72E0CAD0E1848D46EB8F682CA"
+  },
+  {
+    "name": "aeroworks",
+    "filename": "aeroworks-1.2.11.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/aeroworks-1.2.11.jar",
+    "sha256": "198FDCCC4F745455FA45F29C3CF594F0CDADBF64223EB01D792A3E894C806E78"
   },
   {
     "name": "alternate current",
@@ -171,8 +163,6 @@
   },
   {
     "name": "appleskin",
-    "client": true,
-    "description": "Показывает сытость и сколько голода восстановит еда.",
     "filename": "appleskin-neoforge-mc1.21-3.0.9.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/appleskin-neoforge-mc1.21-3.0.9.jar",
     "sha256": "38B48DD6231341C9F964CE6E42C57EC866C6CC8F72BEC938390A59BAFB3922DF"
@@ -191,9 +181,9 @@
   },
   {
     "name": "ars nouveau",
-    "filename": "ars_nouveau-1.21.1-5.11.7.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ars_nouveau-1.21.1-5.11.7.jar",
-    "sha256": "09EF282D6E573F982F80C903830E463B60A5C05A7D5536D2D94ED8939C56F693"
+    "filename": "ars_nouveau-1.21.1-5.12.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ars_nouveau-1.21.1-5.12.0.jar",
+    "sha256": "29752CF3ADE18EDBECF16D7B13DAB46884879ECE127C085BA34A20F923141F3E"
   },
   {
     "name": "ars technica",
@@ -226,9 +216,13 @@
     "sha256": "827AC3921986D0D5E9C24EF2280F47C110D22DC14D284EFB65330010D2E9517D"
   },
   {
+    "name": "cbcmodernwarfare",
+    "filename": "cbcmodernwarfare-0.0.6v.mc.1.21.1-neoforge.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/cbcmodernwarfare-0.0.6v.mc.1.21.1-neoforge.jar",
+    "sha256": "F8BBFCB4766F08A88C773A60AA154C4EB9704F974266E00F00569C765667A348"
+  },
+  {
     "name": "clientsort",
-    "client": true,
-    "description": "Сортировка инвентаря и сундуков одной кнопкой.",
     "filename": "clientsort-neoforge-2.2.2.1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/clientsort-neoforge-2.2.2.1.21.1.jar",
     "sha256": "2844D0F7374EBFB0DD0782A675EF53311BB3CEDACB1CF6258C35025EB809225F"
@@ -241,9 +235,9 @@
   },
   {
     "name": "collective",
-    "filename": "collective-1.21.1-8.25.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/collective-1.21.1-8.25.jar",
-    "sha256": "F66DAF378F7A6747AC3B8E601D62FF571FC9F7F2D11B9FB6FAE69DE33B39F62E"
+    "filename": "collective-1.21.1-8.29.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/collective-1.21.1-8.29.jar",
+    "sha256": "6C6B2B0EC143F51BF6711C8006B32C5FE268F68FDD7665A03FEB80CDB7851CD8"
   },
   {
     "name": "coroutil",
@@ -289,9 +283,9 @@
   },
   {
     "name": "create radar",
-    "filename": "create_radar-0.4.9.2-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_radar-0.4.9.2-1.21.1.jar",
-    "sha256": "79B0B1FA211D54C819FD32642ECC3F2DDD4D92AC348764E785A0A8C1901ACFBE"
+    "filename": "create_radar-0.4.9.4-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_radar-0.4.9.4-1.21.1.jar",
+    "sha256": "4554359FEE389B1C255B4CEF23AC41E978B2A371CEC9E952185F4EC0A90EE930"
   },
   {
     "name": "createbigcannons",
@@ -301,15 +295,15 @@
   },
   {
     "name": "creatorsword",
-    "filename": "creatorsword-0.2.8a.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/creatorsword-0.2.8a.jar",
-    "sha256": "18EEAE06352784B8FECD1406F61718B8152D9675203C2CEEBB7848D63BED73E5"
+    "filename": "creatorsword-0.2.8b.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/creatorsword-0.2.8b.jar",
+    "sha256": "BD1F72377BE121FA2C1F8A5F853BF6BFBBC1E2D3ACC5D62896B5E95AF07AB998"
   },
   {
     "name": "cristellib",
-    "filename": "cristellib-neoforge-1.21.1-3.1.6.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/cristellib-neoforge-1.21.1-3.1.6.jar",
-    "sha256": "856E5E62EC25FB1E8B86C83C38A56A128CAE1ED4E2B4F2CF426C887B5ECFF6A2"
+    "filename": "cristellib-neoforge-1.21.1-3.1.7.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/cristellib-neoforge-1.21.1-3.1.7.jar",
+    "sha256": "11E05DBC97BD3FE1790BD6361747240E314C1DBF40B590EA20CC691DC8396C38"
   },
   {
     "name": "croptopia",
@@ -337,11 +331,9 @@
   },
   {
     "name": "entityculling",
-    "client": true,
-    "description": "Оптимизация: не отрисовывает мобов, которых не видно. Повышает FPS.",
-    "filename": "entityculling-neoforge-1.10.2-mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.2-mc1.21.1.jar",
-    "sha256": "20014DF18EDB983B2C8EB764E70209EF84A4AC5AEFD29EF25502FB102B0306CD"
+    "filename": "entityculling-neoforge-1.10.3-mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.3-mc1.21.1.jar",
+    "sha256": "9505A3C3ACF4660D4F7AD14108086FC2402FFCA8012EB602D864F2C965F286AE"
   },
   {
     "name": "escalated",
@@ -381,9 +373,9 @@
   },
   {
     "name": "fwa+1.21.1",
-    "filename": "fwa.1.21.1-neoforge-1.2.28.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/fwa.1.21.1-neoforge-1.2.28.jar",
-    "sha256": "8B5DBA0653F068768E3CEE5CE87BB2F18ACC9258E430D568D3407ED14DB1456F"
+    "filename": "fwa.1.21.1-neoforge-1.2.31.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/fwa.1.21.1-neoforge-1.2.31.jar",
+    "sha256": "BB57D6AB7161B3EF0E72A67537728DFC4AEE706B4B15A367362903623D8CE1B0"
   },
   {
     "name": "fzzy config",
@@ -405,15 +397,21 @@
   },
   {
     "name": "hookahmod",
-    "filename": "hookahmod-1.0.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.1.jar",
-    "sha256": "AD0274A7D41543AE0D2B958E13316ECE97A570F974D480A675DE294CE8F812B2"
+    "filename": "hookahmod-1.0.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.0.jar",
+    "sha256": "62AAA7842D823A4A175ED048E394E02FC1032886061C13C7A70C57ACF3D50459"
   },
   {
     "name": "immersive melodies",
     "filename": "immersive_melodies-neoforge-0.6.4.1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/immersive_melodies-neoforge-0.6.4.1.21.1.jar",
     "sha256": "A6BFB284B3DEF1E34D62F8CFB0D63DFF5683F2A98081B4D9A76580B806AE3972"
+  },
+  {
+    "name": "iris",
+    "filename": "iris-neoforge-1.8.12.mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/iris-neoforge-1.8.12.mc1.21.1.jar",
+    "sha256": "3E3F94D2D5CDCB8145C4385D521974AA2D8669B2CC212351F70CF06488182E83"
   },
   {
     "name": "jei",
@@ -441,21 +439,21 @@
   },
   {
     "name": "mcd d nether",
-    "filename": "mcd_d_nether-neoforge-1.21.1-1.3.2.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/mcd_d_nether-neoforge-1.21.1-1.3.2.jar",
-    "sha256": "F518A6BC24BF50ED1C533900FD49E72A9C215166155D5B5AF6B6A331F030EA62"
+    "filename": "mcd_d_nether-neoforge-1.21.1-1.3.3.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/mcd_d_nether-neoforge-1.21.1-1.3.3.jar",
+    "sha256": "F048F5802416144EBC7B184410830AE8D0F1A7B47070372F4FF60BCC0C374122"
   },
   {
     "name": "modernfix",
-    "filename": "modernfix-neoforge-5.27.11.mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/modernfix-neoforge-5.27.11.mc1.21.1.jar",
-    "sha256": "BFC54BFB49B94DD33BC11F6F433F3D982413594BACA7D3A58A0C06B2AB0CC145"
+    "filename": "modernfix-neoforge-5.27.14.mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/modernfix-neoforge-5.27.14.mc1.21.1.jar",
+    "sha256": "EFC89CB7D22B932ECAD19777373688035A1C444443ABE8E56D236C44B59C0301"
   },
   {
     "name": "moonlight",
-    "filename": "moonlight-neoforge-1.21.1-3.0.17.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/moonlight-neoforge-1.21.1-3.0.17.jar",
-    "sha256": "41BBE274C689EF4229892B6E46DA57D27DCE34A40FE7E2DE0C230CD0E2BC0E98"
+    "filename": "moonlight-neoforge-1.21.1-3.0.18.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/moonlight-neoforge-1.21.1-3.0.18.jar",
+    "sha256": "9A70E3E36DE0AB25B7587424B3F97946288B6E8192FFF7B5487F8E7CE02FDDC7"
   },
   {
     "name": "morerelics",
@@ -471,9 +469,9 @@
   },
   {
     "name": "not enough glyphs",
-    "filename": "not_enough_glyphs-1.21.1-4.4.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/not_enough_glyphs-1.21.1-4.4.0.jar",
-    "sha256": "C6AE95B7ED4D8D5FCA6A4DCA2FEEC7C8C4B7B5C2AEA35E3AFADB7B2CFDC7F3ED"
+    "filename": "not_enough_glyphs-1.21.1-4.6.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/not_enough_glyphs-1.21.1-4.6.0.jar",
+    "sha256": "29FEE7BB3E41C96CBFA3C3917E5D2F1A5077312056A2ECC51EA0272600FAD049"
   },
   {
     "name": "ntgl",
@@ -483,11 +481,9 @@
   },
   {
     "name": "particular",
-    "client": true,
-    "description": "Дополнительные красивые частицы: листья, водопады, светлячки и т.п.",
-    "filename": "particular-1.21.1-NeoForge-1.1.7.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/particular-1.21.1-NeoForge-1.1.7.jar",
-    "sha256": "2DD32F2104CD789773E43700C315EEC3D2BC1B35F70D6C4F87A12ABD50B6609D"
+    "filename": "particular-1.21.1-NeoForge-1.5.4.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/particular-1.21.1-NeoForge-1.5.4.jar",
+    "sha256": "4A34F35203C7F7EEEE661F24626D6B12240F9536B7362FD12EFDDA9EC6B96A4A"
   },
   {
     "name": "player animation lib",
@@ -509,15 +505,15 @@
   },
   {
     "name": "punchy",
-    "filename": "punchy-2.5.5b-neoforge-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.5b-neoforge-1.21.1.jar",
-    "sha256": "9195A46FEB7E2FD6D8119234AA75C661FDFA214784B209962DC9B311E73610A1"
+    "filename": "punchy-2.5.6-neoforge-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.6-neoforge-1.21.1.jar",
+    "sha256": "9013A36D9A778CE16B16C3F206EFB3DCFCACFDB365E1F0B3152672507241333F"
   },
   {
     "name": "railways",
-    "filename": "railways-0.2.0.neoforge-mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/railways-0.2.0.neoforge-mc1.21.1.jar",
-    "sha256": "1BD19694CFC746F261AFC2F00B87D1083E734E778D65B1481094931100FCA1A9"
+    "filename": "railways-0.2.1.neoforge-mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/railways-0.2.1.neoforge-mc1.21.1.jar",
+    "sha256": "B7636C8B1B0352ED1A130DFE67F8BB574E2FC08803ED1CDA4D3EA00505193914"
   },
   {
     "name": "rarcompat",
@@ -551,16 +547,12 @@
   },
   {
     "name": "sable",
-    "client": true,
-    "description": "Переделывает освещение и шейдеры игры (объёмный свет). Известны проблемы на видеокартах AMD — если у тебя чёрный экран, отключи этот мод.",
     "filename": "sable-neoforge-1.21.1-1.2.2.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sable-neoforge-1.21.1-1.2.2.jar",
     "sha256": "15FB660A0D368204B37F3967BFCC48137397B7174CA2945C5635CC4539C755F8"
   },
   {
     "name": "shine",
-    "client": true,
-    "description": "Цветное динамическое освещение и свечение (bloom). Чисто визуальный мод, при проблемах с графикой можно отключить.",
     "filename": "shine-2.0.1.1.21.1-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/shine-2.0.1.1.21.1-neoforge.jar",
     "sha256": "C881FF8B9670ED8DB13A62DA2F5C14C37E8D37414B0A7C5F7AD9FD29859806A3"
@@ -579,23 +571,21 @@
   },
   {
     "name": "sodium",
-    "client": true,
-    "description": "Главная оптимизация рендера, сильно повышает FPS. Отключай только если глючит графика.",
     "filename": "sodium-neoforge-0.6.13.mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sodium-neoforge-0.6.13.mc1.21.1.jar",
     "sha256": "7ACD7AF2EF75EC883A6872C17494EAD65E38025151EB08A1D60E36D34377F403"
   },
   {
     "name": "sophisticatedbackpacks",
-    "filename": "sophisticatedbackpacks-1.21.1-3.25.55.1843.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedbackpacks-1.21.1-3.25.55.1843.jar",
-    "sha256": "C27677B10D5860943ABD7CB0F11289B13DB32D0B1EDEBF65A86966D0662F8237"
+    "filename": "sophisticatedbackpacks-1.21.1-3.25.64.1919.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedbackpacks-1.21.1-3.25.64.1919.jar",
+    "sha256": "85E50078EAB0B5CEBDB5FB336B3A7B4A5BBEAA71E4D29780D182B7A5D691C0ED"
   },
   {
     "name": "sophisticatedcore",
-    "filename": "sophisticatedcore-1.21.1-1.4.49.1966.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedcore-1.21.1-1.4.49.1966.jar",
-    "sha256": "03D56B6B107DD25490A882A6FF5C4D1BAA80FD5F697B93703FE06466C9F40247"
+    "filename": "sophisticatedcore-1.21.1-1.4.59.2032.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedcore-1.21.1-1.4.59.2032.jar",
+    "sha256": "6024034946922ED6B8849B5727E8ECE6227DB84323F13CE2E61C208B08B3E596"
   },
   {
     "name": "spark",
@@ -611,9 +601,9 @@
   },
   {
     "name": "supplementaries",
-    "filename": "supplementaries-neoforge-1.21.1-3.6.7.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/supplementaries-neoforge-1.21.1-3.6.7.jar",
-    "sha256": "352502E94B84F0E00AB29C16ECA31C95FA9A37A4C38EC0EF7B71A4576DFDDFA8"
+    "filename": "supplementaries-neoforge-1.21.1-3.6.8.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/supplementaries-neoforge-1.21.1-3.6.8.jar",
+    "sha256": "62BC5393710C0B265551A60BE32E1F02D81D31968D5A16B689A3DB135F57CF34"
   },
   {
     "name": "t and t",
@@ -641,34 +631,26 @@
   },
   {
     "name": "voicechat",
-    "client": true,
-    "description": "Голосовой чат на сервере. Если выключишь — не сможешь слышать и говорить с другими.",
     "filename": "voicechat-neoforge-1.21.1-2.6.18.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/voicechat-neoforge-1.21.1-2.6.18.jar",
     "sha256": "FB0DC1F4BB36F471FAFC86FEE12B963F036DDF8D4622653509D884BBED96B1E5"
   },
   {
     "name": "watut",
-    "client": true,
-    "description": "Показывает, что делают другие игроки: печатают в чате, сидят в инвентаре.",
     "filename": "watut-neoforge-1.21.0-1.2.7.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/watut-neoforge-1.21.0-1.2.7.jar",
     "sha256": "B1AAC4B9832E16439EE86F27814F7B6A42F2F6BEA0EA6949DFFFFFCD0599D88C"
   },
   {
     "name": "xaerominimap",
-    "client": true,
-    "description": "Миникарта в углу экрана.",
-    "filename": "xaerominimap-neoforge-1.21.1-25.3.13.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaerominimap-neoforge-1.21.1-25.3.13.jar",
-    "sha256": "05FB78259566983B1E66501F46D6695BFAB087E9630F3B65E82677B88244A1C2"
+    "filename": "xaerominimap-neoforge-1.21.1-26.1.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaerominimap-neoforge-1.21.1-26.1.0.jar",
+    "sha256": "6BD6CBAB01FF57B9BA2FBFEE18F9605593101F15D80E8D19DC59C385D2535CCC"
   },
   {
     "name": "xaeroworldmap",
-    "client": true,
-    "description": "Полная карта мира (открывается на клавишу M).",
-    "filename": "xaeroworldmap-neoforge-1.21.1-1.40.16.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.40.16.jar",
-    "sha256": "73B1447333E467D23645CE7B2C319F3CA951B393B44B3A6ED0F41F06927D42BB"
+    "filename": "xaeroworldmap-neoforge-1.21.1-1.41.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.41.0.jar",
+    "sha256": "B3E377B11D277CFBC0CCDD91A6FB6BC1FF4E93B354EB9C0277E1E4446C316CCB"
   }
 ]

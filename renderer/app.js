@@ -501,48 +501,13 @@ function renderModsTab(mods) {
     return;
   }
 
-  const disabledSet  = new Set((state.settings?.disabledMods || []).map(f => String(f).toLowerCase()));
-  const clientMods   = mods.filter(m => m.client === true);
-  const requiredMods = mods.filter(m => m.client !== true);
-
   list.innerHTML = '';
-
-  if (clientMods.length) {
-    list.appendChild(buildModsSectionHeader(
-      'Клиентские моды',
-      'не нужны серверу — можно выключать; нажми на мод, чтобы узнать, что он делает'
-    ));
-    clientMods.forEach(mod => list.appendChild(buildModCard(mod, true, disabledSet)));
-  }
-
-  if (requiredMods.length) {
-    list.appendChild(buildModsSectionHeader(
-      'Обязательные моды',
-      'нужны для игры на сервере — отключить нельзя'
-    ));
-    requiredMods.forEach(mod => list.appendChild(buildModCard(mod, false, disabledSet)));
-  }
+  mods.forEach(mod => list.appendChild(buildModCard(mod)));
 }
 
-function buildModsSectionHeader(title, hint) {
-  const header = document.createElement('div');
-  header.className = 'mods-section-header';
-  header.innerHTML = `<span class="mods-section-title">${title}</span><span class="mods-section-hint">${hint}</span>`;
-  return header;
-}
-
-function buildModCard(mod, toggleable, disabledSet) {
-  const fileKey = String(mod.filename).toLowerCase();
-  const isOff   = toggleable && disabledSet.has(fileKey);
+function buildModCard(mod) {
   const card = document.createElement('div');
-  card.className = isOff ? 'mod-card mod-card-disabled' : 'mod-card';
-
-  const rightHtml = toggleable
-    ? `<label class="mod-toggle" title="Включить или отключить мод на этом компьютере">
-         <input type="checkbox" ${isOff ? '' : 'checked'}>
-         <span class="mod-toggle-slider"></span>
-       </label>`
-    : `<span class="mod-card-badge">Обязательный</span>`;
+  card.className = 'mod-card';
 
   card.innerHTML = `
     <div class="mod-card-row">
@@ -555,28 +520,14 @@ function buildModCard(mod, toggleable, disabledSet) {
         <div class="mod-card-name">${mod.name || mod.filename}</div>
         <div class="mod-card-file">${mod.filename}</div>
       </div>
-      ${rightHtml}
     </div>
-    <div class="mod-card-desc hidden">${mod.description || 'Обязательный мод сборки — нужен для игры на сервере.'}</div>
+    <div class="mod-card-desc hidden">${mod.description || 'Мод сборки.'}</div>
   `;
 
   const desc = card.querySelector('.mod-card-desc');
-  card.querySelector('.mod-card-row').addEventListener('click', (e) => {
-    if (e.target.closest('.mod-toggle')) return;
+  card.querySelector('.mod-card-row').addEventListener('click', () => {
     desc.classList.toggle('hidden');
   });
-
-  if (toggleable) {
-    const checkbox = card.querySelector('.mod-toggle input');
-    checkbox.addEventListener('change', () => {
-      const set = new Set((state.settings.disabledMods || []).map(f => String(f).toLowerCase()));
-      if (checkbox.checked) set.delete(fileKey);
-      else set.add(fileKey);
-      state.settings.disabledMods = [...set];
-      card.classList.toggle('mod-card-disabled', !checkbox.checked);
-      window.api.saveSettings(state.settings);
-    });
-  }
 
   return card;
 }
@@ -792,7 +743,11 @@ function initSettingsUI() {
   // Browse folder
   $('btn-browse').addEventListener('click', async () => {
     const folder = await window.api.browseFolder();
-    if (folder) $('setting-gamedir').value = folder;
+    if (folder) {
+      $('setting-gamedir').value = folder;
+      state.settings.gameDir = folder;
+      window.api.saveSettings(state.settings);
+    }
   });
 
   // Detect Java

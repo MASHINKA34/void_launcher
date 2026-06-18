@@ -94,7 +94,7 @@ async function downloadAndVerify(mod, destPath) {
 
 // ─── Main sync ────────────────────────────────────────────────────────────────
 
-async function sync(gameDir, modsListPath, disabledMods = []) {
+async function sync(gameDir, modsListPath) {
   try {
     const modsDir = path.join(gameDir, 'mods');
     if (!fs.existsSync(modsDir)) fs.mkdirSync(modsDir, { recursive: true });
@@ -107,9 +107,6 @@ async function sync(gameDir, modsListPath, disabledMods = []) {
       emit({ type: 'done', message: 'No mods list found — skipping sync.' });
       return { success: true };
     }
-
-    const disabled = new Set((disabledMods || []).map(f => String(f).toLowerCase()));
-    modsList = modsList.filter(m => !(m.client === true && disabled.has(String(m.filename).toLowerCase())));
 
     const expectedFilenames = new Set(modsList.map(m => m.filename));
 

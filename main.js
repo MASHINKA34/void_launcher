@@ -88,8 +88,7 @@ function getDefaultSettings() {
     width: 1280,
     height: 720,
     gameDir: path.join(app.getPath('userData'), config.GAME_DIR_NAME),
-    javaPath: 'auto',
-    disabledMods: []
+    javaPath: 'auto'
   };
 }
 
@@ -322,7 +321,6 @@ function mergeModMetadata(list) {
              || byName.get(String(m?.name || '').toLowerCase());
     if (!ref) return m;
     const merged = { ...m };
-    if (merged.client !== true && ref.client === true) merged.client = true;
     if (!merged.description && ref.description) merged.description = ref.description;
     return merged;
   });
@@ -363,15 +361,6 @@ ipcMain.handle('detect-java', async (_, gameDir) => {
 
 // ─── Mod sync ─────────────────────────────────────────────────────────────────
 
-function readDisabledMods() {
-  try {
-    const saved = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'settings.json'), 'utf8'));
-    return Array.isArray(saved.disabledMods) ? saved.disabledMods : [];
-  } catch (_) {
-    return [];
-  }
-}
-
 ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   const modSync = require('./src/modSync');
   const fetch   = require('node-fetch');
@@ -379,8 +368,6 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   modSync.setProgressCallback((progress) => {
     if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
   });
-
-  const disabledMods = readDisabledMods();
 
   // Пытаемся получить свежий список модов с GitHub
   const localModsListPath = path.join(__dirname, 'mods-list.json');
@@ -390,7 +377,7 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
     if (res.ok) {
       const remoteList = mergeModMetadata(JSON.parse(await res.text()));
       fs.writeFileSync(cachePath, JSON.stringify(remoteList, null, 2), 'utf8');
-      return await modSync.sync(gameDir, cachePath, disabledMods);
+      return await modSync.sync(gameDir, cachePath);
     }
   } catch (_) {}
 
@@ -399,10 +386,10 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
     try {
       const cached = mergeModMetadata(JSON.parse(fs.readFileSync(cachePath, 'utf8')));
       fs.writeFileSync(cachePath, JSON.stringify(cached, null, 2), 'utf8');
-      return await modSync.sync(gameDir, cachePath, disabledMods);
+      return await modSync.sync(gameDir, cachePath);
     } catch (_) {}
   }
-  return await modSync.sync(gameDir, localModsListPath, disabledMods);
+  return await modSync.sync(gameDir, localModsListPath);
 });
 
 // ─── Game launch ─────────────────────────────────────────────────────────────

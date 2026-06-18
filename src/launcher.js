@@ -46,14 +46,14 @@ function ensureFmlConfig(gameDir) {
     for (const line of lines) {
       if (keyRe.test(line)) {
         if (!replaced) {
-          out.push('earlyWindowControl = false');
+          out.push('earlyWindowControl = true');
           replaced = true;
         }
         continue;
       }
       out.push(line);
     }
-    if (!replaced) out.push('earlyWindowControl = false');
+    if (!replaced) out.push('earlyWindowControl = true');
 
     fs.writeFileSync(fmlPath, out.join('\n') + '\n', 'utf8');
   } catch (_) {}
