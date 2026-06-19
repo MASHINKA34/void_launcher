@@ -39,7 +39,13 @@
     "name": "Create Numismatics",
     "filename": "CreateNumismatics-1.0.19integration.neoforge-mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/CreateNumismatics-1.0.19integration.neoforge-mc1.21.1.jar",
-    "sha256": "4206F91CC92254F08F21B7C203F7294FE5B37267748AA70BB7D7C3C86212B70D"
+    "sha256": "E7614711E4BFEBF8C1ABBD038F102C1CB0611324CA02B87E766520F321A07DA5"
+  },
+  {
+    "name": "Distant Horizons",
+    "filename": "DistantHorizons-3.1.0-b-1.21.1-fabric-neoforge.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/DistantHorizons-3.1.0-b-1.21.1-fabric-neoforge.jar",
+    "sha256": "6C89D899C17D0847D07D963225F14F1C00DDADBDD5ADA74780F827C75A0080B0"
   },
   {
     "name": "Ephero Lib",
@@ -324,6 +330,12 @@
     "sha256": "72FE7EF8C623EA107894734835AACD3C8AF57FD445781B9646817F3EE4DDCE45"
   },
   {
+    "name": "drinkbeer refill",
+    "filename": "drinkbeer-refill-1.21.1-1.2.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/drinkbeer-refill-1.21.1-1.2.0.jar",
+    "sha256": "B1BE6F4F5D6B94054A5AB30B2A193B766C41F311BB15914F245B20E67E42A420"
+  },
+  {
     "name": "dummmmmmy",
     "filename": "dummmmmmy-1.21-2.0.12-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/dummmmmmy-1.21-2.0.12-neoforge.jar",
@@ -331,9 +343,9 @@
   },
   {
     "name": "entityculling",
-    "filename": "entityculling-neoforge-1.10.3-mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.3-mc1.21.1.jar",
-    "sha256": "9505A3C3ACF4660D4F7AD14108086FC2402FFCA8012EB602D864F2C965F286AE"
+    "filename": "entityculling-neoforge-1.10.4-mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.4-mc1.21.1.jar",
+    "sha256": "24100976DB3F3BF31924301F80DE2D33BE3794F1C01E1CB3F7CA6BE9C3F5DDA6"
   },
   {
     "name": "escalated",
@@ -451,9 +463,9 @@
   },
   {
     "name": "moonlight",
-    "filename": "moonlight-neoforge-1.21.1-3.0.18.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/moonlight-neoforge-1.21.1-3.0.18.jar",
-    "sha256": "9A70E3E36DE0AB25B7587424B3F97946288B6E8192FFF7B5487F8E7CE02FDDC7"
+    "filename": "moonlight-neoforge-1.21.1-3.0.16.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/moonlight-neoforge-1.21.1-3.0.16.jar",
+    "sha256": "6677FA40F61B507BF6B22C882A169049BA7DE7D5546D3374903CF0A43D761FED"
   },
   {
     "name": "morerelics",
@@ -477,13 +489,13 @@
     "name": "ntgl",
     "filename": "ntgl-1.21.1-3.1.5.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ntgl-1.21.1-3.1.5.jar",
-    "sha256": "E22ED92392BEF1B61C32392A65DC38DFED34290436F33C3C1341004F93F5BB29"
+    "sha256": "49F1FE589EB64FEC8E47F0FCE5743283F02590CB4ACB40E4A3220430A166DBF3"
   },
   {
     "name": "particular",
-    "filename": "particular-1.21.1-NeoForge-1.5.4.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/particular-1.21.1-NeoForge-1.5.4.jar",
-    "sha256": "4A34F35203C7F7EEEE661F24626D6B12240F9536B7362FD12EFDDA9EC6B96A4A"
+    "filename": "particular-1.21.1-NeoForge-1.5.5.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/particular-1.21.1-NeoForge-1.5.5.jar",
+    "sha256": "9911906AE0D883A617CE950FF4F1833BD9E379C5B221DF18A2B3E09556F84B2A"
   },
   {
     "name": "player animation lib",
@@ -601,9 +613,9 @@
   },
   {
     "name": "supplementaries",
-    "filename": "supplementaries-neoforge-1.21.1-3.6.8.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/supplementaries-neoforge-1.21.1-3.6.8.jar",
-    "sha256": "62BC5393710C0B265551A60BE32E1F02D81D31968D5A16B689A3DB135F57CF34"
+    "filename": "supplementaries-neoforge-1.21.1-3.6.7.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/supplementaries-neoforge-1.21.1-3.6.7.jar",
+    "sha256": "352502E94B84F0E00AB29C16ECA31C95FA9A37A4C38EC0EF7B71A4576DFDDFA8"
   },
   {
     "name": "t and t",
