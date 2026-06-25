@@ -394,6 +394,22 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
 
 // ─── Game launch ─────────────────────────────────────────────────────────────
 
+function openGameLogStream(gameDir) {
+  try {
+    const base = gameDir && fs.existsSync(gameDir) ? gameDir : app.getPath('userData');
+    const logsDir = path.join(base, 'logs');
+    if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
+    const old = fs.readdirSync(logsDir).filter(f => f.startsWith('launcher-console-')).sort();
+    for (const f of old.slice(0, Math.max(0, old.length - 10))) {
+      try { fs.unlinkSync(path.join(logsDir, f)); } catch (_) {}
+    }
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    return fs.createWriteStream(path.join(logsDir, `launcher-console-${ts}.log`), { flags: 'a' });
+  } catch (_) {
+    return null;
+  }
+}
+
 ipcMain.handle('launch-game', async (_, launchOptions) => {
   if (!activeAuthProfile?.username) {
     return { success: false, error: 'Сначала войдите в аккаунт с паролем.' };
@@ -409,18 +425,32 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
     username: activeAuthProfile.username
   };
 
+  const logStream = openGameLogStream(launchOptions.gameDir);
+  let launcherHidden = false;
+
   launcher.setOutputCallback((type, data) => {
-    if (mainWindow) mainWindow.webContents.send(`game-${type}`, data);
+    if (mainWindow) {
+      mainWindow.webContents.send(`game-${type}`, data);
+      if (!launcherHidden) { launcherHidden = true; mainWindow.hide(); }
+    }
+    if (logStream) logStream.write(data);
   });
 
   launcher.setExitCallback((code, crash) => {
-    if (mainWindow) mainWindow.webContents.send('game-exit', { code, crash: crash || null });
+    if (logStream) { logStream.write(`\n[Launcher] Game exited with code ${code}\n`); logStream.end(); }
+    if (mainWindow) {
+      mainWindow.webContents.send('game-exit', { code, crash: crash || null });
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
 
   try {
     await launcher.launch(safeLaunchOptions);
     return { success: true };
   } catch (err) {
+    if (logStream) logStream.end();
+    if (mainWindow) mainWindow.show();
     return { success: false, error: err.message };
   }
 });

@@ -59,6 +59,17 @@ function ensureFmlConfig(gameDir) {
   } catch (_) {}
 }
 
+function ensureDistantHorizonsDefault(gameDir) {
+  try {
+    const dest = path.join(gameDir, 'config', 'DistantHorizons.toml');
+    if (fs.existsSync(dest)) return;
+    const src = path.join(__dirname, '..', 'default-config', 'DistantHorizons.toml');
+    if (!fs.existsSync(src)) return;
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+  } catch (_) {}
+}
+
 const GPU_DRIVER_DLLS = [
   { re: /\bati[og]\w*\.dll/i,  vendor: 'AMD' },
   { re: /\bamdxc\w*\.dll/i,    vendor: 'AMD' },
@@ -225,6 +236,7 @@ async function launch(opts) {
   } catch (_) {}
 
   ensureFmlConfig(gameDir);
+  ensureDistantHorizonsDefault(gameDir);
 
   return new Promise((resolve) => {
     const crashDetector = createCrashDetector();

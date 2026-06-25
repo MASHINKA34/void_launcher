@@ -43,9 +43,9 @@
   },
   {
     "name": "Distant Horizons",
-    "filename": "DistantHorizons-3.1.0-b-1.21.1-fabric-neoforge.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/DistantHorizons-3.1.0-b-1.21.1-fabric-neoforge.jar",
-    "sha256": "6C89D899C17D0847D07D963225F14F1C00DDADBDD5ADA74780F827C75A0080B0"
+    "filename": "DistantHorizons-3.1.2-b-1.21.1-fabric-neoforge.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/DistantHorizons-3.1.2-b-1.21.1-fabric-neoforge.jar",
+    "sha256": "5B6DF1E412B093ECE73BEE8D2C7238743546B9DC70D06F5EA843AF3E318E1887"
   },
   {
     "name": "Ephero Lib",
@@ -127,9 +127,9 @@
   },
   {
     "name": "Scorched Guns",
-    "filename": "ScorchedGuns-1.4.4.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ScorchedGuns-1.4.4.1.jar",
-    "sha256": "DB47B067F7801D3F0ABE92EF3E24561FD0C558F97A605E11F05BE3B82E4E1D1F"
+    "filename": "ScorchedGuns-1.5.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ScorchedGuns-1.5.jar",
+    "sha256": "6A4237C518FA36A56D3BF2A269FAD508E2F4053A51E9C43381709B09806C2001"
   },
   {
     "name": "Some More Blocks@neoforge",
@@ -199,15 +199,21 @@
   },
   {
     "name": "arsdelight",
-    "filename": "arsdelight-2.2.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/arsdelight-2.2.1.jar",
-    "sha256": "8B072A18FC87355EBC186C1954952FFFCD673DD7BB6D9F106CF68489B01F6B3F"
+    "filename": "arsdelight-2.2.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/arsdelight-2.2.2.jar",
+    "sha256": "52B9B2372E77BF61F6E24CDCD894CC7F8A99C18B928093F27A022CAFF5F42D61"
   },
   {
     "name": "artifacts",
     "filename": "artifacts-neoforge-13.2.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/artifacts-neoforge-13.2.1.jar",
     "sha256": "4A8E1F4D5702937A707861E478829695E432286BCD9E58F5834D82C6D998EEA8"
+  },
+  {
+    "name": "baguettelib",
+    "filename": "baguettelib-1.21.1-NeoForge-2.0.3.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/baguettelib-1.21.1-NeoForge-2.0.3.jar",
+    "sha256": "98ADDFB68B1E92D4F40EF37CDEA8F46217BF7188991CC7347A3FC510A410F1E5"
   },
   {
     "name": "bellsandwhistles",
@@ -241,9 +247,9 @@
   },
   {
     "name": "collective",
-    "filename": "collective-1.21.1-8.29.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/collective-1.21.1-8.29.jar",
-    "sha256": "6C6B2B0EC143F51BF6711C8006B32C5FE268F68FDD7665A03FEB80CDB7851CD8"
+    "filename": "collective-1.21.1-8.31.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/collective-1.21.1-8.31.jar",
+    "sha256": "B2D91FAFE11AEAA1C46717DFFEDFB13AD78ACA50D4B34938599CDB09312E419D"
   },
   {
     "name": "coroutil",
@@ -280,6 +286,12 @@
     "filename": "create-confectionery1.21.1_v1.1.3b.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create-confectionery1.21.1_v1.1.3b.jar",
     "sha256": "1A5022528F5C06BF2CDD39C71169C90CD61E80C3F44879C747A7DEBD63E25A96"
+  },
+  {
+    "name": "create bluemap",
+    "filename": "create_bluemap-1.1.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_bluemap-1.1.1.jar",
+    "sha256": "1DC287271F7DB558146E4473954F204F526F368259A274D5DF0A67E953B66050"
   },
   {
     "name": "create optical",
@@ -343,9 +355,9 @@
   },
   {
     "name": "entityculling",
-    "filename": "entityculling-neoforge-1.10.4-mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.4-mc1.21.1.jar",
-    "sha256": "24100976DB3F3BF31924301F80DE2D33BE3794F1C01E1CB3F7CA6BE9C3F5DDA6"
+    "filename": "entityculling-neoforge-1.10.5-mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/entityculling-neoforge-1.10.5-mc1.21.1.jar",
+    "sha256": "2EACD2BADA39BF1D1EF695736646790C619C0E6CDEAF3D7E3CFC9139D26FAE02"
   },
   {
     "name": "escalated",
@@ -397,9 +409,21 @@
   },
   {
     "name": "geckolib",
-    "filename": "geckolib-neoforge-1.21.1-4.8.4.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/geckolib-neoforge-1.21.1-4.8.4.jar",
-    "sha256": "A1B6CE25E8627AA7E748672EEDB6B71AF68E0993462313649C259F38E42BCAC9"
+    "filename": "geckolib-neoforge-1.21.1-4.9.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/geckolib-neoforge-1.21.1-4.9.1.jar",
+    "sha256": "38C73035D1E8C143610FA76550B0472EA46F8B75FCAF2A14574EBF47517B8D02"
+  },
+  {
+    "name": "gravestone",
+    "filename": "gravestone-neoforge-1.21.1-1.0.37.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/gravestone-neoforge-1.21.1-1.0.37.jar",
+    "sha256": "B7DE5DECBF1F35E41AF2B146AD201699F434CF32B0F8F9B7D1638A9933BD5A3E"
+  },
+  {
+    "name": "gravestonecurioscompat",
+    "filename": "gravestonecurioscompat-1.21.1-NeoForge-3.0.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/gravestonecurioscompat-1.21.1-NeoForge-3.0.1.jar",
+    "sha256": "0F080A4220B09937199293D318B58161BBA042F3758FD732875F6A88A13B3662"
   },
   {
     "name": "handcrafted",
@@ -432,6 +456,12 @@
     "sha256": "2B6D84DF11AB2BB94A75BE8BAC6790BFBB2C0112A1622CD5F5F234468A196721"
   },
   {
+    "name": "kingdoms",
+    "filename": "kingdoms-0.2.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.0.jar",
+    "sha256": "068A79376542B86C5856DE6F84E38AAFC6D44982525595C90AD86D9E11100F62"
+  },
+  {
     "name": "kotlinforforge",
     "filename": "kotlinforforge-5.11.0-all.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kotlinforforge-5.11.0-all.jar",
@@ -445,9 +475,9 @@
   },
   {
     "name": "lithostitched",
-    "filename": "lithostitched-1.7.9-neoforge-21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithostitched-1.7.9-neoforge-21.1.jar",
-    "sha256": "9DA5826E349F8A58DCA526F7AFCEC9CDD7D6906577945242C87462AA6DEBCDEE"
+    "filename": "lithostitched-1.7.11-neoforge-21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithostitched-1.7.11-neoforge-21.1.jar",
+    "sha256": "F70D6C8132341C1B54F0C8E19EAE5EC5B9504F590D14795E717920A2F02F4E6F"
   },
   {
     "name": "mcd d nether",
@@ -481,9 +511,9 @@
   },
   {
     "name": "not enough glyphs",
-    "filename": "not_enough_glyphs-1.21.1-4.6.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/not_enough_glyphs-1.21.1-4.6.0.jar",
-    "sha256": "29FEE7BB3E41C96CBFA3C3917E5D2F1A5077312056A2ECC51EA0272600FAD049"
+    "filename": "not_enough_glyphs-1.21.1-4.6.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/not_enough_glyphs-1.21.1-4.6.1.jar",
+    "sha256": "2060FD11025A737F07ACA7EDA6DF232401E6324A4F33539E13C009F840A6EFA2"
   },
   {
     "name": "ntgl",
@@ -510,6 +540,12 @@
     "sha256": "BEC8118978ADEB052DE9C4EAF9A595830621D82515A764F32F9C8A4DD52AB94B"
   },
   {
+    "name": "powergrid",
+    "filename": "powergrid-mc1.21.1-0.5.5.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/powergrid-mc1.21.1-0.5.5.1.jar",
+    "sha256": "E1570E7691B0D1D7495342581A769DDB765D538C63047E96159E0C6DEC9A8D69"
+  },
+  {
     "name": "protection pixel",
     "filename": "protection_pixel-2.2.1-neoforge-1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/protection_pixel-2.2.1-neoforge-1.21.1.jar",
@@ -517,9 +553,9 @@
   },
   {
     "name": "punchy",
-    "filename": "punchy-2.5.6-neoforge-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.6-neoforge-1.21.1.jar",
-    "sha256": "9013A36D9A778CE16B16C3F206EFB3DCFCACFDB365E1F0B3152672507241333F"
+    "filename": "punchy-2.5.7-neoforge-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.7-neoforge-1.21.1.jar",
+    "sha256": "624A6AE8D241B31ADEFD610AF391E3C6B43CC2D627EAE50113962823543416FD"
   },
   {
     "name": "railways",
@@ -595,9 +631,9 @@
   },
   {
     "name": "sophisticatedcore",
-    "filename": "sophisticatedcore-1.21.1-1.4.59.2032.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedcore-1.21.1-1.4.59.2032.jar",
-    "sha256": "6024034946922ED6B8849B5727E8ECE6227DB84323F13CE2E61C208B08B3E596"
+    "filename": "sophisticatedcore-1.21.1-1.4.60.2044.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedcore-1.21.1-1.4.60.2044.jar",
+    "sha256": "C53DE6EF77FCBB8A486A95074959BFDBCB06B63ACB44340A4DAE9C3A70C0A1E0"
   },
   {
     "name": "spark",
@@ -643,9 +679,9 @@
   },
   {
     "name": "voicechat",
-    "filename": "voicechat-neoforge-1.21.1-2.6.18.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/voicechat-neoforge-1.21.1-2.6.18.jar",
-    "sha256": "FB0DC1F4BB36F471FAFC86FEE12B963F036DDF8D4622653509D884BBED96B1E5"
+    "filename": "voicechat-neoforge-1.21.1-2.6.20.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/voicechat-neoforge-1.21.1-2.6.20.jar",
+    "sha256": "1E387494CEC156553557D0996CEE6DBF6CA606E371782F723FF08D3E9905FE3C"
   },
   {
     "name": "watut",
@@ -661,8 +697,8 @@
   },
   {
     "name": "xaeroworldmap",
-    "filename": "xaeroworldmap-neoforge-1.21.1-1.41.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.41.0.jar",
-    "sha256": "B3E377B11D277CFBC0CCDD91A6FB6BC1FF4E93B354EB9C0277E1E4446C316CCB"
+    "filename": "xaeroworldmap-neoforge-1.21.1-1.41.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.41.2.jar",
+    "sha256": "36B163FE8BE4C2E800668C49294473DA61EB360D821DB675A2A948F8CC7C3D2B"
   }
 ]
