@@ -397,7 +397,7 @@ function updateServerStatus(res) {
   const text = $('status-text');
   dot.className = 'status-dot ' + (res.online ? 'online' : 'offline');
   if (res.online) {
-    text.textContent = `ОНЛАЙН  ${res.players.online}/${res.players.max} игроков  ${res.ping}мс`;
+    text.textContent = `ОНЛАЙН  ${res.players.online}/${res.players.max} игроков`;
   } else {
     text.textContent = 'ОФФЛАЙН';
   }

@@ -9,6 +9,7 @@ const { Client } = require('minecraft-launcher-core');
 const crypto = require('crypto');
 const config = require('../config');
 const installer = require('./installer');
+const minecraftProfile = require('./minecraftProfile');
 
 let outputCallback = null;
 let exitCallback   = null;
@@ -221,19 +222,7 @@ async function launch(opts) {
   }
   launchOptions.javaPath = resolvedJava;
 
-  // Ensure Russian language is set in options.txt
-  const optionsPath = path.join(gameDir, 'options.txt');
-  try {
-    let options = fs.existsSync(optionsPath) ? fs.readFileSync(optionsPath, 'utf8') : '';
-    if (!options.includes('lang:')) {
-      options = options.trimEnd();
-      options += (options ? '\n' : '') + 'lang:ru_ru\n';
-      fs.writeFileSync(optionsPath, options, 'utf8');
-    } else if (!options.includes('lang:ru_ru')) {
-      options = options.replace(/^lang:.+$/m, 'lang:ru_ru');
-      fs.writeFileSync(optionsPath, options, 'utf8');
-    }
-  } catch (_) {}
+  try { minecraftProfile.ensureServerShortcuts(gameDir); } catch (_) {}
 
   ensureFmlConfig(gameDir);
   ensureDistantHorizonsDefault(gameDir);

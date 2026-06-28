@@ -1,12 +1,12 @@
 module.exports = {
-  SERVER_IP:   'YOUR_SERVER_IP',
-  SERVER_PORT: 25565,
+  SERVER_IP:   '5.9.102.157',
+  SERVER_PORT: 25552,
 
   MC_VERSION:       '1.21.1',
   NEOFORGE_VERSION: '21.1.233',
 
   LAUNCHER_NAME:    'VoID Cube',
-  LAUNCHER_VERSION: '1.1.3',
+  LAUNCHER_VERSION: '1.1.4',
   GAME_DIR_NAME:    'mylauncher-minecraft',
 
   // GitHub репозиторий для авто-обновлений лаунчера.
