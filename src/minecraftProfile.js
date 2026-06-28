@@ -260,10 +260,29 @@ function createRoot() {
 }
 
 function createServerEntry(address) {
-  return {
+  const entry = {
     name: { type: TAG_STRING, name: 'name', value: config.LAUNCHER_NAME || 'VoID Cube' },
     ip: { type: TAG_STRING, name: 'ip', value: address }
   };
+  const icon = readServerIcon();
+  if (icon) entry.icon = { type: TAG_STRING, name: 'icon', value: icon };
+  return entry;
+}
+
+function readServerIcon() {
+  const candidates = [
+    path.join(__dirname, '..', 'assets', 'server-icon.png'),
+    path.join(__dirname, '..', 'assets', 'icon.png')
+  ];
+  for (const filePath of candidates) {
+    try {
+      if (!fs.existsSync(filePath)) continue;
+      const data = fs.readFileSync(filePath);
+      if (data.length < 24 || data.toString('ascii', 1, 4) !== 'PNG') continue;
+      return `data:image/png;base64,${data.toString('base64')}`;
+    } catch (_) {}
+  }
+  return null;
 }
 
 function ensureServersTag(root) {
