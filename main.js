@@ -88,7 +88,8 @@ function getDefaultSettings() {
     width: 1280,
     height: 720,
     gameDir: path.join(app.getPath('userData'), config.GAME_DIR_NAME),
-    javaPath: 'auto'
+    javaPath: 'auto',
+    autoJoinServer: false
   };
 }
 
@@ -459,7 +460,7 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
 
 ipcMain.handle('ping-server', async () => {
   const serverPing = require('./src/serverPing');
-  return await serverPing.ping(config.SERVER_IP, config.SERVER_PORT);
+  return await serverPing.ping(config.SERVER_IP, config.SERVER_PORT, 1500);
 });
 
 // ─── Auto-update ──────────────────────────────────────────────────────────────

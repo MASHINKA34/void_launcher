@@ -61,27 +61,35 @@ function buildStatusRequest() {
 
 // ─── Main ping ───────────────────────────────────────────────────────────────
 
-function ping(host, port = 25565, timeoutMs = 5000) {
+function ping(host, port = 25565, timeoutMs = 1500) {
   return new Promise((resolve) => {
-    const offline = () => resolve({ online: false, ping: -1, players: { online: 0, max: 0 } });
+    const offlineResult = { online: false, ping: -1, players: { online: 0, max: 0 } };
 
-    if (!host || host === 'YOUR_SERVER_IP') return offline();
+    if (!host || host === 'YOUR_SERVER_IP') return resolve(offlineResult);
 
     const socket = new net.Socket();
     const start  = Date.now();
     let done     = false;
     let buf      = Buffer.alloc(0);
+    let timer    = null;
 
     const finish = (result) => {
       if (done) return;
       done = true;
+      if (timer) clearTimeout(timer);
       socket.destroy();
       resolve(result);
     };
 
+    const offline = () => finish(offlineResult);
+    timer = setTimeout(offline, timeoutMs);
+
     socket.setTimeout(timeoutMs);
-    socket.on('timeout', offline);
-    socket.on('error',   offline);
+    socket.once('timeout', offline);
+    socket.once('error', offline);
+    socket.once('close', () => {
+      if (!done) offline();
+    });
 
     socket.connect(port, host, () => {
       socket.write(Buffer.concat([buildHandshake(host, port), buildStatusRequest()]));

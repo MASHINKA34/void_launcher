@@ -6,6 +6,8 @@ const state = {
   systemRam: 16,
   modsList:  [],
   serverPingInterval: null,
+  serverStatusKnown: false,
+  serverPingInFlight: false,
   isGameRunning: false
 };
 
@@ -395,6 +397,7 @@ async function runInstallation() {
 function updateServerStatus(res) {
   const dot  = qs('#server-status .status-dot');
   const text = $('status-text');
+  state.serverStatusKnown = true;
   dot.className = 'status-dot ' + (res.online ? 'online' : 'offline');
   if (res.online) {
     text.textContent = `ОНЛАЙН  ${res.players.online}/${res.players.max} игроков`;
@@ -404,13 +407,19 @@ function updateServerStatus(res) {
 }
 
 async function pingServer() {
-  qs('#server-status .status-dot').className = 'status-dot checking';
-  $('status-text').textContent = 'Проверка...';
+  if (state.serverPingInFlight) return;
+  state.serverPingInFlight = true;
+  if (!state.serverStatusKnown) {
+    qs('#server-status .status-dot').className = 'status-dot checking';
+    $('status-text').textContent = 'Проверка...';
+  }
   try {
     const res = await window.api.pingServer();
     updateServerStatus(res);
   } catch (_) {
     updateServerStatus({ online: false, ping: -1, players: { online: 0, max: 0 } });
+  } finally {
+    state.serverPingInFlight = false;
   }
 }
 
@@ -693,7 +702,8 @@ async function startGame() {
       ram:      state.settings.ram,
       width:    state.settings.width,
       height:   state.settings.height,
-      javaPath: state.settings.javaPath
+      javaPath: state.settings.javaPath,
+      autoJoinServer: !!state.settings.autoJoinServer
     });
 
     if (!result.success) {
@@ -725,6 +735,7 @@ async function loadSettings() {
   $('setting-gamedir').value = s.gameDir;
   $('setting-java').value    = s.javaPath === 'auto' ? '' : s.javaPath;
   $('setting-nickname').value = state.profile?.username || '';
+  $('setting-auto-join').checked = !!s.autoJoinServer;
 }
 
 function initSettingsUI() {
@@ -772,7 +783,8 @@ function initSettingsUI() {
       width:   parseInt($('setting-width').value,  10),
       height:  parseInt($('setting-height').value, 10),
       gameDir: $('setting-gamedir').value.trim() || state.settings.gameDir,
-      javaPath: $('setting-java').value.trim() || 'auto'
+      javaPath: $('setting-java').value.trim() || 'auto',
+      autoJoinServer: $('setting-auto-join').checked
     };
     await window.api.saveSettings(newSettings);
     state.settings = newSettings;
@@ -995,7 +1007,7 @@ async function enterMain() {
 
   // Server ping
   await pingServer();
-  state.serverPingInterval = setInterval(pingServer, 30_000);
+  state.serverPingInterval = setInterval(pingServer, 5_000);
 
   // PLAY button
   if (!playButtonBound) {

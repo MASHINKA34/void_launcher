@@ -154,7 +154,8 @@ async function launch(opts) {
     ram    = 4,
     width  = 1280,
     height = 720,
-    javaPath = 'auto'
+    javaPath = 'auto',
+    autoJoinServer = false
   } = opts;
 
   const neoforgeId = findNeoForgeVersionId(gameDir);
@@ -208,6 +209,12 @@ async function launch(opts) {
       '-Dfile.encoding=UTF-8'
     ]
   };
+  if (autoJoinServer) {
+    launchOptions.quickPlay = {
+      type: 'multiplayer',
+      identifier: minecraftProfile.getServerAddress()
+    };
+  }
 
   // Resolve a Java 21+ runtime. NeoForge 1.21.1 requires Java 21 — launching with an
   // older system Java (e.g. Java 8) fails with "Unrecognized option: -p".
