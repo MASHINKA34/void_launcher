@@ -247,9 +247,9 @@
   },
   {
     "name": "collective",
-    "filename": "collective-1.21.1-8.31.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/collective-1.21.1-8.31.jar",
-    "sha256": "B2D91FAFE11AEAA1C46717DFFEDFB13AD78ACA50D4B34938599CDB09312E419D"
+    "filename": "collective-1.21.1-8.32.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/collective-1.21.1-8.32.jar",
+    "sha256": "4EA51B27920CB6BE9BF3708A3A65187F740621F89D7A0A93617CB0229BD20A99"
   },
   {
     "name": "coroutil",
@@ -310,6 +310,12 @@
     "filename": "createbigcannons-5.11.6.mc.1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/createbigcannons-5.11.6.mc.1.21.1.jar",
     "sha256": "9345E8773AA8BE0F33BBF633796124E70D84C0C299AAC94D8D252086F8712FFE"
+  },
+  {
+    "name": "createbionics",
+    "filename": "createbionics-2.0.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/createbionics-2.0.2.jar",
+    "sha256": "54DB00BF85F10C9341B8322EF227752285FBB9A79620E754E567018512FAFBAD"
   },
   {
     "name": "creatorsword",
@@ -457,9 +463,9 @@
   },
   {
     "name": "kingdoms",
-    "filename": "kingdoms-0.2.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.0.jar",
-    "sha256": "068A79376542B86C5856DE6F84E38AAFC6D44982525595C90AD86D9E11100F62"
+    "filename": "kingdoms-0.2.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.1.jar",
+    "sha256": "A8451C4900FAB8DA9C2ACDAAE49F1836F329E4D6B8067EFC9BCABE0AB00F9D4F"
   },
   {
     "name": "kotlinforforge",
@@ -469,15 +475,15 @@
   },
   {
     "name": "lithium",
-    "filename": "lithium-neoforge-0.15.3.mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithium-neoforge-0.15.3.mc1.21.1.jar",
-    "sha256": "A6548862BD13FF8EEA6747CF61DF50C8374A16A22D067614E414ED600EEE6D83"
+    "filename": "lithium-neoforge-0.15.4.mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithium-neoforge-0.15.4.mc1.21.1.jar",
+    "sha256": "488F33216030C1CB0BAA33E59DE3D657D08D5795A6C2080C8C8BBBC133FC8757"
   },
   {
     "name": "lithostitched",
-    "filename": "lithostitched-1.7.11-neoforge-21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithostitched-1.7.11-neoforge-21.1.jar",
-    "sha256": "F70D6C8132341C1B54F0C8E19EAE5EC5B9504F590D14795E717920A2F02F4E6F"
+    "filename": "lithostitched-1.7.12-neoforge-21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithostitched-1.7.12-neoforge-21.1.jar",
+    "sha256": "E18CAE8AAEF95F7058A16C05705C6E78A4B33A00BCF9189E96ED8A8785FB9647"
   },
   {
     "name": "mcd d nether",
@@ -499,9 +505,9 @@
   },
   {
     "name": "morerelics",
-    "filename": "morerelics-1.7.4.1-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/morerelics-1.7.4.1-1.21.1.jar",
-    "sha256": "B382329C6CB18DD478CFE4195F7785B1107D70D5F4EFD578DC0D8EB917A4DA7A"
+    "filename": "morerelics-1.7.5-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/morerelics-1.7.5-1.21.1.jar",
+    "sha256": "A957C93650A48C8E745CD0AECB7145C8E12BA5F7D7A64B77425648C4C88D2E62"
   },
   {
     "name": "noisium",
@@ -553,9 +559,9 @@
   },
   {
     "name": "punchy",
-    "filename": "punchy-2.5.7-neoforge-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.7-neoforge-1.21.1.jar",
-    "sha256": "624A6AE8D241B31ADEFD610AF391E3C6B43CC2D627EAE50113962823543416FD"
+    "filename": "punchy-2.5.8-neoforge-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.8-neoforge-1.21.1.jar",
+    "sha256": "5940745C6F36BEA87575213C45CE14D2ABE0EE0622554DE949A5278AD08B1611"
   },
   {
     "name": "railways",
@@ -625,9 +631,9 @@
   },
   {
     "name": "sophisticatedbackpacks",
-    "filename": "sophisticatedbackpacks-1.21.1-3.25.64.1919.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedbackpacks-1.21.1-3.25.64.1919.jar",
-    "sha256": "85E50078EAB0B5CEBDB5FB336B3A7B4A5BBEAA71E4D29780D182B7A5D691C0ED"
+    "filename": "sophisticatedbackpacks-1.21.1-3.25.64.1933.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sophisticatedbackpacks-1.21.1-3.25.64.1933.jar",
+    "sha256": "D5A202A1BF83B047F17C28965DF5035A15D60CC7EDA212D901143777AC8A19D2"
   },
   {
     "name": "sophisticatedcore",
