@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('api', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   getVersions:   () => ipcRenderer.invoke('get-versions'),
   browseFolder: () => ipcRenderer.invoke('browse-folder'),
+  setLocalSkin: (opts) => ipcRenderer.invoke('set-local-skin', opts),
   detectJava:   (gameDir) => ipcRenderer.invoke('detect-java', gameDir),
 
   // ── Content ─────────────────────────────────────────────────────────────────

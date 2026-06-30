@@ -147,6 +147,27 @@ function buildNeoForgeJvmArgs(gameDir, versionId) {
   return result;
 }
 
+function applyGpuPreference(javaExe, mode) {
+  if (process.platform !== 'win32' || !javaExe) return;
+  try {
+    const { execFileSync } = require('child_process');
+    const key = 'HKCU\\Software\\Microsoft\\DirectX\\UserGpuPreferences';
+    const dir = path.dirname(javaExe);
+    const seen = new Set();
+    for (const exe of [javaExe, path.join(dir, 'javaw.exe'), path.join(dir, 'java.exe')]) {
+      const p = path.resolve(exe);
+      if (seen.has(p.toLowerCase())) continue;
+      seen.add(p.toLowerCase());
+      if (mode === 'auto') {
+        try { execFileSync('reg', ['delete', key, '/v', p, '/f'], { stdio: 'ignore' }); } catch (_) {}
+      } else {
+        const pref = mode === 'low' ? 1 : 2;
+        execFileSync('reg', ['add', key, '/v', p, '/t', 'REG_SZ', '/d', `GpuPreference=${pref};`, '/f'], { stdio: 'ignore' });
+      }
+    }
+  } catch (_) {}
+}
+
 async function launch(opts) {
   const {
     username,
@@ -155,7 +176,8 @@ async function launch(opts) {
     width  = 1280,
     height = 720,
     javaPath = 'auto',
-    autoJoinServer = false
+    autoJoinServer = false,
+    gpu = 'auto'
   } = opts;
 
   const neoforgeId = findNeoForgeVersionId(gameDir);
@@ -228,6 +250,7 @@ async function launch(opts) {
     throw new Error('Java 21 не найдена. Перезапустите лаунчер — он установит её автоматически.');
   }
   launchOptions.javaPath = resolvedJava;
+  applyGpuPreference(resolvedJava, gpu);
 
   try { minecraftProfile.ensureServerShortcuts(gameDir); } catch (_) {}
 

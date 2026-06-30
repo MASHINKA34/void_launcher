@@ -299,12 +299,34 @@
             </div>
           </div>
 
+          <!-- Видеокарта -->
+          <div class="setting-group">
+            <label class="setting-label">Видеокарта</label>
+            <select id="setting-gpu" class="text-input">
+              <option value="auto">Автоматически</option>
+              <option value="high">Дискретная (производительность)</option>
+              <option value="low">Встроенная (экономия)</option>
+            </select>
+          </div>
+
           <!-- Никнейм -->
           <div class="setting-group">
             <label class="setting-label">Никнейм</label>
             <div class="folder-row">
               <input type="text" id="setting-nickname" class="text-input" placeholder="Никнейм" maxlength="16" readonly>
               <button class="btn-secondary" id="btn-change-nick">Изменить</button>
+            </div>
+          </div>
+
+          <!-- Скины -->
+          <div class="setting-group">
+            <label class="setting-label">Скины</label>
+            <div class="folder-row">
+              <button class="btn-secondary" id="btn-skins">Загрузить скин (ely.by)</button>
+              <button class="btn-secondary" id="btn-skin-local">Локальный скин</button>
+            </div>
+            <div class="about-rows">
+              <div class="about-row"><span>ely.by — скин под твоим ником видят ВСЕ на сервере (и ты сам). Локальный — PNG-файл, виден только тебе.</span></div>
             </div>
           </div>
 

@@ -703,7 +703,8 @@ async function startGame() {
       width:    state.settings.width,
       height:   state.settings.height,
       javaPath: state.settings.javaPath,
-      autoJoinServer: !!state.settings.autoJoinServer
+      autoJoinServer: !!state.settings.autoJoinServer,
+      gpu: state.settings.gpu
     });
 
     if (!result.success) {
@@ -734,6 +735,7 @@ async function loadSettings() {
   $('setting-height').value  = s.height;
   $('setting-gamedir').value = s.gameDir;
   $('setting-java').value    = s.javaPath === 'auto' ? '' : s.javaPath;
+  $('setting-gpu').value     = s.gpu || 'auto';
   $('setting-nickname').value = state.profile?.username || '';
   $('setting-auto-join').checked = !!s.autoJoinServer;
 }
@@ -761,6 +763,16 @@ function initSettingsUI() {
     }
   });
 
+  $('btn-skins').addEventListener('click', () => {
+    window.open('https://ely.by/skins', '_blank');
+  });
+
+  $('btn-skin-local').addEventListener('click', async () => {
+    const res = await window.api.setLocalSkin({ gameDir: state.settings.gameDir, username: state.profile?.username });
+    if (res?.success) showError('✓ Локальный скин установлен. Будет виден тебе после перезахода в игру.');
+    else if (res && !res.canceled) showError('Не удалось установить скин: ' + (res.error || ''));
+  });
+
   // Detect Java
   $('btn-detect-java').addEventListener('click', async () => {
     $('btn-detect-java').textContent = 'Поиск...';
@@ -784,7 +796,8 @@ function initSettingsUI() {
       height:  parseInt($('setting-height').value, 10),
       gameDir: $('setting-gamedir').value.trim() || state.settings.gameDir,
       javaPath: $('setting-java').value.trim() || 'auto',
-      autoJoinServer: $('setting-auto-join').checked
+      autoJoinServer: $('setting-auto-join').checked,
+      gpu: $('setting-gpu').value
     };
     await window.api.saveSettings(newSettings);
     state.settings = newSettings;

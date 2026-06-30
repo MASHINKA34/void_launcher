@@ -42,6 +42,12 @@
     "sha256": "E7614711E4BFEBF8C1ABBD038F102C1CB0611324CA02B87E766520F321A07DA5"
   },
   {
+    "name": "Custom Skin Loader Universal",
+    "filename": "CustomSkinLoader_Universal-15.0.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/CustomSkinLoader_Universal-15.0.1.jar",
+    "sha256": "026D8B38EA93EDCCD647F60568193E79801A377B7BD4E916DCFC0D5482B767FC"
+  },
+  {
     "name": "Distant Horizons",
     "filename": "DistantHorizons-3.1.2-b-1.21.1-fabric-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/DistantHorizons-3.1.2-b-1.21.1-fabric-neoforge.jar",

@@ -89,7 +89,8 @@ function getDefaultSettings() {
     height: 720,
     gameDir: path.join(app.getPath('userData'), config.GAME_DIR_NAME),
     javaPath: 'auto',
-    autoJoinServer: false
+    autoJoinServer: false,
+    gpu: 'auto'
   };
 }
 
@@ -282,6 +283,24 @@ ipcMain.handle('browse-folder', async () => {
   });
   if (!result.canceled && result.filePaths.length > 0) return result.filePaths[0];
   return null;
+});
+
+ipcMain.handle('set-local-skin', async (_, { gameDir, username } = {}) => {
+  if (!mainWindow) return { success: false, error: 'нет окна' };
+  if (!username) return { success: false, error: 'Сначала войди под своим ником.' };
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'Скин PNG', extensions: ['png'] }]
+  });
+  if (result.canceled || !result.filePaths.length) return { success: false, canceled: true };
+  try {
+    const dir = path.join(gameDir, 'CustomSkinLoader', 'LocalSkin', 'skins');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.copyFileSync(result.filePaths[0], path.join(dir, `${username}.png`));
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 });
 
 // ─── Content ──────────────────────────────────────────────────────────────────
