@@ -90,6 +90,7 @@ function getDefaultSettings() {
     gameDir: path.join(app.getPath('userData'), config.GAME_DIR_NAME),
     javaPath: 'auto',
     autoJoinServer: false,
+    fullscreen: false,
     gpu: 'auto'
   };
 }

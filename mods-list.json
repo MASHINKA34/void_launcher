@@ -36,6 +36,12 @@
     "sha256": "D827F52694EA7C2BFEBA5E6FA55B19232DD61111CFA4206468DFCFEB1AA7B846"
   },
   {
+    "name": "Create Dragons Plus",
+    "filename": "CreateDragonsPlus-1.11.2b.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/CreateDragonsPlus-1.11.2b.jar",
+    "sha256": "9B15E464465A639DE9EF5A935AE9FD94EA545904517D1428BC784A4012E0A1E2"
+  },
+  {
     "name": "Create Numismatics",
     "filename": "CreateNumismatics-1.0.19integration.neoforge-mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/CreateNumismatics-1.0.19integration.neoforge-mc1.21.1.jar",
@@ -294,10 +300,28 @@
     "sha256": "1A5022528F5C06BF2CDD39C71169C90CD61E80C3F44879C747A7DEBD63E25A96"
   },
   {
+    "name": "create enchantment industry",
+    "filename": "create-enchantment-industry-2.4.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create-enchantment-industry-2.4.2.jar",
+    "sha256": "81F192BB53888E01F87A82EAAC2F261C93715F2221DBCF5D8A8D414F912F75EF"
+  },
+  {
+    "name": "create new age",
+    "filename": "create-new-age-1.2.0.neoforge-mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create-new-age-1.2.0.neoforge-mc1.21.1.jar",
+    "sha256": "A217EA21CCC8364E99D86777E519436BC7C94516DF9737AD0103047E48A44717"
+  },
+  {
     "name": "create bluemap",
     "filename": "create_bluemap-1.1.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_bluemap-1.1.1.jar",
     "sha256": "1DC287271F7DB558146E4473954F204F526F368259A274D5DF0A67E953B66050"
+  },
+  {
+    "name": "create mob spawners",
+    "filename": "create_mob_spawners-1.0.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_mob_spawners-1.0.0.jar",
+    "sha256": "A573B2384F8D7BEB6553A1450D75D5B462AB74A1D1E16E271EFFB1A3415B5E7B"
   },
   {
     "name": "create optical",
@@ -322,6 +346,12 @@
     "filename": "createbionics-2.0.2.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/createbionics-2.0.2.jar",
     "sha256": "54DB00BF85F10C9341B8322EF227752285FBB9A79620E754E567018512FAFBAD"
+  },
+  {
+    "name": "createrailwaysnavigator",
+    "filename": "createrailwaysnavigator-neoforge-1.21.1-beta-0.9.1-C6.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/createrailwaysnavigator-neoforge-1.21.1-beta-0.9.1-C6.jar",
+    "sha256": "336536A181FAF6DB7F756393248E786382FDD0C1C2760FF2DFC4B265859321B7"
   },
   {
     "name": "creatorsword",
@@ -352,6 +382,18 @@
     "filename": "delightfulcreators-1.2.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/delightfulcreators-1.2.jar",
     "sha256": "72FE7EF8C623EA107894734835AACD3C8AF57FD445781B9646817F3EE4DDCE45"
+  },
+  {
+    "name": "doubledoors",
+    "filename": "doubledoors-1.21.1-7.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/doubledoors-1.21.1-7.2.jar",
+    "sha256": "947CC425DBA61A003FC6CFC9CE6BB87DBEF1F2D4561701235EB2FED6073B72FF"
+  },
+  {
+    "name": "dragonlib",
+    "filename": "dragonlib-neoforge-1.21.1-beta-3.0.28.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/dragonlib-neoforge-1.21.1-beta-3.0.28.jar",
+    "sha256": "BA127947220504D1410716E422EF6A9A387D818A922AD5FDB3BE044F9F7556F7"
   },
   {
     "name": "drinkbeer refill",
@@ -469,9 +511,9 @@
   },
   {
     "name": "kingdoms",
-    "filename": "kingdoms-0.2.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.1.jar",
-    "sha256": "A8451C4900FAB8DA9C2ACDAAE49F1836F329E4D6B8067EFC9BCABE0AB00F9D4F"
+    "filename": "kingdoms-0.2.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.2.jar",
+    "sha256": "EADEB473B67A1857D0C96151DF94E9935F2D17B4DC277A138D2EA3B3DA0AE444"
   },
   {
     "name": "kotlinforforge",
@@ -628,6 +670,12 @@
     "filename": "smallernetherportals-1.21.1-3.9.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/smallernetherportals-1.21.1-3.9.jar",
     "sha256": "46FF89D3934F4BE018D7CB0C5D06B1DD303D67407E255D299C612FDB8772CB7C"
+  },
+  {
+    "name": "snatched",
+    "filename": "snatched-1.2.0-neoforge-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/snatched-1.2.0-neoforge-1.21.1.jar",
+    "sha256": "801F6811430A59EADF9E490D10828630CCEAD0FEA59B24DAF5439C5699EFFBA9"
   },
   {
     "name": "sodium",

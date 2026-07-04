@@ -1131,13 +1131,20 @@ body {
 .text-input[readonly] { opacity: 0.7; cursor: default; }
 .text-input.small { width: 90px; flex: none; text-align: center; }
 
+select.text-input { color-scheme: dark; }
+select.text-input option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 .resolution-row { display: flex; align-items: center; gap: 10px; }
 .res-x { color: var(--text-muted); font-size: 16px; }
 
 .folder-row { display: flex; gap: 10px; align-items: center; }
 
+.settings-check-row + .settings-check-row { margin-top: 8px; }
 .settings-check-row {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
   color: var(--text-secondary);

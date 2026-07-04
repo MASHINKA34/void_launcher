@@ -177,6 +177,7 @@ async function launch(opts) {
     height = 720,
     javaPath = 'auto',
     autoJoinServer = false,
+    fullscreen = false,
     gpu = 'auto'
   } = opts;
 
@@ -206,7 +207,9 @@ async function launch(opts) {
     },
     overrides: {
       gameDirectory: gameDir,
-      ...(width && height ? { window: { width, height } } : {})
+      ...(fullscreen
+        ? { window: { fullscreen: true } }
+        : (width && height ? { window: { width, height } } : {}))
     },
     javaPath: javaPath !== 'auto' ? javaPath : undefined,
     customArgs: [

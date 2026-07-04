@@ -704,6 +704,7 @@ async function startGame() {
       height:   state.settings.height,
       javaPath: state.settings.javaPath,
       autoJoinServer: !!state.settings.autoJoinServer,
+      fullscreen: !!state.settings.fullscreen,
       gpu: state.settings.gpu
     });
 
@@ -738,6 +739,7 @@ async function loadSettings() {
   $('setting-gpu').value     = s.gpu || 'auto';
   $('setting-nickname').value = state.profile?.username || '';
   $('setting-auto-join').checked = !!s.autoJoinServer;
+  $('setting-fullscreen').checked = !!s.fullscreen;
 }
 
 function initSettingsUI() {
@@ -778,6 +780,11 @@ function initSettingsUI() {
     window.api.saveSettings(state.settings);
   });
 
+  $('setting-fullscreen').addEventListener('change', () => {
+    state.settings.fullscreen = $('setting-fullscreen').checked;
+    window.api.saveSettings(state.settings);
+  });
+
   // Detect Java
   $('btn-detect-java').addEventListener('click', async () => {
     $('btn-detect-java').textContent = 'Поиск...';
@@ -802,6 +809,7 @@ function initSettingsUI() {
       gameDir: $('setting-gamedir').value.trim() || state.settings.gameDir,
       javaPath: $('setting-java').value.trim() || 'auto',
       autoJoinServer: $('setting-auto-join').checked,
+      fullscreen: $('setting-fullscreen').checked,
       gpu: $('setting-gpu').value
     };
     await window.api.saveSettings(newSettings);
