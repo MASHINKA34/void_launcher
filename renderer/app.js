@@ -773,6 +773,11 @@ function initSettingsUI() {
     else if (res && !res.canceled) showError('Не удалось установить скин: ' + (res.error || ''));
   });
 
+  $('setting-auto-join').addEventListener('change', () => {
+    state.settings.autoJoinServer = $('setting-auto-join').checked;
+    window.api.saveSettings(state.settings);
+  });
+
   // Detect Java
   $('btn-detect-java').addEventListener('click', async () => {
     $('btn-detect-java').textContent = 'Поиск...';
