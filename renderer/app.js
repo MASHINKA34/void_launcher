@@ -281,7 +281,7 @@ function initLoginScreen(prefillNick = '') {
 const STEPS = [
   { id: 'java',      label: 'Java 21 Runtime'   },
   { id: 'minecraft', label: 'Minecraft 1.21.1'  },
-  { id: 'neoforge',  label: 'NeoForge 21.1.172' }
+  { id: 'neoforge',  label: 'NeoForge 21.1.233' }
 ];
 
 let stepStatus = {};

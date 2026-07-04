@@ -1,6 +1,6 @@
 /**
  * installer.js
- * Handles first-launch setup: Java 21, Minecraft 1.21.1, NeoForge 21.1.172
+ * Handles first-launch setup: Java 21, Minecraft 1.21.1, NeoForge 21.1.233
  */
 
 const fs       = require('fs');
