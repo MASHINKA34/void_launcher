@@ -91,6 +91,7 @@ function getDefaultSettings() {
     javaPath: 'auto',
     autoJoinServer: false,
     fullscreen: false,
+    distantHorizons: false,
     gpu: 'auto'
   };
 }

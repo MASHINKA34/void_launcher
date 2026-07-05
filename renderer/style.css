@@ -1143,6 +1143,11 @@ select.text-input option {
 .folder-row { display: flex; gap: 10px; align-items: center; }
 
 .settings-check-row + .settings-check-row { margin-top: 8px; }
+.setting-hint {
+  margin: 4px 0 0 26px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
 .settings-check-row {
   display: flex;
   align-items: center;

@@ -705,6 +705,7 @@ async function startGame() {
       javaPath: state.settings.javaPath,
       autoJoinServer: !!state.settings.autoJoinServer,
       fullscreen: !!state.settings.fullscreen,
+      distantHorizons: !!state.settings.distantHorizons,
       gpu: state.settings.gpu
     });
 
@@ -740,6 +741,7 @@ async function loadSettings() {
   $('setting-nickname').value = state.profile?.username || '';
   $('setting-auto-join').checked = !!s.autoJoinServer;
   $('setting-fullscreen').checked = !!s.fullscreen;
+  $('setting-dh').checked = !!s.distantHorizons;
 }
 
 function initSettingsUI() {
@@ -785,6 +787,11 @@ function initSettingsUI() {
     window.api.saveSettings(state.settings);
   });
 
+  $('setting-dh').addEventListener('change', () => {
+    state.settings.distantHorizons = $('setting-dh').checked;
+    window.api.saveSettings(state.settings);
+  });
+
   // Detect Java
   $('btn-detect-java').addEventListener('click', async () => {
     $('btn-detect-java').textContent = 'Поиск...';
@@ -810,6 +817,7 @@ function initSettingsUI() {
       javaPath: $('setting-java').value.trim() || 'auto',
       autoJoinServer: $('setting-auto-join').checked,
       fullscreen: $('setting-fullscreen').checked,
+      distantHorizons: $('setting-dh').checked,
       gpu: $('setting-gpu').value
     };
     await window.api.saveSettings(newSettings);

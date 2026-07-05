@@ -540,6 +540,12 @@
     "sha256": "F048F5802416144EBC7B184410830AE8D0F1A7B47070372F4FF60BCC0C374122"
   },
   {
+    "name": "mcw lights",
+    "filename": "mcw-lights-1.1.5-mc1.21.1neoforge.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/mcw-lights-1.1.5-mc1.21.1neoforge.jar",
+    "sha256": "B27CD68A7673874B0F6D765BDEF2A022666CC07CA0E5057209A16D1A535DA9E4"
+  },
+  {
     "name": "modernfix",
     "filename": "modernfix-neoforge-5.27.14.mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/modernfix-neoforge-5.27.14.mc1.21.1.jar",

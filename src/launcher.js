@@ -71,6 +71,19 @@ function ensureDistantHorizonsDefault(gameDir) {
   } catch (_) {}
 }
 
+const DH_DISABLED_DIMENSIONS = 'minecraft:overworld,minecraft:the_nether,minecraft:the_end';
+
+function applyDistantHorizonsToggle(gameDir, enabled) {
+  try {
+    const configPath = path.join(gameDir, 'config', 'DistantHorizons.toml');
+    if (!fs.existsSync(configPath)) return;
+    const value = enabled ? '' : DH_DISABLED_DIMENSIONS;
+    const text = fs.readFileSync(configPath, 'utf8');
+    const updated = text.replace(/ignoredDimensionCsv\s*=\s*"[^"]*"/, `ignoredDimensionCsv = "${value}"`);
+    if (updated !== text) fs.writeFileSync(configPath, updated, 'utf8');
+  } catch (_) {}
+}
+
 const GPU_DRIVER_DLLS = [
   { re: /\bati[og]\w*\.dll/i,  vendor: 'AMD' },
   { re: /\bamdxc\w*\.dll/i,    vendor: 'AMD' },
@@ -178,6 +191,7 @@ async function launch(opts) {
     javaPath = 'auto',
     autoJoinServer = false,
     fullscreen = false,
+    distantHorizons = false,
     gpu = 'auto'
   } = opts;
 
@@ -259,6 +273,7 @@ async function launch(opts) {
 
   ensureFmlConfig(gameDir);
   ensureDistantHorizonsDefault(gameDir);
+  applyDistantHorizonsToggle(gameDir, distantHorizons);
 
   return new Promise((resolve) => {
     const crashDetector = createCrashDetector();
