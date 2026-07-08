@@ -398,6 +398,13 @@ body.app-paused *::after {
   color: var(--error);
 }
 .install-error span { flex: 1; line-height: 1.5; }
+.install-error-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.install-error-actions .btn-secondary { width: 100%; }
 
 /* ═══════════════════════════════════════════════════ MAIN SCREEN */
 #screen-main {
@@ -1254,7 +1261,7 @@ select.text-input option {
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
-.modal-actions { display: flex; gap: 10px; justify-content: center; }
+.modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
 /* ═══════════════════════════════════════════════════ Utilities */
 .hidden { display: none !important; }

@@ -389,9 +389,38 @@ ipcMain.handle('install-game', async (_, { gameDir, javaPath }) => {
   }
 });
 
+ipcMain.handle('repair-installation', async (_, { gameDir, javaPath }) => {
+  if (installInFlight) {
+    return { success: false, error: 'Установка уже выполняется.' };
+  }
+  installInFlight = true;
+  try {
+    const installer = require('./src/installer');
+    installer.setProgressCallback((progress) => {
+      if (mainWindow) mainWindow.webContents.send('install-progress', progress);
+    });
+    return await installer.repair(gameDir, javaPath);
+  } finally {
+    installInFlight = false;
+  }
+});
+
 ipcMain.handle('detect-java', async (_, gameDir) => {
   const installer = require('./src/installer');
   return await installer.findJava(gameDir);
+});
+
+ipcMain.handle('open-logs-folder', async (_, gameDir) => {
+  try {
+    const base = gameDir && fs.existsSync(gameDir) ? gameDir : app.getPath('userData');
+    const logsDir = path.join(base, 'logs');
+    const target = fs.existsSync(logsDir) ? logsDir : base;
+    const err = await shell.openPath(target);
+    if (err) return { success: false, error: err };
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 });
 
 // ─── Mod sync ─────────────────────────────────────────────────────────────────
@@ -476,7 +505,9 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
   launcher.setExitCallback((code, crash) => {
     if (logStream) { logStream.write(`\n[Launcher] Game exited with code ${code}\n`); logStream.end(); }
     if (mainWindow) {
-      mainWindow.webContents.send('game-exit', { code, crash: crash || null });
+      const crashMsg   = crash && typeof crash === 'object' ? crash.message : (crash || null);
+      const repairable = !!(crash && typeof crash === 'object' && crash.repairable);
+      mainWindow.webContents.send('game-exit', { code, crash: crashMsg, repairable });
       mainWindow.show();
       mainWindow.focus();
     }

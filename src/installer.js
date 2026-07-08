@@ -102,6 +102,24 @@ function sha256File(filePath) {
   });
 }
 
+function makeSizeShaVerifier(expectedSize, expectedSha, label) {
+  return async (filePath) => {
+    const actualSize = fs.statSync(filePath).size;
+    if (expectedSize && actualSize !== expectedSize) {
+      dlog(`${label}: verify FAIL size got=${actualSize} expected=${expectedSize}`);
+      throw new Error('INCOMPLETE_DOWNLOAD size mismatch');
+    }
+    if (expectedSha) {
+      const actualSha = (await sha256File(filePath)).toLowerCase();
+      if (actualSha !== expectedSha.toLowerCase()) {
+        dlog(`${label}: verify FAIL sha got=${actualSha} expected=${expectedSha}`);
+        throw new Error('CHECKSUM_MISMATCH');
+      }
+    }
+    dlog(`${label}: verify OK size=${actualSize}`);
+  };
+}
+
 async function downloadFileOnce(url, partPath, label, opts) {
   let startByte = 0;
   try {
@@ -297,16 +315,35 @@ async function extractViaPowerShell(zipPath, destDir) {
   );
 }
 
+function extractWithAdmZip(zipPath, destDir) {
+  // adm-zip's async inflater attaches no 'error' handler to its zlib stream, so a
+  // corrupt/truncated entry surfaces as an uncaughtException that crashes the whole
+  // process. Scope a temporary handler over the extraction window and turn it into a
+  // normal rejection (which routes us to the PowerShell fallback).
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const onUncaught = (err) => finish(err);
+    function finish(err) {
+      if (settled) return;
+      settled = true;
+      process.removeListener('uncaughtException', onUncaught);
+      if (err) reject(err);
+      else resolve();
+    }
+    process.on('uncaughtException', onUncaught);
+    try {
+      const zip = new AdmZip(zipPath);
+      zip.extractAllToAsync(destDir, true, false, (err) => finish(err));
+    } catch (err) {
+      finish(err);
+    }
+  });
+}
+
 async function extractZip(zipPath, destDir) {
   ensureDir(destDir);
   try {
-    const zip = new AdmZip(zipPath);
-    await new Promise((resolve, reject) => {
-      zip.extractAllToAsync(destDir, true, false, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await extractWithAdmZip(zipPath, destDir);
   } catch (err) {
     await extractViaPowerShell(zipPath, destDir);
   }
@@ -632,7 +669,12 @@ async function installNeoForgeFromArchive(gameDir, nfVersion) {
   emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Загрузка готового NeoForge...' });
   removeFileIfExists(archivePath);
   removeFileIfExists(`${archivePath}.part`);
-  await downloadFile(archiveUrl, archivePath, 'NeoForge (offline)', { step: 'neoforge' });
+
+  const nf = config.NEOFORGE || {};
+  const verify = (nf.OFFLINE_SHA256 || nf.OFFLINE_SIZE)
+    ? makeSizeShaVerifier(nf.OFFLINE_SIZE, nf.OFFLINE_SHA256, 'NeoForge (offline)')
+    : null;
+  await downloadFile(archiveUrl, archivePath, 'NeoForge (offline)', { step: 'neoforge', verify });
   assertZipFile(archivePath, 'NeoForge (offline)', 1024);
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Распаковка NeoForge...' });
@@ -698,7 +740,11 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
   }
   sources.push(`https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/${installerName}`);
 
-  await downloadFromSources(sources, installerJar, 'NeoForge Installer', { step: 'neoforge' });
+  const nf = config.NEOFORGE || {};
+  const verify = (nf.INSTALLER_SHA256 || nf.INSTALLER_SIZE)
+    ? makeSizeShaVerifier(nf.INSTALLER_SIZE, nf.INSTALLER_SHA256, 'NeoForge Installer')
+    : null;
+  await downloadFromSources(sources, installerJar, 'NeoForge Installer', { step: 'neoforge', verify });
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Installing NeoForge (this may take a few minutes)...' });
 
@@ -855,4 +901,29 @@ async function install(gameDir, javaPathOverride) {
   }
 }
 
-module.exports = { checkInstallation, install, findJava, getJavaMajor, setProgressCallback };
+// Wipe the parts of the install that get corrupted by a broken download/patch
+// (Minecraft + NeoForge jars/libs) while keeping the expensive, integrity-checked
+// pieces: the bundled Java runtime, downloaded assets, mods, configs and saves.
+function cleanForRepair(gameDir) {
+  removeDirIfExists(path.join(gameDir, 'versions'));
+  removeDirIfExists(path.join(gameDir, 'libraries'));
+  removeFileIfExists(path.join(gameDir, 'launcher_profiles.json'));
+  try {
+    for (const f of fs.readdirSync(gameDir)) {
+      const lower = f.toLowerCase();
+      if (lower.endsWith('.part') ||
+          (lower.startsWith('neoforge-') && (lower.endsWith('.jar') || lower.endsWith('.zip')))) {
+        removeFileIfExists(path.join(gameDir, f));
+      }
+    }
+  } catch (_) {}
+}
+
+async function repair(gameDir, javaPathOverride) {
+  ensureDir(gameDir);
+  emit({ type: 'step-start', step: 'java', message: 'Сброс повреждённой установки...' });
+  cleanForRepair(gameDir);
+  return install(gameDir, javaPathOverride);
+}
+
+module.exports = { checkInstallation, install, repair, findJava, getJavaMajor, setProgressCallback };

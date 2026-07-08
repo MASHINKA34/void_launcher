@@ -92,13 +92,21 @@ const GPU_DRIVER_DLLS = [
 ];
 
 function createCrashDetector() {
-  const state = { nativeCrash: false, gpuVendor: null, hsErrPath: null };
+  const state = { nativeCrash: false, gpuVendor: null, hsErrPath: null, corruptInstall: false };
 
   function inspect(text) {
     if (typeof text !== 'string') return;
     if (text.includes('EXCEPTION_ACCESS_VIOLATION') ||
         text.includes('A fatal error has been detected by the Java Runtime Environment')) {
       state.nativeCrash = true;
+    }
+    // Missing core Minecraft/NeoForge classes ⇒ the game jars are corrupt or only
+    // half-installed (e.g. LoadingOverlay ClassNotFoundException). Repairable.
+    if (/ClassNotFoundException: net\.minecraft\./.test(text) ||
+        /NoClassDefFoundError: net\/minecraft\//.test(text) ||
+        /ClassNotFoundException: cpw\.mods\./.test(text) ||
+        /ClassNotFoundException: net\.neoforged\./.test(text)) {
+      state.corruptInstall = true;
     }
     if (!state.gpuVendor) {
       for (const { re, vendor } of GPU_DRIVER_DLLS) {
@@ -112,7 +120,15 @@ function createCrashDetector() {
   }
 
   function buildMessage(exitCode) {
-    if (exitCode === 0 || !state.nativeCrash) return null;
+    if (exitCode === 0) return null;
+    if (state.corruptInstall) {
+      return {
+        message: 'Файлы игры повреждены или установлены не полностью (не хватает классов Minecraft). ' +
+                 'Нажмите «Сбросить и переустановить», чтобы починить автоматически.',
+        repairable: true
+      };
+    }
+    if (!state.nativeCrash) return null;
     let msg;
     if (state.gpuVendor) {
       msg = `Minecraft аварийно завершился из-за сбоя видеодрайвера ${state.gpuVendor}. ` +
@@ -122,7 +138,7 @@ function createCrashDetector() {
             'Чаще всего это вызвано устаревшим драйвером видеокарты — обновите его и попробуйте снова.';
     }
     if (state.hsErrPath) msg += `\n\nОтчёт о краше: ${state.hsErrPath}`;
-    return msg;
+    return { message: msg, repairable: false };
   }
 
   return { inspect, buildMessage };

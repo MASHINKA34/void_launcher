@@ -44,16 +44,18 @@ function fmtSpeed(bps) {
 
 /* ─────────────────────────────────────────────────────────────── Error modal */
 let modalRetryFn = null;
+let modalRepairFn = null;
 
-function showError(msg, retryFn = null) {
+function showError(msg, retryFn = null, repairFn = null) {
   $('modal-msg').textContent = msg;
   const retryBtn = $('modal-retry');
-  if (retryFn) {
-    retryBtn.style.display = '';
-    modalRetryFn = retryFn;
-  } else {
-    retryBtn.style.display = 'none';
-    modalRetryFn = null;
+  retryBtn.style.display = retryFn ? '' : 'none';
+  modalRetryFn = retryFn || null;
+
+  const repairBtn = $('modal-repair');
+  if (repairBtn) {
+    repairBtn.style.display = repairFn ? '' : 'none';
+    modalRepairFn = repairFn || null;
   }
   $('error-modal').classList.remove('hidden');
 }
@@ -62,6 +64,10 @@ $('modal-ok').addEventListener('click', () => $('error-modal').classList.add('hi
 $('modal-retry').addEventListener('click', () => {
   $('error-modal').classList.add('hidden');
   if (modalRetryFn) modalRetryFn();
+});
+$('modal-repair').addEventListener('click', () => {
+  $('error-modal').classList.add('hidden');
+  if (modalRepairFn) modalRepairFn();
 });
 
 /* ─────────────────────────────────────────────────────────────── Particles */
@@ -397,18 +403,22 @@ function handleInstallProgress(data) {
   }
 }
 
-async function runInstallation() {
+async function runInstallation(repair = false) {
   if (installationRunning) return false;
   installationRunning = true;
 
   showScreen('install');
   stepStatus = { java: 'pending', minecraft: 'pending', neoforge: 'pending' };
   renderInstallSteps();
-  setInstallProgress(0, 'Начало установки...', '');
+  setInstallProgress(0, repair ? 'Сброс установки...' : 'Начало установки...', '');
   $('install-error').classList.add('hidden');
   $('btn-retry').disabled = true;
+  $('btn-repair').disabled = true;
   $('btn-retry').onclick = async () => {
-    if (await runInstallation()) await initMainScreen();
+    if (await runInstallation(false)) await initMainScreen();
+  };
+  $('btn-repair').onclick = async () => {
+    if (await runInstallation(true)) await initMainScreen();
   };
 
   window.api.removeAllListeners('install-progress');
@@ -417,15 +427,16 @@ async function runInstallation() {
   let result;
 
   try {
-    result = await window.api.installGame({
-      gameDir:  state.settings.gameDir,
-      javaPath: state.settings.javaPath
-    });
+    const opts = { gameDir: state.settings.gameDir, javaPath: state.settings.javaPath };
+    result = repair
+      ? await window.api.repairInstallation(opts)
+      : await window.api.installGame(opts);
   } catch (err) {
     result = { success: false, error: err.message };
   } finally {
     installationRunning = false;
     $('btn-retry').disabled = false;
+    $('btn-repair').disabled = false;
   }
 
   if (!result.success) {
@@ -640,14 +651,21 @@ function initConsole() {
   window.api.onGameStdout((data) => appendConsole(data, 'stdout'));
   window.api.onGameStderr((data) => appendConsole(data, 'stderr'));
   window.api.onGameExit((data) => {
-    const code  = (data && typeof data === 'object') ? data.code  : data;
-    const crash = (data && typeof data === 'object') ? data.crash : null;
+    const code       = (data && typeof data === 'object') ? data.code       : data;
+    const crash      = (data && typeof data === 'object') ? data.crash      : null;
+    const repairable = (data && typeof data === 'object') ? data.repairable : false;
     state.isGameRunning = false;
     setPlayBtnState('idle');
     appendConsole(`\n[Лаунчер] Игра завершена (код ${code})\n`, 'system');
     if (crash) {
       appendConsole(`[Лаунчер] ${crash}\n`, 'stderr');
-      showError(crash);
+      if (repairable) {
+        showError(crash, null, async () => {
+          if (await runInstallation(true)) await initMainScreen();
+        });
+      } else {
+        showError(crash);
+      }
     }
   });
 }
@@ -993,6 +1011,10 @@ function initTitleBar() {
   // Install screen titlebar buttons
   $('install-btn-minimize').addEventListener('click', minimizeApp);
   $('install-btn-close').addEventListener('click',    () => window.api.close());
+
+  $('btn-open-logs').addEventListener('click', () => {
+    window.api.openLogsFolder(state.settings?.gameDir);
+  });
 }
 
 /* ─────────────────────────────────────────────────────────────── Sidebar nav */

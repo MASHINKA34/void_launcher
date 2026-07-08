@@ -36,6 +36,8 @@ contextBridge.exposeInMainWorld('api', {
   // ── Installation ────────────────────────────────────────────────────────────
   checkInstallation: (gameDir, javaPath) => ipcRenderer.invoke('check-installation', gameDir, javaPath),
   installGame:       (opts)    => ipcRenderer.invoke('install-game', opts),
+  repairInstallation:(opts)    => ipcRenderer.invoke('repair-installation', opts),
+  openLogsFolder:    (gameDir) => ipcRenderer.invoke('open-logs-folder', gameDir),
 
   // ── Mod sync ────────────────────────────────────────────────────────────────
   syncMods: (opts) => ipcRenderer.invoke('sync-mods', opts),

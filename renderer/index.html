@@ -122,7 +122,11 @@
 
     <div id="install-error" class="install-error hidden">
       <span id="install-error-msg"></span>
-      <button id="btn-retry" class="btn-secondary">Повторить</button>
+      <div class="install-error-actions">
+        <button id="btn-retry" class="btn-secondary">Повторить</button>
+        <button id="btn-repair" class="btn-secondary">Сбросить и переустановить</button>
+        <button id="btn-open-logs" class="btn-secondary">Открыть лог</button>
+      </div>
     </div>
   </div>
 </div>
@@ -407,6 +411,7 @@
     <div class="modal-msg" id="modal-msg"></div>
     <div class="modal-actions">
       <button class="btn-secondary" id="modal-retry" style="display:none">Повторить</button>
+      <button class="btn-secondary" id="modal-repair" style="display:none">Сбросить и переустановить</button>
       <button class="btn-primary"   id="modal-ok">ОК</button>
     </div>
   </div>
