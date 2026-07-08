@@ -371,12 +371,22 @@ ipcMain.handle('check-installation', async (_, gameDir, javaPath) => {
   return await installer.checkInstallation(gameDir, javaPath);
 });
 
+let installInFlight = false;
+
 ipcMain.handle('install-game', async (_, { gameDir, javaPath }) => {
-  const installer = require('./src/installer');
-  installer.setProgressCallback((progress) => {
-    if (mainWindow) mainWindow.webContents.send('install-progress', progress);
-  });
-  return await installer.install(gameDir, javaPath);
+  if (installInFlight) {
+    return { success: false, error: 'Установка уже выполняется.' };
+  }
+  installInFlight = true;
+  try {
+    const installer = require('./src/installer');
+    installer.setProgressCallback((progress) => {
+      if (mainWindow) mainWindow.webContents.send('install-progress', progress);
+    });
+    return await installer.install(gameDir, javaPath);
+  } finally {
+    installInFlight = false;
+  }
 });
 
 ipcMain.handle('detect-java', async (_, gameDir) => {

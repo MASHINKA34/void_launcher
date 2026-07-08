@@ -6,7 +6,7 @@ module.exports = {
   NEOFORGE_VERSION: '21.1.233',
 
   LAUNCHER_NAME:    'VoID Cube',
-  LAUNCHER_VERSION: '1.2.0',
+  LAUNCHER_VERSION: '1.2.1',
   GAME_DIR_NAME:    'mylauncher-minecraft',
 
   // GitHub репозиторий для автообновлений лаунчера.

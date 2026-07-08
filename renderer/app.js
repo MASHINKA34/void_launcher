@@ -66,6 +66,29 @@ $('modal-retry').addEventListener('click', () => {
 
 /* ─────────────────────────────────────────────────────────────── Particles */
 let particlesStarted = false;
+let particlesFrame = null;
+let particlesPaused = false;
+let particlesDraw = null;
+
+function setParticlesPaused(paused) {
+  particlesPaused = paused;
+  if (!paused && particlesDraw && particlesFrame === null) {
+    particlesFrame = requestAnimationFrame(particlesDraw);
+  }
+}
+
+function setAppPaused(paused) {
+  document.body.classList.toggle('app-paused', paused);
+  setParticlesPaused(paused);
+}
+
+document.addEventListener('visibilitychange', () => {
+  setAppPaused(document.hidden);
+});
+
+window.addEventListener('focus', () => {
+  setAppPaused(false);
+});
 
 function initParticles() {
   if (particlesStarted) return;
@@ -86,6 +109,9 @@ function initParticles() {
   }));
 
   function draw() {
+    particlesFrame = null;
+    if (particlesPaused || document.hidden) return;
+
     ctx.clearRect(0, 0, 900, 600);
     for (const p of particles) {
       ctx.beginPath();
@@ -97,9 +123,11 @@ function initParticles() {
       if (p.x < 0 || p.x > 900) p.vx *= -1;
       if (p.y < 0 || p.y > 600) p.vy *= -1;
     }
-    requestAnimationFrame(draw);
+    particlesFrame = requestAnimationFrame(draw);
   }
-  draw();
+
+  particlesDraw = draw;
+  setParticlesPaused(document.hidden);
 }
 
 /* ─────────────────────────────────────────────────────────────── Login Screen */
@@ -285,6 +313,7 @@ const STEPS = [
 ];
 
 let stepStatus = {};
+let installationRunning = false;
 
 function renderInstallSteps() {
   const container = $('install-steps');
@@ -357,6 +386,11 @@ function handleInstallProgress(data) {
       break;
 
     case 'error':
+      for (const step of Object.keys(stepStatus)) {
+        if (stepStatus[step] === 'active') stepStatus[step] = 'error';
+      }
+      renderInstallSteps();
+      setInstallProgress(0, 'Установка остановлена', '');
       $('install-error-msg').textContent = data.message;
       $('install-error').classList.remove('hidden');
       break;
@@ -364,24 +398,39 @@ function handleInstallProgress(data) {
 }
 
 async function runInstallation() {
+  if (installationRunning) return false;
+  installationRunning = true;
+
   showScreen('install');
   stepStatus = { java: 'pending', minecraft: 'pending', neoforge: 'pending' };
   renderInstallSteps();
   setInstallProgress(0, 'Начало установки...', '');
   $('install-error').classList.add('hidden');
+  $('btn-retry').disabled = true;
+  $('btn-retry').onclick = async () => {
+    if (await runInstallation()) await initMainScreen();
+  };
 
   window.api.removeAllListeners('install-progress');
   window.api.onInstallProgress(handleInstallProgress);
 
-  const result = await window.api.installGame({
-    gameDir:  state.settings.gameDir,
-    javaPath: state.settings.javaPath
-  });
+  let result;
+
+  try {
+    result = await window.api.installGame({
+      gameDir:  state.settings.gameDir,
+      javaPath: state.settings.javaPath
+    });
+  } catch (err) {
+    result = { success: false, error: err.message };
+  } finally {
+    installationRunning = false;
+    $('btn-retry').disabled = false;
+  }
 
   if (!result.success) {
     $('install-error-msg').textContent = result.error || 'Установка завершилась с ошибкой.';
     $('install-error').classList.remove('hidden');
-    $('btn-retry').onclick = () => runInstallation();
     return false;
   }
 
@@ -929,15 +978,20 @@ async function openProfilesModal() {
 }
 
 /* ─────────────────────────────────────────────────────────────── Title bar */
+function minimizeApp() {
+  setAppPaused(true);
+  window.api.minimize();
+}
+
 function initTitleBar() {
-  $('login-btn-minimize').addEventListener('click', () => window.api.minimize());
+  $('login-btn-minimize').addEventListener('click', minimizeApp);
   $('login-btn-close').addEventListener('click',    () => window.api.close());
 
-  $('btn-minimize').addEventListener('click', () => window.api.minimize());
+  $('btn-minimize').addEventListener('click', minimizeApp);
   $('btn-close').addEventListener('click',    () => window.api.close());
 
   // Install screen titlebar buttons
-  $('install-btn-minimize').addEventListener('click', () => window.api.minimize());
+  $('install-btn-minimize').addEventListener('click', minimizeApp);
   $('install-btn-close').addEventListener('click',    () => window.api.close());
 }
 
@@ -1017,6 +1071,31 @@ async function checkAndShowUpdate() {
 }
 
 /* ─────────────────────────────────────────────────────────────── Enter main */
+let newsRefreshInterval = null;
+
+async function initMainScreen() {
+  showScreen('main');
+  showTab('home');
+
+  // Проверяем обновления лаунчера (тихо, в фоне)
+  checkAndShowUpdate();
+
+  // Load content
+  await Promise.all([loadNews(), loadModsInfo()]);
+  if (!newsRefreshInterval) newsRefreshInterval = setInterval(loadNews, 60_000);
+
+  // Server ping
+  await pingServer();
+  if (state.serverPingInterval) clearInterval(state.serverPingInterval);
+  state.serverPingInterval = setInterval(pingServer, 5_000);
+
+  // PLAY button
+  if (!playButtonBound) {
+    $('btn-play').addEventListener('click', startGame);
+    playButtonBound = true;
+  }
+}
+
 async function enterMain() {
   // Load settings
   state.settings  = await window.api.getSettings();
@@ -1037,25 +1116,7 @@ async function enterMain() {
     if (!ok) return; // stays on install screen with error
   }
 
-  showScreen('main');
-  showTab('home');
-
-  // Проверяем обновления лаунчера (тихо, в фоне)
-  checkAndShowUpdate();
-
-  // Load content
-  await Promise.all([loadNews(), loadModsInfo()]);
-  setInterval(loadNews, 60_000);
-
-  // Server ping
-  await pingServer();
-  state.serverPingInterval = setInterval(pingServer, 5_000);
-
-  // PLAY button
-  if (!playButtonBound) {
-    $('btn-play').addEventListener('click', startGame);
-    playButtonBound = true;
-  }
+  await initMainScreen();
 }
 
 /* ─────────────────────────────────────────────────────────────── Boot */

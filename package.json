@@ -1,6 +1,6 @@
 {
   "name": "voidcube",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "VoID Cube — приватный лаунчер Minecraft",
   "main": "main.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "electron-builder build --win"
   },
   "dependencies": {
+    "adm-zip": "^0.5.18",
     "lucide": "^0.468.0",
     "minecraft-launcher-core": "^3.5.2",
     "node-fetch": "^2.7.0"

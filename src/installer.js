@@ -6,8 +6,9 @@
 const fs       = require('fs');
 const path     = require('path');
 const os       = require('os');
-const { exec, execFile, spawn } = require('child_process');
+const { exec, spawn } = require('child_process');
 const util     = require('util');
+const AdmZip   = require('adm-zip');
 const { Client } = require('minecraft-launcher-core');
 const config   = require('../config');
 const { fetchWithTimeout, toNodeReadable, normalizeNetworkError } = require('./net');
@@ -34,6 +35,36 @@ function removeFileIfExists(filePath) {
   try {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   } catch (_) {}
+}
+
+function removeDirIfExists(dirPath) {
+  try {
+    if (fs.existsSync(dirPath)) fs.rmSync(dirPath, { recursive: true, force: true });
+  } catch (_) {}
+}
+
+function assertZipFile(filePath, label, minBytes = 1024) {
+  let stat = null;
+  try {
+    stat = fs.statSync(filePath);
+  } catch (_) {
+    throw new Error(`${label}: архив не найден после загрузки`);
+  }
+
+  if (stat.size < minBytes) {
+    throw new Error(`${label}: архив скачался некорректно. Попробуйте повторить установку.`);
+  }
+
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const header = Buffer.alloc(4);
+    fs.readSync(fd, header, 0, 4, 0);
+    if (header[0] !== 0x50 || header[1] !== 0x4b) {
+      throw new Error(`${label}: сервер вернул не zip-архив. Проверьте подключение или VPN.`);
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
 async function downloadFileOnce(url, partPath, label, opts) {
@@ -191,11 +222,13 @@ function ensureDir(dir) {
 
 async function extractZip(zipPath, destDir) {
   ensureDir(destDir);
-  // Use PowerShell Expand-Archive (Windows 10+ built-in)
-  await execAsync(
-    `powershell -NoProfile -Command "Expand-Archive -Force -LiteralPath '${zipPath}' -DestinationPath '${destDir}'"`,
-    { timeout: 300_000 }
-  );
+  const zip = new AdmZip(zipPath);
+  await new Promise((resolve, reject) => {
+    zip.extractAllToAsync(destDir, true, false, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
 }
 
 // ─── Java detection ───────────────────────────────────────────────────────────
@@ -208,20 +241,6 @@ const WIN_JAVA_DIRS = [
   'C:\\Program Files\\Zulu',
   'C:\\Program Files\\BellSoft',
 ];
-
-async function testJavaExe(exePath) {
-  try {
-    const { stdout } = await execAsync(`"${exePath}" -version`, { timeout: 5000 });
-    // java -version prints to stderr on most JVMs; combine both
-    return true;
-  } catch (err) {
-    try {
-      // Some JVMs print to stdout
-      if (err.stdout && err.stdout.includes('version')) return true;
-    } catch (_) {}
-    return false;
-  }
-}
 
 // Returns the major Java version of an executable (8, 17, 21, ...), or null if unknown.
 // `java -version` prints e.g. `version "21.0.10"` (modern) or `version "1.8.0_401"` (Java 8),
@@ -268,10 +287,6 @@ async function findJavaInDir(baseDir, minVersion) {
 const REQUIRED_JAVA_MAJOR = 21;
 
 async function findJava(gameDir) {
-  // 1. Bundled runtime in game dir — this is always the Java 21 we install ourselves.
-  const bundled = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
-  if (fs.existsSync(bundled)) return bundled;
-
   // Accept a candidate only if it is actually Java 21+ (a system Java 8 must be rejected,
   // otherwise NeoForge fails at launch with "Unrecognized option: -p").
   const accept = async (exe) => {
@@ -279,6 +294,11 @@ async function findJava(gameDir) {
     const major = await getJavaMajor(exe);
     return major !== null && major >= REQUIRED_JAVA_MAJOR;
   };
+
+  // 1. Bundled runtime in game dir — the Java 21 we install ourselves.
+  // Validated too: a broken/partial extraction must not be reused forever.
+  const bundled = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
+  if (await accept(bundled)) return bundled;
 
   // 2. JAVA_HOME (only if Java 21+)
   if (process.env.JAVA_HOME) {
@@ -326,27 +346,38 @@ async function installJava(gameDir) {
 
   const downloadUrl  = release.binary.package.link;
   const tmpZip       = path.join(runtimeDir, 'java21.zip');
+  const java21Dir     = path.join(runtimeDir, 'java21');
+  const tmpExtract    = path.join(runtimeDir, '_java_extract');
 
-  await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE', { step: 'java' });
+  removeFileIfExists(tmpZip);
+  removeFileIfExists(`${tmpZip}.part`);
+  removeDirIfExists(tmpExtract);
 
-  emit({ type: 'step', step: 'java', status: 'extracting', message: 'Extracting Java 21...' });
+  try {
+    await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE', { step: 'java' });
+    assertZipFile(tmpZip, 'Java 21 JRE', 1024 * 1024);
 
-  const java21Dir = path.join(runtimeDir, 'java21');
-  if (fs.existsSync(java21Dir)) fs.rmSync(java21Dir, { recursive: true, force: true });
+    emit({ type: 'step', step: 'java', status: 'extracting', message: 'Extracting Java 21...' });
 
-  // Extract zip — contents are usually inside a single top-level folder
-  const tmpExtract = path.join(runtimeDir, '_java_extract');
-  await extractZip(tmpZip, tmpExtract);
+    removeDirIfExists(java21Dir);
+    removeDirIfExists(tmpExtract);
 
-  // Move the inner folder to java21/
-  const extracted = fs.readdirSync(tmpExtract);
-  if (extracted.length === 0) throw new Error('Java archive appears empty');
-  fs.renameSync(path.join(tmpExtract, extracted[0]), java21Dir);
-  fs.rmSync(tmpExtract, { recursive: true, force: true });
-  fs.unlinkSync(tmpZip);
+    await extractZip(tmpZip, tmpExtract);
+
+    const extracted = fs.readdirSync(tmpExtract);
+    if (extracted.length === 0) throw new Error('Java 21 JRE: архив распаковался пустым. Повторите установку.');
+    fs.renameSync(path.join(tmpExtract, extracted[0]), java21Dir);
+  } catch (err) {
+    removeDirIfExists(java21Dir);
+    throw err;
+  } finally {
+    removeDirIfExists(tmpExtract);
+    removeFileIfExists(tmpZip);
+    removeFileIfExists(`${tmpZip}.part`);
+  }
 
   const javaExe = path.join(java21Dir, 'bin', 'java.exe');
-  if (!fs.existsSync(javaExe)) throw new Error('Java executable not found after extraction');
+  if (!fs.existsSync(javaExe)) throw new Error('Java 21 JRE: java.exe не найден после распаковки. Повторите установку.');
 
   emit({ type: 'step', step: 'java', status: 'done', message: 'Java 21 installed.' });
   return javaExe;
@@ -354,22 +385,62 @@ async function installJava(gameDir) {
 
 // ─── Minecraft download ───────────────────────────────────────────────────────
 
-async function downloadMinecraft(gameDir) {
+async function downloadMinecraft(gameDir, javaExe) {
   emit({ type: 'step', step: 'minecraft', status: 'downloading', message: 'Downloading Minecraft 1.21.1...' });
 
   const launcher = new Client();
+  let gameProc = null;
+
+  const killGameProc = () => {
+    if (!gameProc) return;
+    try { gameProc.kill(); } catch (_) {}
+    gameProc = null;
+  };
 
   await new Promise((resolve, reject) => {
+    let settled = false;
+    let idleTimer = null;
+    let safetyTimer = null;
+
+    const cleanup = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      if (safetyTimer) clearTimeout(safetyTimer);
+    };
+
+    const finish = (err) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      killGameProc();
+      if (err) reject(err);
+      else resolve();
+    };
+
+    const touch = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        finish(new Error('Minecraft download stalled. Проверьте интернет и повторите установку.'));
+      }, 90_000);
+    };
+
+    touch();
+    safetyTimer = setTimeout(() => finish(), 600_000);
+
+    // launch() resolves with the spawned game process once all files are downloaded.
+    // We only need the downloads — the game itself must be killed immediately.
     launcher.launch({
       authorization: { access_token: 'offline', uuid: '00000000-0000-0000-0000-000000000000', username: 'Player', user_type: 'offline' },
       root:    gameDir,
       version: { number: config.MC_VERSION, type: 'release' },
       memory:  { max: '2G', min: '512M' },
-      // downloadOnly flag — launch will fail because no Java here; we just want assets
-      javaPath: 'java'
-    });
+      javaPath: javaExe
+    }).then((proc) => {
+      gameProc = proc || null;
+      if (settled) killGameProc();
+    }).catch((err) => finish(err));
 
     launcher.on('progress', (e) => {
+      touch();
       emit({
         type:    'download-progress',
         label:   `Minecraft — ${e.type || ''}`,
@@ -381,28 +452,26 @@ async function downloadMinecraft(gameDir) {
     });
 
     launcher.on('debug', (msg) => {
+      touch();
       // Launcher finishes file downloads before starting the game
       if (typeof msg === 'string' && msg.includes('Downloaded')) {
         emit({ type: 'step', step: 'minecraft', status: 'progress', message: msg });
       }
     });
 
-    // The launcher will error when trying to actually run (no proper java),
-    // but all game files will be downloaded by then.
-    launcher.on('data',  () => resolve());
-    launcher.on('close', () => resolve());
+    launcher.on('data',  () => finish());
+    launcher.on('close', () => finish());
     launcher.on('error', (err) => {
-      // Ignore "spawn" errors — files are already downloaded
-      if (err && typeof err === 'string' && err.includes('spawn')) resolve();
-      else reject(new Error(typeof err === 'string' ? err : JSON.stringify(err)));
+      if (err && typeof err === 'string' && err.includes('spawn')) finish();
+      else finish(new Error(typeof err === 'string' ? err : JSON.stringify(err)));
     });
-
-    // Safety timeout — resolve after 10 min in case events are different
-    setTimeout(resolve, 600_000);
   }).catch(err => {
-    // Tolerate launch errors; what matters is whether files exist
     console.warn('MC download note:', err.message);
   });
+
+  if (!isMinecraftInstalled(gameDir)) {
+    throw new Error('Minecraft 1.21.1 не скачался полностью. Проверьте интернет и повторите установку.');
+  }
 
   emit({ type: 'step', step: 'minecraft', status: 'done', message: 'Minecraft 1.21.1 ready.' });
 }
@@ -450,11 +519,18 @@ async function installNeoForgeFromArchive(gameDir, nfVersion) {
   const archivePath = path.join(gameDir, archiveName);
 
   emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Загрузка готового NeoForge...' });
+  removeFileIfExists(archivePath);
+  removeFileIfExists(`${archivePath}.part`);
   await downloadFile(archiveUrl, archivePath, 'NeoForge (offline)', { step: 'neoforge' });
+  assertZipFile(archivePath, 'NeoForge (offline)', 1024);
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Распаковка NeoForge...' });
-  await extractZip(archivePath, gameDir);
-  try { fs.unlinkSync(archivePath); } catch (_) {}
+  try {
+    await extractZip(archivePath, gameDir);
+  } finally {
+    removeFileIfExists(archivePath);
+    removeFileIfExists(`${archivePath}.part`);
+  }
 
   // Verify the unpacked archive is complete: the version manifest AND the universal jar
   // that registers the neoforge/minecraft mod providers. If either is missing, throw so
@@ -570,7 +646,9 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 function isMinecraftInstalled(gameDir) {
-  return fs.existsSync(path.join(gameDir, 'versions', config.MC_VERSION));
+  const versionDir = path.join(gameDir, 'versions', config.MC_VERSION);
+  return fs.existsSync(path.join(versionDir, `${config.MC_VERSION}.json`)) &&
+         fs.existsSync(path.join(versionDir, `${config.MC_VERSION}.jar`));
 }
 
 function isNeoForgeInstalled(gameDir) {
@@ -617,9 +695,16 @@ async function install(gameDir, javaPathOverride) {
 
     // ── Step 1: Java ──────────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'java', message: 'Checking Java 21...' });
-    let javaExe = javaPathOverride && javaPathOverride !== 'auto'
-      ? javaPathOverride
-      : await findJava(gameDir);
+    let javaExe = null;
+
+    if (javaPathOverride && javaPathOverride !== 'auto' && fs.existsSync(javaPathOverride)) {
+      const major = await getJavaMajor(javaPathOverride);
+      if (major !== null && major >= REQUIRED_JAVA_MAJOR) javaExe = javaPathOverride;
+    }
+
+    if (!javaExe) {
+      javaExe = await findJava(gameDir);
+    }
 
     if (!javaExe) {
       javaExe = await installJava(gameDir);
@@ -632,7 +717,7 @@ async function install(gameDir, javaPathOverride) {
     if (isMinecraftInstalled(gameDir)) {
       emit({ type: 'step', step: 'minecraft', status: 'done', message: 'Minecraft 1.21.1 ready.' });
     } else {
-      await downloadMinecraft(gameDir);
+      await downloadMinecraft(gameDir, javaExe);
     }
 
     // ── Step 3: NeoForge ──────────────────────────────────────────────────────
