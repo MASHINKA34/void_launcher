@@ -80,16 +80,37 @@ function sha256File(filePath) {
 }
 
 async function downloadFileOnce(url, partPath, label, opts) {
-  const res = await fetchWithTimeout(url, {
-    headers: { 'User-Agent': config.LAUNCHER_NAME },
-    redirect: 'follow'
-  }, opts.requestTimeoutMs);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  let startByte = 0;
+  try {
+    const st = fs.statSync(partPath);
+    if (st.size > 0) startByte = st.size;
+  } catch (_) {}
 
-  const total   = parseInt(res.headers.get('content-length') || '0', 10);
-  let received  = 0;
+  const headers = { 'User-Agent': config.LAUNCHER_NAME };
+  if (startByte > 0) headers['Range'] = `bytes=${startByte}-`;
+
+  const res = await fetchWithTimeout(url, { headers, redirect: 'follow' }, opts.requestTimeoutMs);
+
+  if (res.status === 416) return;
+  if (!res.ok && res.status !== 206) throw new Error(`HTTP ${res.status}`);
+
+  const resuming = res.status === 206;
+  if (startByte > 0 && !resuming) startByte = 0;
+
+  let total = 0;
+  const range = res.headers.get('content-range');
+  if (range) {
+    const m = /\/(\d+)\s*$/.exec(range);
+    if (m) total = parseInt(m[1], 10);
+  }
+  if (!total) {
+    const len = parseInt(res.headers.get('content-length') || '0', 10);
+    total = resuming ? startByte + len : len;
+  }
+
+  let received  = startByte;
   const start   = Date.now();
-  const writer  = fs.createWriteStream(partPath);
+  const writer  = fs.createWriteStream(partPath, { flags: resuming ? 'a' : 'w' });
   const body    = toNodeReadable(res.body);
 
   await new Promise((resolve, reject) => {
@@ -140,7 +161,7 @@ async function downloadFileOnce(url, partPath, label, opts) {
           percent:  Math.round((received / total) * 100),
           received,
           total,
-          speed:    Math.round(received / elapsed)
+          speed:    Math.round((received - startByte) / elapsed)
         });
       }
     });
@@ -165,8 +186,6 @@ async function downloadFile(url, destPath, label, options = {}) {
   let lastError = null;
 
   for (let attempt = 1; attempt <= opts.retries; attempt++) {
-    removeFileIfExists(partPath);
-
     if (attempt > 1) {
       emit({
         type:    'step',
@@ -178,20 +197,26 @@ async function downloadFile(url, destPath, label, options = {}) {
 
     try {
       await downloadFileOnce(url, partPath, label, opts);
-      if (opts.verify) await opts.verify(partPath);
+      if (opts.verify) {
+        try {
+          await opts.verify(partPath);
+        } catch (vErr) {
+          removeFileIfExists(partPath);
+          throw vErr;
+        }
+      }
       removeFileIfExists(destPath);
       fs.renameSync(partPath, destPath);
       return;
     } catch (err) {
       lastError = err;
-      removeFileIfExists(partPath);
-
       if (attempt < opts.retries) {
         await sleep(opts.retryDelayMs * attempt);
       }
     }
   }
 
+  removeFileIfExists(partPath);
   throw new Error(`${label}: ${normalizeNetworkError(lastError)}`);
 }
 
@@ -207,6 +232,7 @@ async function downloadFromSources(urls, destPath, label, options = {}) {
     const isLast = i === sources.length - 1;
 
     if (i > 0) {
+      removeFileIfExists(`${destPath}.part`);
       emit({
         type:    'step',
         step:    options.step || null,
@@ -353,29 +379,26 @@ async function findJava(gameDir) {
 // ─── Java installation ────────────────────────────────────────────────────────
 
 async function installJava(gameDir) {
-  emit({ type: 'step', step: 'java', status: 'downloading', message: 'Downloading Java 21 from Adoptium...' });
+  emit({ type: 'step', step: 'java', status: 'downloading', message: 'Downloading Java 21...' });
 
   const runtimeDir = path.join(gameDir, 'runtime');
   ensureDir(runtimeDir);
 
-  // Fetch latest JRE 21 release info from Adoptium API
-  const apiUrl = 'https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=x64&image_type=jre';
-  const apiRes = await fetchWithTimeout(apiUrl, {
-    headers: { 'User-Agent': config.LAUNCHER_NAME },
-    redirect: 'follow'
-  }, 15_000);
-  if (!apiRes.ok) throw new Error('Failed to fetch Java download info from Adoptium API');
-  const releases = await apiRes.json();
-
-  const release = releases.find(r => r.binary?.package?.link?.endsWith('.zip')) || releases[0];
-  if (!release?.binary?.package?.link) throw new Error('No suitable Java 21 release found');
-
-  const downloadUrl  = release.binary.package.link;
-  const expectedSha  = release.binary.package.checksum || null;
-  const expectedSize = release.binary.package.size || 0;
+  const java        = config.JAVA || {};
+  const expectedSha  = java.SHA256 || null;
+  const expectedSize = java.SIZE || 0;
   const tmpZip       = path.join(runtimeDir, 'java21.zip');
   const java21Dir     = path.join(runtimeDir, 'java21');
   const tmpExtract    = path.join(runtimeDir, '_java_extract');
+
+  const sources = [];
+  if (java.ASSET_NAME && java.RELEASE_TAG &&
+      config.GITHUB_OWNER && config.GITHUB_REPO &&
+      config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER') {
+    sources.push(`https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/download/${java.RELEASE_TAG}/${java.ASSET_NAME}`);
+  }
+  if (java.ADOPTIUM_URL) sources.push(java.ADOPTIUM_URL);
+  if (sources.length === 0) throw new Error('Java 21 JRE: не задан источник загрузки в config.js');
 
   removeFileIfExists(tmpZip);
   removeFileIfExists(`${tmpZip}.part`);
@@ -394,7 +417,9 @@ async function installJava(gameDir) {
   };
 
   try {
-    await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE', { step: 'java', verify: verifyZip });
+    await downloadFromSources(sources, tmpZip, 'Java 21 JRE', {
+      step: 'java', verify: verifyZip, retries: 4, mirrorRetries: 3
+    });
     assertZipFile(tmpZip, 'Java 21 JRE', 1024 * 1024);
 
     emit({ type: 'step', step: 'java', status: 'extracting', message: 'Extracting Java 21...' });

@@ -1,6 +1,6 @@
 {
   "name": "voidcube",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "VoID Cube — приватный лаунчер Minecraft",
   "main": "main.js",
   "scripts": {
