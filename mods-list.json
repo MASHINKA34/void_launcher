@@ -61,9 +61,9 @@
   },
   {
     "name": "Distant Horizons",
-    "filename": "DistantHorizons-3.1.2-b-1.21.1-fabric-neoforge.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/DistantHorizons-3.1.2-b-1.21.1-fabric-neoforge.jar",
-    "sha256": "5B6DF1E412B093ECE73BEE8D2C7238743546B9DC70D06F5EA843AF3E318E1887"
+    "filename": "DistantHorizons-3.2.0-b-1.21.1-fabric-neoforge.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/DistantHorizons-3.2.0-b-1.21.1-fabric-neoforge.jar",
+    "sha256": "D6A7A963F794501678113E2545D8B25C90E123EF6B9256BB5716907D059E1EF5"
   },
   {
     "name": "Ephero Lib",
@@ -238,6 +238,12 @@
     "filename": "bellsandwhistles-0.4.7-1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/bellsandwhistles-0.4.7-1.21.1.jar",
     "sha256": "A438CF2EA3A05120E12342484F1E12CA11526FBF4195D259CE1D7DF8A9B3FFCA"
+  },
+  {
+    "name": "bettercombat",
+    "filename": "bettercombat-neoforge-2.3.2.1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/bettercombat-neoforge-2.3.2.1.21.1.jar",
+    "sha256": "AFB1F28271EE3B622947F533AA754BB22ED67EDD4940A3E9FDF2CCA1EDB7B8A9"
   },
   {
     "name": "bluemap",
@@ -456,6 +462,18 @@
     "sha256": "429EA90A162D7C25C1463EE60979E4D7B1DDB525D9384A3A2A2F45D70BDA03F5"
   },
   {
+    "name": "ftb library",
+    "filename": "ftb-library-neoforge-2101.1.32.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ftb-library-neoforge-2101.1.32.jar",
+    "sha256": "6308E71FEC7095F68328020A63121A966C8EF89BD3528E459C528037E3484354"
+  },
+  {
+    "name": "ftb ultimine",
+    "filename": "ftb-ultimine-neoforge-2101.1.15.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ftb-ultimine-neoforge-2101.1.15.jar",
+    "sha256": "1393A85CEB6E4794450D5F06043E3A033278E31B86DE8E03950D8B87604B2213"
+  },
+  {
     "name": "fwa+1.21.1",
     "filename": "fwa.1.21.1-neoforge-1.2.31.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/fwa.1.21.1-neoforge-1.2.31.jar",
@@ -469,9 +487,9 @@
   },
   {
     "name": "geckolib",
-    "filename": "geckolib-neoforge-1.21.1-4.9.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/geckolib-neoforge-1.21.1-4.9.1.jar",
-    "sha256": "38C73035D1E8C143610FA76550B0472EA46F8B75FCAF2A14574EBF47517B8D02"
+    "filename": "geckolib-neoforge-1.21.1-4.9.2.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/geckolib-neoforge-1.21.1-4.9.2.jar",
+    "sha256": "5E548466AF9AB6ACA7A91A7C7D4DC0DC8BC385E22958AED5DA0E7BEBD0FA3FBA"
   },
   {
     "name": "gravestone",
@@ -517,9 +535,9 @@
   },
   {
     "name": "kingdoms",
-    "filename": "kingdoms-0.2.2.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.2.jar",
-    "sha256": "EADEB473B67A1857D0C96151DF94E9935F2D17B4DC277A138D2EA3B3DA0AE444"
+    "filename": "kingdoms-0.2.3.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.3.jar",
+    "sha256": "B783287B4631B181D5F6957288FD3E9FE303F255EF96B35E437C522B58EAA5E2"
   },
   {
     "name": "kotlinforforge",
@@ -535,9 +553,9 @@
   },
   {
     "name": "lithostitched",
-    "filename": "lithostitched-1.7.12-neoforge-21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithostitched-1.7.12-neoforge-21.1.jar",
-    "sha256": "E18CAE8AAEF95F7058A16C05705C6E78A4B33A00BCF9189E96ED8A8785FB9647"
+    "filename": "lithostitched-1.7.13-neoforge-21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/lithostitched-1.7.13-neoforge-21.1.jar",
+    "sha256": "A90B1D485B138328CEAA156B7897B0829EB1EE1522B997870A53129AE65E5512"
   },
   {
     "name": "mcd d nether",
@@ -553,9 +571,9 @@
   },
   {
     "name": "modernfix",
-    "filename": "modernfix-neoforge-5.27.14.mc1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/modernfix-neoforge-5.27.14.mc1.21.1.jar",
-    "sha256": "EFC89CB7D22B932ECAD19777373688035A1C444443ABE8E56D236C44B59C0301"
+    "filename": "modernfix-neoforge-5.27.15.mc1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/modernfix-neoforge-5.27.15.mc1.21.1.jar",
+    "sha256": "60BAD0CB2436B8F5DD277D752E83F05B244477DA85BA01456B2BFE01F1EDE850"
   },
   {
     "name": "moonlight",
@@ -619,9 +637,9 @@
   },
   {
     "name": "punchy",
-    "filename": "punchy-2.5.8-neoforge-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.5.8-neoforge-1.21.1.jar",
-    "sha256": "5940745C6F36BEA87575213C45CE14D2ABE0EE0622554DE949A5278AD08B1611"
+    "filename": "punchy-2.6.1-neoforge-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/punchy-2.6.1-neoforge-1.21.1.jar",
+    "sha256": "B6C9058240E956BD16F2F4B85FEFF5FBC506D2380AD841636E8F73D613EE23F5"
   },
   {
     "name": "railways",
@@ -685,9 +703,9 @@
   },
   {
     "name": "snatched",
-    "filename": "snatched-1.2.0-neoforge-1.21.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/snatched-1.2.0-neoforge-1.21.1.jar",
-    "sha256": "801F6811430A59EADF9E490D10828630CCEAD0FEA59B24DAF5439C5699EFFBA9"
+    "filename": "snatched-1.2.1-neoforge-1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/snatched-1.2.1-neoforge-1.21.1.jar",
+    "sha256": "D659684D7DC1D810C702D8C9F984E03EBF45BB2E507D617826553140A18B8F67"
   },
   {
     "name": "sodium",
@@ -763,14 +781,14 @@
   },
   {
     "name": "xaerominimap",
-    "filename": "xaerominimap-neoforge-1.21.1-26.1.0.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaerominimap-neoforge-1.21.1-26.1.0.jar",
-    "sha256": "6BD6CBAB01FF57B9BA2FBFEE18F9605593101F15D80E8D19DC59C385D2535CCC"
+    "filename": "xaerominimap-neoforge-1.21.1-26.2.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaerominimap-neoforge-1.21.1-26.2.0.jar",
+    "sha256": "882E85DF885923251EC1D3CF63B274B2A0A028EA1CBF603ABEDD6ACE4C2ADC95"
   },
   {
     "name": "xaeroworldmap",
-    "filename": "xaeroworldmap-neoforge-1.21.1-1.41.2.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.41.2.jar",
-    "sha256": "36B163FE8BE4C2E800668C49294473DA61EB360D821DB675A2A948F8CC7C3D2B"
+    "filename": "xaeroworldmap-neoforge-1.21.1-1.42.0.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/xaeroworldmap-neoforge-1.21.1-1.42.0.jar",
+    "sha256": "8B200D28B9F3D05712F892F968D54AD70FE8BD99335DA176A62B2B98D94DF373"
   }
 ]
