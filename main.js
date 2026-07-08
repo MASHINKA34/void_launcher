@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const config = require('./config');
 const auth = require('./src/auth');
+const { fetchWithTimeout } = require('./src/net');
 
 app.commandLine.appendSwitch('disable-gpu-disk-cache');
 app.commandLine.appendSwitch('no-sandbox');
@@ -312,8 +313,10 @@ const MODS_LIST_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launche
 
 ipcMain.handle('get-news', async () => {
   try {
-    const fetch = require('node-fetch');
-    const res = await fetch(`${NEWS_URL}?t=${Date.now()}`, { timeout: 5000 });
+    const res = await fetchWithTimeout(`${NEWS_URL}?t=${Date.now()}`, {
+      headers: { 'User-Agent': config.LAUNCHER_NAME },
+      redirect: 'follow'
+    }, 5_000);
     if (!res.ok) throw new Error('fetch failed');
     return await res.json();
   } catch (_) {
@@ -385,7 +388,6 @@ ipcMain.handle('detect-java', async (_, gameDir) => {
 
 ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   const modSync = require('./src/modSync');
-  const fetch   = require('node-fetch');
 
   modSync.setProgressCallback((progress) => {
     if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
@@ -395,7 +397,10 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   const localModsListPath = path.join(__dirname, 'mods-list.json');
   const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
   try {
-    const res = await fetch(`${MODS_LIST_URL}?t=${Date.now()}`, { timeout: 10_000 });
+    const res = await fetchWithTimeout(`${MODS_LIST_URL}?t=${Date.now()}`, {
+      headers: { 'User-Agent': config.LAUNCHER_NAME },
+      redirect: 'follow'
+    }, 10_000);
     if (res.ok) {
       const remoteList = mergeModMetadata(JSON.parse(await res.text()));
       fs.writeFileSync(cachePath, JSON.stringify(remoteList, null, 2), 'utf8');
@@ -491,12 +496,12 @@ ipcMain.handle('check-update', async () => {
   return await updater.checkForUpdates(app.getVersion());
 });
 
-ipcMain.handle('download-update', async (_, { downloadUrl, assetName }) => {
+ipcMain.handle('download-update', async (_, opts) => {
   const updater = require('./src/updater');
   updater.setProgressCallback((data) => {
     if (mainWindow) mainWindow.webContents.send('update-progress', data);
   });
-  return await updater.downloadUpdate(downloadUrl, assetName);
+  return await updater.downloadUpdate(opts);
 });
 
 ipcMain.handle('install-update', (_, filePath) => {

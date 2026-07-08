@@ -8,9 +8,9 @@ const path     = require('path');
 const os       = require('os');
 const { exec, execFile, spawn } = require('child_process');
 const util     = require('util');
-const fetch    = require('node-fetch');
 const { Client } = require('minecraft-launcher-core');
 const config   = require('../config');
+const { fetchWithTimeout, toNodeReadable, normalizeNetworkError } = require('./net');
 
 const execAsync = util.promisify(exec);
 
@@ -36,30 +36,18 @@ function removeFileIfExists(filePath) {
   } catch (_) {}
 }
 
-async function fetchWithTimeout(url, timeoutMs) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    return await fetch(url, { signal: controller.signal });
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      throw new Error(`Connection timed out after ${Math.round(timeoutMs / 1000)}s: ${url}`);
-    }
-    throw err;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 async function downloadFileOnce(url, partPath, label, opts) {
-  const res = await fetchWithTimeout(url, opts.requestTimeoutMs);
-  if (!res.ok) throw new Error(`Download failed (HTTP ${res.status}): ${url}`);
+  const res = await fetchWithTimeout(url, {
+    headers: { 'User-Agent': config.LAUNCHER_NAME },
+    redirect: 'follow'
+  }, opts.requestTimeoutMs);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
   const total   = parseInt(res.headers.get('content-length') || '0', 10);
   let received  = 0;
   const start   = Date.now();
   const writer  = fs.createWriteStream(partPath);
+  const body    = toNodeReadable(res.body);
 
   await new Promise((resolve, reject) => {
     let settled = false;
@@ -73,7 +61,7 @@ async function downloadFileOnce(url, partPath, label, opts) {
       if (settled) return;
       settled = true;
       cleanup();
-      try { res.body.destroy(); } catch (_) {}
+      try { body.destroy(); } catch (_) {}
       try { writer.destroy(); } catch (_) {}
       reject(err);
     };
@@ -98,7 +86,7 @@ async function downloadFileOnce(url, partPath, label, opts) {
 
     resetIdleTimer();
 
-    res.body.on('data', (chunk) => {
+    body.on('data', (chunk) => {
       received += chunk.length;
       resetIdleTimer();
       if (total > 0) {
@@ -113,10 +101,10 @@ async function downloadFileOnce(url, partPath, label, opts) {
         });
       }
     });
-    res.body.on('error', fail);
+    body.on('error', fail);
     writer.on('error',   fail);
     writer.on('finish',  finish);
-    res.body.pipe(writer);
+    body.pipe(writer);
   });
 }
 
@@ -159,7 +147,7 @@ async function downloadFile(url, destPath, label, options = {}) {
     }
   }
 
-  throw new Error(`${label} download failed after ${opts.retries} attempts: ${lastError.message}`);
+  throw new Error(`${label}: ${normalizeNetworkError(lastError)}`);
 }
 
 /**
@@ -326,7 +314,10 @@ async function installJava(gameDir) {
 
   // Fetch latest JRE 21 release info from Adoptium API
   const apiUrl = 'https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=x64&image_type=jre';
-  const apiRes = await fetch(apiUrl, { timeout: 15_000 });
+  const apiRes = await fetchWithTimeout(apiUrl, {
+    headers: { 'User-Agent': config.LAUNCHER_NAME },
+    redirect: 'follow'
+  }, 15_000);
   if (!apiRes.ok) throw new Error('Failed to fetch Java download info from Adoptium API');
   const releases = await apiRes.json();
 

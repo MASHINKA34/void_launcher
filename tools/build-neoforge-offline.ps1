@@ -14,7 +14,20 @@ New-Item -ItemType Directory -Path $work | Out-Null
 
 Write-Host "Downloading installer $Version ..."
 $url = "https://maven.neoforged.net/releases/net/neoforged/neoforge/$Version/neoforge-$Version-installer.jar"
-Invoke-WebRequest -Uri $url -OutFile $installer
+$part = "$installer.part"
+$ok = $false
+for ($attempt = 1; $attempt -le 3 -and -not $ok; $attempt++) {
+  try {
+    if (Test-Path $part) { Remove-Item $part -Force }
+    Invoke-WebRequest -Uri $url -OutFile $part -TimeoutSec 90
+    Move-Item -LiteralPath $part -Destination $installer -Force
+    $ok = $true
+  } catch {
+    if (Test-Path $part) { Remove-Item $part -Force }
+    if ($attempt -eq 3) { throw }
+    Start-Sleep -Seconds (2 * $attempt)
+  }
+}
 
 $profiles = @{
   profiles = @{}

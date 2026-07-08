@@ -682,7 +682,7 @@ async function startGame() {
       setPlayBtnState('idle');
       appendConsole(`[ОШИБКА] Синхронизация: ${syncResult.error}\n`, 'stderr');
       showError(
-        `Ошибка синхронизации модов:\n${syncResult.error}\n\nПроверь подключение к интернету.`,
+        `Ошибка синхронизации модов:\n${syncResult.error}`,
         () => startGame()
       );
       return;
@@ -969,29 +969,36 @@ async function checkAndShowUpdate() {
     const progPct  = $('update-progress-pct');
 
     text.textContent = `Доступно обновление v${info.latestVersion}`;
+    text.title = '';
     banner.classList.remove('hidden');
 
-    btn.addEventListener('click', async () => {
+    window.api.removeAllListeners('update-progress');
+    window.api.onUpdateProgress((data) => {
+      progFill.style.width = `${data.percent}%`;
+      progPct.textContent  = `${data.percent}%`;
+    });
+
+    btn.onclick = async () => {
       btn.disabled = true;
       btn.textContent = 'Скачивание...';
+      text.title = '';
+      progFill.style.width = '0%';
+      progPct.textContent  = '0%';
       progWrap.classList.remove('hidden');
-
-      // Слушаем прогресс скачивания
-      window.api.onUpdateProgress((data) => {
-        progFill.style.width = `${data.percent}%`;
-        progPct.textContent  = `${data.percent}%`;
-      });
 
       const result = await window.api.downloadUpdate({
         downloadUrl: info.downloadUrl,
+        assetApiUrl: info.assetApiUrl,
         assetName:   info.assetName
       });
 
       if (!result.success) {
+        const errorText = result.error || 'не удалось скачать обновление. Попробуйте снова';
         btn.disabled = false;
         btn.textContent = 'Повторить';
         progWrap.classList.add('hidden');
-        text.textContent = `Ошибка загрузки: ${result.error}`;
+        text.textContent = `Ошибка загрузки: ${errorText}`;
+        text.title = result.details || errorText;
         return;
       }
 
@@ -1000,9 +1007,10 @@ async function checkAndShowUpdate() {
       progPct.textContent  = '100%';
       btn.textContent = 'Установка...';
       text.textContent = 'Запуск установщика...';
+      text.title = '';
 
       setTimeout(() => window.api.installUpdate(result.filePath), 600);
-    });
+    };
   } catch (_) {
     // Тихо игнорируем — обновление не критично
   }

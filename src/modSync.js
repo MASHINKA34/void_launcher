@@ -7,8 +7,10 @@
 const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
-const fetch  = require('node-fetch');
+const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
+const config = require('../config');
+const { fetchWithTimeout, toNodeReadable, normalizeNetworkError } = require('./net');
 
 let progressCallback = null;
 
@@ -18,6 +20,53 @@ function setProgressCallback(cb) {
 
 function emit(data) {
   if (progressCallback) progressCallback(data);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function removeFileIfExists(filePath) {
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch (_) {}
+}
+
+function normalizeDownloadError(mod, err) {
+  const message = String(err?.message || err || '');
+
+  if (/HTTP 404/i.test(message)) {
+    return `Не удалось скачать мод "${mod.name}": файл не найден в релизе.`;
+  }
+
+  return `Не удалось скачать мод "${mod.name}": ${normalizeNetworkError(err)}.`;
+}
+
+function buildModSources(mod) {
+  const sources = [];
+
+  if (mod.url) {
+    sources.push(mod.url);
+  }
+
+  if (Array.isArray(config.MOD_MIRRORS)) {
+    for (const mirror of config.MOD_MIRRORS) {
+      if (!mirror || !mod.filename) continue;
+      const encodedName = encodeURIComponent(mod.filename);
+      sources.push(
+        mirror.includes('{filename}')
+          ? mirror.replaceAll('{filename}', encodedName)
+          : `${mirror.replace(/\/$/, '')}/${encodedName}`
+      );
+    }
+  }
+
+  const seen = new Set();
+  return sources.filter(url => {
+    if (seen.has(url)) return false;
+    seen.add(url);
+    return true;
+  });
 }
 
 // ─── Hash ─────────────────────────────────────────────────────────────────────
@@ -34,62 +83,89 @@ function getFileSHA256(filePath) {
 
 // ─── Download ─────────────────────────────────────────────────────────────────
 
-async function downloadMod(mod, destPath) {
-  const res = await fetch(mod.url, { timeout: 60_000 });
+async function downloadModFromUrl(mod, url, partPath) {
+  const res = await fetchWithTimeout(url, {
+    headers: { 'User-Agent': config.LAUNCHER_NAME },
+    redirect: 'follow'
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status} downloading ${mod.name}`);
 
   const total  = parseInt(res.headers.get('content-length') || '0', 10);
   let received = 0;
   const start  = Date.now();
 
-  res.body.on('data', (chunk) => {
-    received += chunk.length;
-    if (total > 0) {
-      const elapsed = (Date.now() - start) / 1000 || 0.001;
-      emit({
-        type:     'mod-download',
-        modName:  mod.name,
-        percent:  Math.round((received / total) * 100),
-        received,
-        total,
-        speed:    Math.round(received / elapsed)
-      });
-    }
-  });
+  await pipeline(
+    toNodeReadable(res.body),
+    new Transform({
+      transform(chunk, _encoding, callback) {
+        received += chunk.length;
+        if (total > 0) {
+          const elapsed = (Date.now() - start) / 1000 || 0.001;
+          emit({
+            type:     'mod-download',
+            modName:  mod.name,
+            percent:  Math.round((received / total) * 100),
+            received,
+            total,
+            speed:    Math.round(received / elapsed)
+          });
+        }
 
-  await pipeline(res.body, fs.createWriteStream(destPath));
+        callback(null, chunk);
+      }
+    }),
+    fs.createWriteStream(partPath)
+  );
+
+  if (total > 0 && received !== total) {
+    throw new Error(`INCOMPLETE_DOWNLOAD ${received}/${total}`);
+  }
 }
 
 const DOWNLOAD_ATTEMPTS = 3;
 
 async function downloadAndVerify(mod, destPath) {
   let lastError = null;
+  const partPath = `${destPath}.part`;
+  const sources = buildModSources(mod);
 
-  for (let attempt = 1; attempt <= DOWNLOAD_ATTEMPTS; attempt++) {
-    try {
-      emit({
-        type:    'status',
-        message: attempt === 1
-          ? `Downloading ${mod.name}...`
-          : `Retrying ${mod.name} (${attempt}/${DOWNLOAD_ATTEMPTS})...`
-      });
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    for (let attempt = 1; attempt <= DOWNLOAD_ATTEMPTS; attempt++) {
+      removeFileIfExists(partPath);
 
-      await downloadMod(mod, destPath);
+      try {
+        emit({
+          type:    'status',
+          message: attempt === 1 && sourceIndex === 0
+            ? `Downloading ${mod.name}...`
+            : `Retrying ${mod.name} (${attempt}/${DOWNLOAD_ATTEMPTS})...`
+        });
 
-      if (mod.sha256) {
-        const hash = await getFileSHA256(destPath);
-        if (hash.toLowerCase() !== mod.sha256.toLowerCase()) {
-          throw new Error(`Hash verification failed for ${mod.name} after download`);
+        await downloadModFromUrl(mod, sources[sourceIndex], partPath);
+        removeFileIfExists(destPath);
+        fs.renameSync(partPath, destPath);
+
+        if (mod.sha256) {
+          const hash = await getFileSHA256(destPath);
+          if (hash.toLowerCase() !== mod.sha256.toLowerCase()) {
+            throw new Error(`Hash verification failed for ${mod.name} after download`);
+          }
+        }
+        removeFileIfExists(partPath);
+        return;
+      } catch (err) {
+        lastError = err;
+        removeFileIfExists(partPath);
+        removeFileIfExists(destPath);
+
+        if (attempt < DOWNLOAD_ATTEMPTS) {
+          await sleep(1_000 * attempt);
         }
       }
-      return;
-    } catch (err) {
-      lastError = err;
-      try { if (fs.existsSync(destPath)) fs.unlinkSync(destPath); } catch (_) {}
     }
   }
 
-  throw lastError;
+  throw new Error(normalizeDownloadError(mod, lastError));
 }
 
 // ─── Main sync ────────────────────────────────────────────────────────────────

@@ -1238,7 +1238,16 @@ select.text-input option {
 }
 .modal-icon   { margin-bottom: 14px; }
 .modal-title  { font-size: 18px; font-weight: 700; color: var(--error); margin-bottom: 10px; }
-.modal-msg    { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 22px; }
+.modal-msg {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 22px;
+  max-height: 260px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
 .modal-actions { display: flex; gap: 10px; justify-content: center; }
 
 /* ═══════════════════════════════════════════════════ Utilities */
@@ -1265,6 +1274,7 @@ select.text-input option {
   margin: 10px 16px 0;
   gap: 12px;
   animation: fadeIn .3s ease;
+  min-width: 0;
 }
 .update-banner-left {
   display: flex;
@@ -1273,12 +1283,21 @@ select.text-input option {
   color: #c084fc;
   font-size: 13px;
   font-weight: 500;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .update-banner-left svg { flex-shrink: 0; }
+#update-banner-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .update-banner-right {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 0 0 auto;
 }
 .btn-update-launcher {
   background: linear-gradient(135deg, #7c3aed, #a855f7);
