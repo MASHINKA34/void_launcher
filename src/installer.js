@@ -6,14 +6,16 @@
 const fs       = require('fs');
 const path     = require('path');
 const os       = require('os');
-const { exec, spawn } = require('child_process');
+const { exec, execFile, spawn } = require('child_process');
 const util     = require('util');
+const crypto   = require('crypto');
 const AdmZip   = require('adm-zip');
 const { Client } = require('minecraft-launcher-core');
 const config   = require('../config');
 const { fetchWithTimeout, toNodeReadable, normalizeNetworkError } = require('./net');
 
 const execAsync = util.promisify(exec);
+const execFileAsync = util.promisify(execFile);
 
 let progressCallback = null;
 
@@ -65,6 +67,16 @@ function assertZipFile(filePath, label, minBytes = 1024) {
   } finally {
     fs.closeSync(fd);
   }
+}
+
+function sha256File(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+    stream.on('error', reject);
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+  });
 }
 
 async function downloadFileOnce(url, partPath, label, opts) {
@@ -145,7 +157,8 @@ async function downloadFile(url, destPath, label, options = {}) {
     requestTimeoutMs: options.requestTimeoutMs || 30_000,
     idleTimeoutMs:    options.idleTimeoutMs || 45_000,
     retryDelayMs:     options.retryDelayMs || 1_500,
-    step:             options.step || null
+    step:             options.step || null,
+    verify:           options.verify || null
   };
 
   const partPath = `${destPath}.part`;
@@ -165,6 +178,7 @@ async function downloadFile(url, destPath, label, options = {}) {
 
     try {
       await downloadFileOnce(url, partPath, label, opts);
+      if (opts.verify) await opts.verify(partPath);
       removeFileIfExists(destPath);
       fs.renameSync(partPath, destPath);
       return;
@@ -220,15 +234,28 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
+async function extractViaPowerShell(zipPath, destDir) {
+  await execFileAsync(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command',
+     'Expand-Archive -Force -LiteralPath $env:VC_ZIP_SRC -DestinationPath $env:VC_ZIP_DEST'],
+    { timeout: 300_000, env: { ...process.env, VC_ZIP_SRC: zipPath, VC_ZIP_DEST: destDir } }
+  );
+}
+
 async function extractZip(zipPath, destDir) {
   ensureDir(destDir);
-  const zip = new AdmZip(zipPath);
-  await new Promise((resolve, reject) => {
-    zip.extractAllToAsync(destDir, true, false, (err) => {
-      if (err) reject(err);
-      else resolve();
+  try {
+    const zip = new AdmZip(zipPath);
+    await new Promise((resolve, reject) => {
+      zip.extractAllToAsync(destDir, true, false, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
-  });
+  } catch (err) {
+    await extractViaPowerShell(zipPath, destDir);
+  }
 }
 
 // ─── Java detection ───────────────────────────────────────────────────────────
@@ -296,7 +323,6 @@ async function findJava(gameDir) {
   };
 
   // 1. Bundled runtime in game dir — the Java 21 we install ourselves.
-  // Validated too: a broken/partial extraction must not be reused forever.
   const bundled = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
   if (await accept(bundled)) return bundled;
 
@@ -345,6 +371,8 @@ async function installJava(gameDir) {
   if (!release?.binary?.package?.link) throw new Error('No suitable Java 21 release found');
 
   const downloadUrl  = release.binary.package.link;
+  const expectedSha  = release.binary.package.checksum || null;
+  const expectedSize = release.binary.package.size || 0;
   const tmpZip       = path.join(runtimeDir, 'java21.zip');
   const java21Dir     = path.join(runtimeDir, 'java21');
   const tmpExtract    = path.join(runtimeDir, '_java_extract');
@@ -353,8 +381,20 @@ async function installJava(gameDir) {
   removeFileIfExists(`${tmpZip}.part`);
   removeDirIfExists(tmpExtract);
 
+  const verifyZip = async (filePath) => {
+    if (expectedSize && fs.statSync(filePath).size !== expectedSize) {
+      throw new Error('INCOMPLETE_DOWNLOAD размер архива не совпал');
+    }
+    if (expectedSha) {
+      const actualSha = await sha256File(filePath);
+      if (actualSha.toLowerCase() !== expectedSha.toLowerCase()) {
+        throw new Error('INCOMPLETE_DOWNLOAD контрольная сумма не совпала');
+      }
+    }
+  };
+
   try {
-    await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE', { step: 'java' });
+    await downloadFile(downloadUrl, tmpZip, 'Java 21 JRE', { step: 'java', verify: verifyZip });
     assertZipFile(tmpZip, 'Java 21 JRE', 1024 * 1024);
 
     emit({ type: 'step', step: 'java', status: 'extracting', message: 'Extracting Java 21...' });
@@ -426,8 +466,6 @@ async function downloadMinecraft(gameDir, javaExe) {
     touch();
     safetyTimer = setTimeout(() => finish(), 600_000);
 
-    // launch() resolves with the spawned game process once all files are downloaded.
-    // We only need the downloads — the game itself must be killed immediately.
     launcher.launch({
       authorization: { access_token: 'offline', uuid: '00000000-0000-0000-0000-000000000000', username: 'Player', user_type: 'offline' },
       root:    gameDir,
