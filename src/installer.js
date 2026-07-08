@@ -27,6 +27,29 @@ function emit(data) {
   if (progressCallback) progressCallback(data);
 }
 
+let installLog = null;
+
+function openInstallLog(gameDir) {
+  try {
+    const dir = path.join(gameDir, 'logs');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    installLog = fs.createWriteStream(path.join(dir, `install-${ts}.log`), { flags: 'a' });
+    dlog(`installer v${config.LAUNCHER_VERSION} | ${os.platform()} ${os.arch()} ${os.release()} | node ${process.versions.node}`);
+  } catch (_) {
+    installLog = null;
+  }
+}
+
+function dlog(msg) {
+  try { if (installLog) installLog.write(`[${new Date().toISOString()}] ${msg}\n`); } catch (_) {}
+}
+
+function closeInstallLog() {
+  try { if (installLog) installLog.end(); } catch (_) {}
+  installLog = null;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function sleep(ms) {
@@ -89,10 +112,11 @@ async function downloadFileOnce(url, partPath, label, opts) {
   const headers = { 'User-Agent': config.LAUNCHER_NAME };
   if (startByte > 0) headers['Range'] = `bytes=${startByte}-`;
 
+  dlog(`GET ${label} resume=${startByte} ${url}`);
   const res = await fetchWithTimeout(url, { headers, redirect: 'follow' }, opts.requestTimeoutMs);
 
-  if (res.status === 416) return;
-  if (!res.ok && res.status !== 206) throw new Error(`HTTP ${res.status}`);
+  if (res.status === 416) { dlog(`  HTTP 416 (already complete)`); return; }
+  if (!res.ok && res.status !== 206) { dlog(`  HTTP ${res.status} (abort)`); throw new Error(`HTTP ${res.status}`); }
 
   const resuming = res.status === 206;
   if (startByte > 0 && !resuming) startByte = 0;
@@ -107,6 +131,8 @@ async function downloadFileOnce(url, partPath, label, opts) {
     const len = parseInt(res.headers.get('content-length') || '0', 10);
     total = resuming ? startByte + len : len;
   }
+
+  dlog(`  HTTP ${res.status} resuming=${resuming} total=${total} startByte=${startByte}`);
 
   let received  = startByte;
   const start   = Date.now();
@@ -125,6 +151,7 @@ async function downloadFileOnce(url, partPath, label, opts) {
       if (settled) return;
       settled = true;
       cleanup();
+      dlog(`  FAIL ${err.message} (received ${received} / ${total})`);
       try { body.destroy(); } catch (_) {}
       try { writer.destroy(); } catch (_) {}
       reject(err);
@@ -145,6 +172,7 @@ async function downloadFileOnce(url, partPath, label, opts) {
       }
       settled = true;
       cleanup();
+      dlog(`  OK received=${received} total=${total}`);
       resolve();
     };
 
@@ -404,22 +432,42 @@ async function installJava(gameDir) {
   removeFileIfExists(`${tmpZip}.part`);
   removeDirIfExists(tmpExtract);
 
+  dlog(`installJava start | expectedSize=${expectedSize} expectedSha=${expectedSha} | sources=${JSON.stringify(sources)}`);
+
+  let lastFailKind = null;
   const verifyZip = async (filePath) => {
-    if (expectedSize && fs.statSync(filePath).size !== expectedSize) {
-      throw new Error('INCOMPLETE_DOWNLOAD размер архива не совпал');
+    const actualSize = fs.statSync(filePath).size;
+    if (expectedSize && actualSize !== expectedSize) {
+      lastFailKind = 'size';
+      dlog(`verify FAIL size: got ${actualSize}, expected ${expectedSize}`);
+      throw new Error('INCOMPLETE_DOWNLOAD size mismatch');
     }
     if (expectedSha) {
-      const actualSha = await sha256File(filePath);
-      if (actualSha.toLowerCase() !== expectedSha.toLowerCase()) {
-        throw new Error('INCOMPLETE_DOWNLOAD контрольная сумма не совпала');
+      const actualSha = (await sha256File(filePath)).toLowerCase();
+      if (actualSha !== expectedSha.toLowerCase()) {
+        lastFailKind = 'checksum';
+        dlog(`verify FAIL sha: got ${actualSha}, expected ${expectedSha} (size ${actualSize} OK)`);
+        throw new Error('CHECKSUM_MISMATCH');
       }
     }
+    lastFailKind = null;
+    dlog(`verify OK size=${actualSize}`);
   };
 
   try {
-    await downloadFromSources(sources, tmpZip, 'Java 21 JRE', {
-      step: 'java', verify: verifyZip, retries: 4, mirrorRetries: 3
-    });
+    try {
+      await downloadFromSources(sources, tmpZip, 'Java 21 JRE', {
+        step: 'java', verify: verifyZip, retries: 4, mirrorRetries: 3
+      });
+    } catch (err) {
+      if (lastFailKind === 'checksum') {
+        throw new Error('Java 21 JRE: файл скачался, но повреждён (размер верный, контрольная сумма не совпала). Обычно виноват антивирус или прокси, который меняет файл — отключите его или смените сеть/VPN и повторите.');
+      }
+      if (lastFailKind === 'size') {
+        throw new Error('Java 21 JRE: файл скачался не полностью — соединение обрывается. Проверьте интернет/VPN и повторите (докачка продолжится с места обрыва).');
+      }
+      throw err;
+    }
     assertZipFile(tmpZip, 'Java 21 JRE', 1024 * 1024);
 
     emit({ type: 'step', step: 'java', status: 'extracting', message: 'Extracting Java 21...' });
@@ -753,9 +801,9 @@ async function checkInstallation(gameDir, savedJavaPath) {
 }
 
 async function install(gameDir, javaPathOverride) {
+  ensureDir(gameDir);
+  openInstallLog(gameDir);
   try {
-    ensureDir(gameDir);
-
     // ── Step 1: Java ──────────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'java', message: 'Checking Java 21...' });
     let javaExe = null;
@@ -768,6 +816,8 @@ async function install(gameDir, javaPathOverride) {
     if (!javaExe) {
       javaExe = await findJava(gameDir);
     }
+
+    dlog(`java resolved before install: ${javaExe || '(none)'}`);
 
     if (!javaExe) {
       javaExe = await installJava(gameDir);
@@ -793,11 +843,15 @@ async function install(gameDir, javaPathOverride) {
     }
 
     emit({ type: 'done', message: 'Installation complete!' });
+    dlog('installation complete');
     return { success: true, javaPath: javaExe };
 
   } catch (err) {
+    dlog(`ERROR: ${err.message}`);
     emit({ type: 'error', message: err.message });
     return { success: false, error: err.message };
+  } finally {
+    closeInstallLog();
   }
 }
 
