@@ -396,6 +396,12 @@
     "sha256": "72FE7EF8C623EA107894734835AACD3C8AF57FD445781B9646817F3EE4DDCE45"
   },
   {
+    "name": "disconnect packet fix",
+    "filename": "disconnect-packet-fix-neoforge-2.0.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/disconnect-packet-fix-neoforge-2.0.1.jar",
+    "sha256": "6254F47C73249108706860505F8261B0273AAFDC53FE8008AADFCA162F0CFD3B"
+  },
+  {
     "name": "doubledoors",
     "filename": "doubledoors-1.21.1-7.2.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/doubledoors-1.21.1-7.2.jar",
