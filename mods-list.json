@@ -517,9 +517,9 @@
   },
   {
     "name": "hookahmod",
-    "filename": "hookahmod-1.0.2.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.2.jar",
-    "sha256": "C055DC2D2D863BABF7FE3BFA2AA5BEDCF67C63F6214DE4B5F9806C69A6F45BD2"
+    "filename": "hookahmod-1.0.3.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/hookahmod-1.0.3.jar",
+    "sha256": "70C50A5695C0CE081E43CF856F810343A1950EECB606E4EE2D3266344B3C483E"
   },
   {
     "name": "immersive melodies",
@@ -541,9 +541,9 @@
   },
   {
     "name": "kingdoms",
-    "filename": "kingdoms-0.2.4.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.4.jar",
-    "sha256": "BA9058E264D5F4854B6C3B41077F66AFCD318F547A7ACB75BCA9238A1E9F0A59"
+    "filename": "kingdoms-0.2.5.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.5.jar",
+    "sha256": "15F436F15813875EF0FC157FB45A5868B06C390B41B803BD5954E938D0BAC7F8"
   },
   {
     "name": "kotlinforforge",
