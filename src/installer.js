@@ -225,7 +225,11 @@ async function downloadFile(url, destPath, label, options = {}) {
     idleTimeoutMs:    options.idleTimeoutMs || 45_000,
     retryDelayMs:     options.retryDelayMs || 1_500,
     step:             options.step || null,
-    verify:           options.verify || null
+    verify:           options.verify || null,
+    // Keep the partial .part on final failure so the next attempt (retry button or
+    // app restart) resumes instead of re-downloading from zero — vital for large
+    // files on unstable connections. A corrupt .part is still dropped by verify.
+    keepPartOnFail:   options.keepPartOnFail || false
   };
 
   const partPath = `${destPath}.part`;
@@ -262,16 +266,31 @@ async function downloadFile(url, destPath, label, options = {}) {
     }
   }
 
-  removeFileIfExists(partPath);
+  if (!opts.keepPartOnFail) removeFileIfExists(partPath);
   throw new Error(`${label}: ${normalizeNetworkError(lastError)}`);
 }
 
+// Resolve a public Yandex.Disk link to a direct download URL via the public API.
+// `publicKey` is the shared folder (or file) link; `filePath` selects a file inside a
+// shared folder (e.g. '/neoforge/neoforge-...zip'). Mirror for GitHub-blocked users.
+async function resolveYandexUrl(publicKey, filePath) {
+  let api = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(publicKey)}`;
+  if (filePath) api += `&path=${encodeURIComponent(filePath)}`;
+  const res = await fetchWithTimeout(api, { headers: { 'User-Agent': config.LAUNCHER_NAME } }, 15_000);
+  if (!res.ok) throw new Error(`Yandex API HTTP ${res.status}`);
+  const data = await res.json();
+  if (!data || !data.href) throw new Error('Yandex: нет ссылки на скачивание');
+  dlog(`resolved Yandex ${publicKey}${filePath ? ' path=' + filePath : ''}`);
+  return data.href;
+}
+
 /**
- * Tries several URLs in order until one succeeds.
- * Use for files available from a primary mirror + an official fallback.
+ * Tries several sources in order until one succeeds. A source is either a URL string
+ * or an async function returning a URL (used for Yandex.Disk, which needs an API call).
+ * Use for files available from a primary mirror + official/extra fallbacks.
  */
-async function downloadFromSources(urls, destPath, label, options = {}) {
-  const sources = urls.filter(Boolean);
+async function downloadFromSources(sourcesIn, destPath, label, options = {}) {
+  const sources = sourcesIn.filter(Boolean);
   let lastError = null;
 
   for (let i = 0; i < sources.length; i++) {
@@ -288,8 +307,10 @@ async function downloadFromSources(urls, destPath, label, options = {}) {
     }
 
     try {
+      const src = sources[i];
+      const url = typeof src === 'function' ? await src() : src;
       // Non-final mirrors get fewer retries so we fall back to the next source quickly.
-      await downloadFile(sources[i], destPath, label, {
+      await downloadFile(url, destPath, label, {
         ...options,
         retries: isLast ? (options.retries || 3) : (options.mirrorRetries || 2)
       });
@@ -323,9 +344,11 @@ function extractWithAdmZip(zipPath, destDir) {
   return new Promise((resolve, reject) => {
     let settled = false;
     const onUncaught = (err) => finish(err);
+    const timer = setTimeout(() => finish(new Error('extract timed out')), 5 * 60 * 1000);
     function finish(err) {
       if (settled) return;
       settled = true;
+      clearTimeout(timer);
       process.removeListener('uncaughtException', onUncaught);
       if (err) reject(err);
       else resolve();
@@ -463,6 +486,9 @@ async function installJava(gameDir) {
     sources.push(`https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/download/${java.RELEASE_TAG}/${java.ASSET_NAME}`);
   }
   if (java.ADOPTIUM_URL) sources.push(java.ADOPTIUM_URL);
+  if (config.YANDEX_DISK_URL && java.YANDEX_PATH) {
+    sources.push(() => resolveYandexUrl(config.YANDEX_DISK_URL, java.YANDEX_PATH));
+  }
   if (sources.length === 0) throw new Error('Java 21 JRE: не задан источник загрузки в config.js');
 
   removeFileIfExists(tmpZip);
@@ -667,14 +693,30 @@ async function installNeoForgeFromArchive(gameDir, nfVersion) {
   const archivePath = path.join(gameDir, archiveName);
 
   emit({ type: 'step', step: 'neoforge', status: 'downloading', message: 'Загрузка готового NeoForge...' });
-  removeFileIfExists(archivePath);
-  removeFileIfExists(`${archivePath}.part`);
 
   const nf = config.NEOFORGE || {};
   const verify = (nf.OFFLINE_SHA256 || nf.OFFLINE_SIZE)
     ? makeSizeShaVerifier(nf.OFFLINE_SIZE, nf.OFFLINE_SHA256, 'NeoForge (offline)')
     : null;
-  await downloadFile(archiveUrl, archivePath, 'NeoForge (offline)', { step: 'neoforge', verify });
+
+  // Reuse a fully-downloaded archive from a previous attempt; otherwise resume the .part.
+  let haveArchive = false;
+  if (verify && fs.existsSync(archivePath)) {
+    try { await verify(archivePath); haveArchive = true; }
+    catch (_) { removeFileIfExists(archivePath); }
+  }
+  if (!haveArchive) {
+    // Sources: GitHub mirror → Yandex.Disk (for users where GitHub is blocked).
+    // Big file on a flaky link: many retries + keep the .part so progress accumulates
+    // across attempts and app restarts until the 97 MB finally lands.
+    const sources = [archiveUrl];
+    if (config.YANDEX_DISK_URL && nf.OFFLINE_YANDEX_PATH) {
+      sources.push(() => resolveYandexUrl(config.YANDEX_DISK_URL, nf.OFFLINE_YANDEX_PATH));
+    }
+    await downloadFromSources(sources, archivePath, 'NeoForge (offline)', {
+      step: 'neoforge', verify, retries: 8, mirrorRetries: 6, keepPartOnFail: true
+    });
+  }
   assertZipFile(archivePath, 'NeoForge (offline)', 1024);
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Распаковка NeoForge...' });
@@ -732,15 +774,19 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
   const installerName = `neoforge-${nfVersion}-installer.jar`;
   const installerJar  = path.join(gameDir, installerName);
 
-  // Источники по приоритету: своё зеркало в GitHub Releases (тег "neoforge") → официальный maven.
+  const nf = config.NEOFORGE || {};
+
+  // Источники по приоритету: своё зеркало в GitHub Releases → официальный maven → Яндекс.Диск.
   const sources = [];
   if (config.GITHUB_OWNER && config.GITHUB_REPO &&
       config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER') {
     sources.push(`https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/download/neoforge/${installerName}`);
   }
   sources.push(`https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/${installerName}`);
+  if (config.YANDEX_DISK_URL && nf.INSTALLER_YANDEX_PATH) {
+    sources.push(() => resolveYandexUrl(config.YANDEX_DISK_URL, nf.INSTALLER_YANDEX_PATH));
+  }
 
-  const nf = config.NEOFORGE || {};
   const verify = (nf.INSTALLER_SHA256 || nf.INSTALLER_SIZE)
     ? makeSizeShaVerifier(nf.INSTALLER_SIZE, nf.INSTALLER_SHA256, 'NeoForge Installer')
     : null;

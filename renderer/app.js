@@ -65,7 +65,7 @@ $('modal-retry').addEventListener('click', () => {
   $('error-modal').classList.add('hidden');
   if (modalRetryFn) modalRetryFn();
 });
-$('modal-repair').addEventListener('click', () => {
+$('modal-repair')?.addEventListener('click', () => {
   $('error-modal').classList.add('hidden');
   if (modalRepairFn) modalRepairFn();
 });
@@ -403,7 +403,7 @@ function handleInstallProgress(data) {
   }
 }
 
-async function runInstallation(repair = false) {
+async function runInstallation(repair = false, autoAttempt = 0) {
   if (installationRunning) return false;
   installationRunning = true;
 
@@ -412,14 +412,6 @@ async function runInstallation(repair = false) {
   renderInstallSteps();
   setInstallProgress(0, repair ? 'Сброс установки...' : 'Начало установки...', '');
   $('install-error').classList.add('hidden');
-  $('btn-retry').disabled = true;
-  $('btn-repair').disabled = true;
-  $('btn-retry').onclick = async () => {
-    if (await runInstallation(false)) await initMainScreen();
-  };
-  $('btn-repair').onclick = async () => {
-    if (await runInstallation(true)) await initMainScreen();
-  };
 
   window.api.removeAllListeners('install-progress');
   window.api.onInstallProgress(handleInstallProgress);
@@ -435,11 +427,17 @@ async function runInstallation(repair = false) {
     result = { success: false, error: err.message };
   } finally {
     installationRunning = false;
-    $('btn-retry').disabled = false;
-    $('btn-repair').disabled = false;
   }
 
   if (!result.success) {
+    // Downloads resume from where they dropped, so silently retry a couple of times
+    // before bothering the user. Skip for repair (it re-cleans the resumable part).
+    const MAX_AUTO = 2;
+    if (!repair && autoAttempt < MAX_AUTO) {
+      setInstallProgress(null, `Соединение прервалось — повторная попытка ${autoAttempt + 2}/${MAX_AUTO + 1}...`, '');
+      await new Promise(r => setTimeout(r, 2500));
+      return runInstallation(repair, autoAttempt + 1);
+    }
     $('install-error-msg').textContent = result.error || 'Установка завершилась с ошибкой.';
     $('install-error').classList.remove('hidden');
     return false;
@@ -1014,6 +1012,15 @@ function initTitleBar() {
 
   $('btn-open-logs').addEventListener('click', () => {
     window.api.openLogsFolder(state.settings?.gameDir);
+  });
+
+  // Install-error actions wired once at boot so they can never be left without a
+  // handler or stuck disabled by an in-flight install.
+  $('btn-retry')?.addEventListener('click', async () => {
+    if (await runInstallation(false)) await initMainScreen();
+  });
+  $('btn-repair')?.addEventListener('click', async () => {
+    if (await runInstallation(true)) await initMainScreen();
   });
 }
 
