@@ -12,18 +12,6 @@
     "sha256": "60B548BEF04A2F0E1DA686EE9035C2E3D4ED0459A17D7A4836FC26AF6DE6B60E"
   },
   {
-    "name": "Chunky",
-    "filename": "Chunky-NeoForge-1.4.23.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/Chunky-NeoForge-1.4.23.jar",
-    "sha256": "D72F235CF1F56F2C374F52C00BDDA5034524B28142305A84CFC123A3F92AD274"
-  },
-  {
-    "name": "Chunky Border",
-    "filename": "ChunkyBorder-1.2.18.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/ChunkyBorder-1.2.18.jar",
-    "sha256": "FB1B49AC0A2C9211A5B39331B024D7DBB85A3DDB5443A79B7D9223D3629F190E"
-  },
-  {
     "name": "Clumps",
     "filename": "Clumps-neoforge-1.21.1-19.0.0.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/Clumps-neoforge-1.21.1-19.0.0.1.jar",
@@ -246,12 +234,6 @@
     "sha256": "AFB1F28271EE3B622947F533AA754BB22ED67EDD4940A3E9FDF2CCA1EDB7B8A9"
   },
   {
-    "name": "bluemap",
-    "filename": "bluemap-5.7-neoforge.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/bluemap-5.7-neoforge.jar",
-    "sha256": "827AC3921986D0D5E9C24EF2280F47C110D22DC14D284EFB65330010D2E9517D"
-  },
-  {
     "name": "cbcmodernwarfare",
     "filename": "cbcmodernwarfare-0.0.6v.mc.1.21.1-neoforge.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/cbcmodernwarfare-0.0.6v.mc.1.21.1-neoforge.jar",
@@ -322,12 +304,6 @@
     "filename": "create-new-age-1.2.0.neoforge-mc1.21.1.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create-new-age-1.2.0.neoforge-mc1.21.1.jar",
     "sha256": "A217EA21CCC8364E99D86777E519436BC7C94516DF9737AD0103047E48A44717"
-  },
-  {
-    "name": "create bluemap",
-    "filename": "create_bluemap-1.1.1.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_bluemap-1.1.1.jar",
-    "sha256": "1DC287271F7DB558146E4473954F204F526F368259A274D5DF0A67E953B66050"
   },
   {
     "name": "create mob spawners",
