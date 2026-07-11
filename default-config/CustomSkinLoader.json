@@ -77,7 +77,7 @@
   "forceLoadAllTextures": true,
   "enableCape": true,
   "threadPoolSize": 8,
-  "enableLogStdOut": false,
+  "enableLogStdOut": true,
   "cacheExpiry": 30,
   "forceUpdateSkull": false,
   "enableLocalProfileCache": false,

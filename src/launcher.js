@@ -116,6 +116,11 @@ function ensureSkinLoaderConfig(gameDir) {
       changed = true;
     }
 
+    if (cfg.enableLogStdOut !== true) {
+      cfg.enableLogStdOut = true;
+      changed = true;
+    }
+
     const isElyBy = e => e && (e.name === 'ElyBy' || /ely\.by/i.test(e.root || ''));
     const elyIdx  = list.findIndex(isElyBy);
     const mojIdx  = list.findIndex(e => e && e.type === 'MojangAPI');
