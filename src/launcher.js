@@ -71,6 +71,70 @@ function ensureDistantHorizonsDefault(gameDir) {
   } catch (_) {}
 }
 
+function ensureSkinLoaderConfig(gameDir) {
+  try {
+    const src     = path.join(__dirname, '..', 'default-config', 'CustomSkinLoader.json');
+    const destDir = path.join(gameDir, 'CustomSkinLoader');
+    const dest    = path.join(destDir, 'CustomSkinLoader.json');
+
+    let cfg = null;
+    if (fs.existsSync(dest)) {
+      try { cfg = JSON.parse(fs.readFileSync(dest, 'utf8')); } catch (_) {}
+    }
+
+    if (!cfg || !Array.isArray(cfg.loadlist)) {
+      if (!fs.existsSync(src)) return;
+      fs.mkdirSync(destDir, { recursive: true });
+      fs.copyFileSync(src, dest);
+      return;
+    }
+
+    const list = cfg.loadlist;
+    let changed = false;
+
+    const isLocal  = e => e && (e.name === 'LocalSkin' || /LocalSkin\/skins/i.test(e.skin || ''));
+    const localIdx = list.findIndex(isLocal);
+    if (localIdx === -1) {
+      list.unshift({
+        name: 'LocalSkin',
+        type: 'Legacy',
+        checkPNG: false,
+        skin: 'LocalSkin/skins/{USERNAME}.png',
+        model: 'auto',
+        cape: 'LocalSkin/capes/{USERNAME}.png',
+        elytra: 'LocalSkin/elytras/{USERNAME}.png'
+      });
+      changed = true;
+    } else if (localIdx > 0) {
+      const [local] = list.splice(localIdx, 1);
+      list.unshift(local);
+      changed = true;
+    }
+
+    const isElyBy = e => e && (e.name === 'ElyBy' || /ely\.by/i.test(e.root || ''));
+    const elyIdx  = list.findIndex(isElyBy);
+    const mojIdx  = list.findIndex(e => e && e.type === 'MojangAPI');
+
+    if (elyIdx !== -1 && list[elyIdx].root === 'http://skinsystem.ely.by/textures/') {
+      list[elyIdx].root = 'https://skinsystem.ely.by/textures/';
+      changed = true;
+    }
+
+    if (mojIdx !== -1) {
+      if (elyIdx === -1) {
+        list.splice(mojIdx, 0, { name: 'ElyBy', type: 'ElyByAPI', root: 'https://skinsystem.ely.by/textures/' });
+        changed = true;
+      } else if (elyIdx > mojIdx) {
+        const [ely] = list.splice(elyIdx, 1);
+        list.splice(mojIdx, 0, ely);
+        changed = true;
+      }
+    }
+
+    if (changed) fs.writeFileSync(dest, JSON.stringify(cfg, null, 2), 'utf8');
+  } catch (_) {}
+}
+
 const DH_DISABLED_DIMENSIONS = 'minecraft:overworld,minecraft:the_nether,minecraft:the_end';
 
 function applyDistantHorizonsToggle(gameDir, enabled) {
@@ -288,6 +352,7 @@ async function launch(opts) {
   try { minecraftProfile.ensureServerShortcuts(gameDir); } catch (_) {}
 
   ensureFmlConfig(gameDir);
+  ensureSkinLoaderConfig(gameDir);
   ensureDistantHorizonsDefault(gameDir);
   applyDistantHorizonsToggle(gameDir, distantHorizons);
 

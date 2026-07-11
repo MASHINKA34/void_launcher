@@ -310,15 +310,31 @@ ipcMain.handle('set-local-skin', async (_, { gameDir, username } = {}) => {
 
 const NEWS_URL     = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/news.json';
 const MODS_LIST_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/mods-list.json';
+const NEWS_SOURCES = [
+  NEWS_URL,
+  'https://cdn.jsdelivr.net/gh/MASHINKA34/void_launcher@main/news.json'
+];
+const MODS_LIST_SOURCES = [
+  MODS_LIST_URL,
+  'https://cdn.jsdelivr.net/gh/MASHINKA34/void_launcher@main/mods-list.json'
+];
+
+async function fetchFirstJson(urls, timeoutMs) {
+  return await Promise.any(urls.map(async (url) => {
+    const res = await fetchWithTimeout(`${url}?t=${Date.now()}`, {
+      headers: { 'User-Agent': config.LAUNCHER_NAME },
+      redirect: 'follow'
+    }, timeoutMs);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = JSON.parse(await res.text());
+    if (!Array.isArray(data)) throw new Error('unexpected payload');
+    return data;
+  }));
+}
 
 ipcMain.handle('get-news', async () => {
   try {
-    const res = await fetchWithTimeout(`${NEWS_URL}?t=${Date.now()}`, {
-      headers: { 'User-Agent': config.LAUNCHER_NAME },
-      redirect: 'follow'
-    }, 5_000);
-    if (!res.ok) throw new Error('fetch failed');
-    return await res.json();
+    return await fetchFirstJson(NEWS_SOURCES, 5_000);
   } catch (_) {
     try {
       return JSON.parse(fs.readFileSync(path.join(__dirname, 'news.json'), 'utf8'));
@@ -432,30 +448,26 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
     if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
   });
 
-  // Пытаемся получить свежий список модов с GitHub
+  // Пытаемся получить свежий список модов: GitHub и зеркало jsDelivr параллельно
   const localModsListPath = path.join(__dirname, 'mods-list.json');
   const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
   try {
-    const res = await fetchWithTimeout(`${MODS_LIST_URL}?t=${Date.now()}`, {
-      headers: { 'User-Agent': config.LAUNCHER_NAME },
-      redirect: 'follow'
-    }, 10_000);
-    if (res.ok) {
-      const remoteList = mergeModMetadata(JSON.parse(await res.text()));
-      fs.writeFileSync(cachePath, JSON.stringify(remoteList, null, 2), 'utf8');
-      return await modSync.sync(gameDir, cachePath);
-    }
+    const remoteList = mergeModMetadata(await fetchFirstJson(MODS_LIST_SOURCES, 10_000));
+    fs.writeFileSync(cachePath, JSON.stringify(remoteList, null, 2), 'utf8');
+    return await modSync.sync(gameDir, cachePath);
   } catch (_) {}
 
-  // Fallback: кэш с прошлого запуска → локальный файл
+  // Fallback: кэш с прошлого запуска → локальный файл; список мог устареть
   if (fs.existsSync(cachePath)) {
     try {
       const cached = mergeModMetadata(JSON.parse(fs.readFileSync(cachePath, 'utf8')));
       fs.writeFileSync(cachePath, JSON.stringify(cached, null, 2), 'utf8');
-      return await modSync.sync(gameDir, cachePath);
+      const result = await modSync.sync(gameDir, cachePath);
+      return { ...result, staleList: true };
     } catch (_) {}
   }
-  return await modSync.sync(gameDir, localModsListPath);
+  const result = await modSync.sync(gameDir, localModsListPath);
+  return { ...result, staleList: true };
 });
 
 // ─── Game launch ─────────────────────────────────────────────────────────────
