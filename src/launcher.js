@@ -140,6 +140,41 @@ function ensureSkinLoaderConfig(gameDir) {
   } catch (_) {}
 }
 
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+function isValidPngFile(file) {
+  let fd = null;
+  try {
+    fd = fs.openSync(file, 'r');
+    const buf = Buffer.alloc(8);
+    const read = fs.readSync(fd, buf, 0, 8, 0);
+    return read === 8 && buf.equals(PNG_SIGNATURE);
+  } catch (_) {
+    return false;
+  } finally {
+    if (fd !== null) { try { fs.closeSync(fd); } catch (_) {} }
+  }
+}
+
+function removeCorruptPngs(dir) {
+  let entries;
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return; }
+  for (const entry of entries) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      removeCorruptPngs(p);
+    } else if (entry.isFile() && !entry.name.endsWith('.json') && !isValidPngFile(p)) {
+      try { fs.unlinkSync(p); } catch (_) {}
+    }
+  }
+}
+
+function cleanCorruptSkinCaches(gameDir) {
+  removeCorruptPngs(path.join(gameDir, 'CustomSkinLoader', 'caches'));
+  removeCorruptPngs(path.join(gameDir, 'CustomSkinLoader', 'LocalSkin'));
+  removeCorruptPngs(path.join(gameDir, 'assets', 'skins'));
+}
+
 const DH_DISABLED_DIMENSIONS = 'minecraft:overworld,minecraft:the_nether,minecraft:the_end';
 
 function applyDistantHorizonsToggle(gameDir, enabled) {
@@ -358,6 +393,7 @@ async function launch(opts) {
 
   ensureFmlConfig(gameDir);
   ensureSkinLoaderConfig(gameDir);
+  cleanCorruptSkinCaches(gameDir);
   ensureDistantHorizonsDefault(gameDir);
   applyDistantHorizonsToggle(gameDir, distantHorizons);
 
