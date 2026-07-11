@@ -5,7 +5,7 @@
     {
       "name": "LocalSkin",
       "type": "Legacy",
-      "checkPNG": false,
+      "checkPNG": true,
       "skin": "LocalSkin/skins/{USERNAME}.png",
       "model": "auto",
       "cape": "LocalSkin/capes/{USERNAME}.png",

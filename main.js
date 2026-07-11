@@ -297,9 +297,14 @@ ipcMain.handle('set-local-skin', async (_, { gameDir, username } = {}) => {
   });
   if (result.canceled || !result.filePaths.length) return { success: false, canceled: true };
   try {
+    const data = fs.readFileSync(result.filePaths[0]);
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    if (data.length < 8 || !data.subarray(0, 8).equals(pngSignature)) {
+      return { success: false, error: 'Файл не является настоящим PNG (возможно, переименованный JPG/WebP). Пересохрани скин в формате PNG.' };
+    }
     const dir = path.join(gameDir, 'CustomSkinLoader', 'LocalSkin', 'skins');
     fs.mkdirSync(dir, { recursive: true });
-    fs.copyFileSync(result.filePaths[0], path.join(dir, `${username}.png`));
+    fs.writeFileSync(path.join(dir, `${username}.png`), data);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };

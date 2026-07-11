@@ -98,7 +98,7 @@ function ensureSkinLoaderConfig(gameDir) {
       list.unshift({
         name: 'LocalSkin',
         type: 'Legacy',
-        checkPNG: false,
+        checkPNG: true,
         skin: 'LocalSkin/skins/{USERNAME}.png',
         model: 'auto',
         cape: 'LocalSkin/capes/{USERNAME}.png',
@@ -108,6 +108,11 @@ function ensureSkinLoaderConfig(gameDir) {
     } else if (localIdx > 0) {
       const [local] = list.splice(localIdx, 1);
       list.unshift(local);
+      changed = true;
+    }
+
+    if (isLocal(list[0]) && list[0].checkPNG !== true) {
+      list[0].checkPNG = true;
       changed = true;
     }
 
