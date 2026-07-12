@@ -306,6 +306,12 @@
     "sha256": "A217EA21CCC8364E99D86777E519436BC7C94516DF9737AD0103047E48A44717"
   },
   {
+    "name": "create stuff additions1.21.1",
+    "filename": "create-stuff-additions1.21.1_v2.1.4a.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create-stuff-additions1.21.1_v2.1.4a.jar",
+    "sha256": "3E93A9930E49BC3F8AE5CF5E45F5E9065860EA708365F8ED4336289295B66893"
+  },
+  {
     "name": "create mob spawners",
     "filename": "create_mob_spawners-1.0.0.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/create_mob_spawners-1.0.0.jar",
@@ -517,9 +523,9 @@
   },
   {
     "name": "kingdoms",
-    "filename": "kingdoms-0.2.5.jar",
-    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.5.jar",
-    "sha256": "15F436F15813875EF0FC157FB45A5868B06C390B41B803BD5954E938D0BAC7F8"
+    "filename": "kingdoms-0.2.6.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/kingdoms-0.2.6.jar",
+    "sha256": "C0D6FB9C5A81507EC01DC699F98EE5DF23F4326F3BD4A9C47C6FCF2A99917529"
   },
   {
     "name": "kotlinforforge",
@@ -664,6 +670,12 @@
     "filename": "sable-neoforge-1.21.1-1.2.2.jar",
     "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/sable-neoforge-1.21.1-1.2.2.jar",
     "sha256": "15FB660A0D368204B37F3967BFCC48137397B7174CA2945C5635CC4539C755F8"
+  },
+  {
+    "name": "servercore",
+    "filename": "servercore-neoforge-1.5.19.1.21.1.jar",
+    "url": "https://github.com/MASHINKA34/void_launcher/releases/download/mods/servercore-neoforge-1.5.19.1.21.1.jar",
+    "sha256": "A5706AA0BB3A47C5F1ADAB44306685736688EC03414F60BEB4FCBE05B99F5A82"
   },
   {
     "name": "shine",
