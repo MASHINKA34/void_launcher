@@ -8,6 +8,8 @@ const REPO = 'void_launcher';
 const RELEASE_TAG = 'mods';
 const STAGING = path.join(__dirname, 'staging-mods');
 const OUT = path.join(__dirname, '..', 'mods-list.json');
+const MANIFEST_VERSION = Date.now();
+const ASSET_TAG = `${RELEASE_TAG}-${MANIFEST_VERSION}`;
 
 const STOP = /^(v?\d|neoforge|forge|fabric|quilt|mc?1\.\d|1\.\d)/i;
 
@@ -48,8 +50,10 @@ const list = jars.map(original => {
   return {
     name: prettyName(original),
     filename,
-    url: `https://github.com/${OWNER}/${REPO}/releases/download/${RELEASE_TAG}/${filename}`,
-    sha256: sha256(buf)
+    url: `https://github.com/${OWNER}/${REPO}/releases/download/${ASSET_TAG}/${filename}`,
+    sha256: sha256(buf),
+    size: buf.length,
+    manifestVersion: MANIFEST_VERSION
   };
 });
 

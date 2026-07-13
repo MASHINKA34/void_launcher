@@ -54,7 +54,7 @@ function normalizeNetworkError(err) {
     return 'сервер временно ограничил загрузку. Попробуйте позже';
   }
 
-  if (/INCOMPLETE_DOWNLOAD|EMPTY_RESPONSE_BODY/i.test(message)) {
+  if (/INCOMPLETE_DOWNLOAD|EMPTY_RESPONSE_BODY|SIZE_MISMATCH|Hash verification failed/i.test(message)) {
     return 'файл скачался не полностью. Попробуйте снова';
   }
 

@@ -5,6 +5,7 @@ const os = require('os');
 const config = require('./config');
 const auth = require('./src/auth');
 const { fetchWithTimeout } = require('./src/net');
+const modSync = require('./src/modSync');
 
 app.commandLine.appendSwitch('disable-gpu-disk-cache');
 app.commandLine.appendSwitch('no-sandbox');
@@ -321,8 +322,27 @@ const NEWS_SOURCES = [
 ];
 const MODS_LIST_SOURCES = [
   MODS_LIST_URL,
+  'https://api.github.com/repos/MASHINKA34/void_launcher/contents/mods-list.json?ref=main',
   'https://cdn.jsdelivr.net/gh/MASHINKA34/void_launcher@main/mods-list.json'
 ];
+
+async function readResponseText(res, timeoutMs) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(`TIMEOUT ${Math.round(timeoutMs / 1000)}s`);
+      if (typeof res.body?.destroy === 'function') res.body.destroy(error);
+      else if (typeof res.body?.cancel === 'function') res.body.cancel(error).catch(() => {});
+      reject(error);
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([res.text(), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 async function fetchFirstJson(urls, timeoutMs) {
   return await Promise.any(urls.map(async (url) => {
@@ -331,10 +351,48 @@ async function fetchFirstJson(urls, timeoutMs) {
       redirect: 'follow'
     }, timeoutMs);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = JSON.parse(await res.text());
+    const data = JSON.parse(await readResponseText(res, timeoutMs));
     if (!Array.isArray(data)) throw new Error('unexpected payload');
     return data;
   }));
+}
+
+async function fetchCurrentModsList(timeoutMs, minimumVersion) {
+  const settled = await Promise.allSettled(MODS_LIST_SOURCES.map(async (url, index) => {
+    const separator = url.includes('?') ? '&' : '?';
+    const headers = { 'User-Agent': config.LAUNCHER_NAME };
+    if (url.startsWith('https://api.github.com/')) {
+      headers.Accept = 'application/vnd.github.raw+json';
+    }
+    const res = await fetchWithTimeout(`${url}${separator}t=${Date.now()}`, {
+      headers,
+      redirect: 'follow'
+    }, timeoutMs);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const list = modSync.validateManifest(JSON.parse(await readResponseText(res, timeoutMs)));
+    return { index, list, version: list[0].manifestVersion };
+  }));
+
+  const candidates = settled
+    .filter(result => result.status === 'fulfilled')
+    .map(result => result.value)
+    .filter(result => result.version >= minimumVersion)
+    .sort((a, b) => b.version - a.version || a.index - b.index);
+
+  if (candidates.length === 0) {
+    throw new Error('CURRENT_MODS_LIST_UNAVAILABLE');
+  }
+  return candidates[0].list;
+}
+
+function writeJsonAtomic(filePath, value) {
+  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    fs.writeFileSync(tempPath, JSON.stringify(value, null, 2), { encoding: 'utf8', flag: 'wx' });
+    fs.renameSync(tempPath, filePath);
+  } finally {
+    try { if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath); } catch (_) {}
+  }
 }
 
 ipcMain.handle('get-news', async () => {
@@ -379,7 +437,7 @@ ipcMain.handle('get-mods-list', () => {
   ];
   for (const p of candidates) {
     try {
-      if (fs.existsSync(p)) return mergeModMetadata(JSON.parse(fs.readFileSync(p, 'utf8')));
+      if (fs.existsSync(p)) return mergeModMetadata(modSync.validateManifest(JSON.parse(fs.readFileSync(p, 'utf8'))));
     } catch (_) {}
   }
   return [];
@@ -446,33 +504,41 @@ ipcMain.handle('open-logs-folder', async (_, gameDir) => {
 
 // ─── Mod sync ─────────────────────────────────────────────────────────────────
 
+let modSyncInFlight = false;
+
 ipcMain.handle('sync-mods', async (_, { gameDir }) => {
-  const modSync = require('./src/modSync');
-
-  modSync.setProgressCallback((progress) => {
-    if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
-  });
-
-  // Пытаемся получить свежий список модов: GitHub и зеркало jsDelivr параллельно
-  const localModsListPath = path.join(__dirname, 'mods-list.json');
-  const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
-  try {
-    const remoteList = mergeModMetadata(await fetchFirstJson(MODS_LIST_SOURCES, 10_000));
-    fs.writeFileSync(cachePath, JSON.stringify(remoteList, null, 2), 'utf8');
-    return await modSync.sync(gameDir, cachePath);
-  } catch (_) {}
-
-  // Fallback: кэш с прошлого запуска → локальный файл; список мог устареть
-  if (fs.existsSync(cachePath)) {
-    try {
-      const cached = mergeModMetadata(JSON.parse(fs.readFileSync(cachePath, 'utf8')));
-      fs.writeFileSync(cachePath, JSON.stringify(cached, null, 2), 'utf8');
-      const result = await modSync.sync(gameDir, cachePath);
-      return { ...result, staleList: true };
-    } catch (_) {}
+  if (modSyncInFlight) {
+    return { success: false, error: 'Синхронизация модов уже выполняется.' };
   }
-  const result = await modSync.sync(gameDir, localModsListPath);
-  return { ...result, staleList: true };
+
+  modSyncInFlight = true;
+  try {
+    modSync.setProgressCallback((progress) => {
+      if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
+    });
+
+    const localModsListPath = path.join(__dirname, 'mods-list.json');
+    const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
+    const bundledList = modSync.validateManifest(JSON.parse(fs.readFileSync(localModsListPath, 'utf8')));
+    let remoteList;
+
+    try {
+      remoteList = await fetchCurrentModsList(15_000, bundledList[0].manifestVersion);
+    } catch (_) {
+      return {
+        success: false,
+        error: 'Не удалось получить актуальный список модов. Проверьте интернет, VPN или прокси и повторите запуск.'
+      };
+    }
+
+    const normalizedList = mergeModMetadata(remoteList);
+    writeJsonAtomic(cachePath, normalizedList);
+    return await modSync.sync(gameDir, cachePath);
+  } catch (err) {
+    return { success: false, error: err.message };
+  } finally {
+    modSyncInFlight = false;
+  }
 });
 
 // ─── Game launch ─────────────────────────────────────────────────────────────
