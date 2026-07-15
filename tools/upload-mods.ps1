@@ -20,19 +20,20 @@ $AssetTag = "$Tag-$($versions[0])"
 $expected = @{}
 foreach ($mod in $manifest) {
   if (-not $mod.filename -or -not $mod.sha256 -or -not $mod.size) { Write-Error "Invalid manifest entry"; exit 1 }
-  if ($expected.ContainsKey($mod.filename)) { Write-Error "Duplicate: $($mod.filename)"; exit 1 }
+  $assetName = [Uri]::UnescapeDataString(([Uri]$mod.url).Segments[-1])
+  if (-not $assetName -or $expected.ContainsKey($assetName)) { Write-Error "Duplicate: $assetName"; exit 1 }
 
-  $filePath = Join-Path $ModsDir $mod.filename
+  $filePath = Join-Path $ModsDir $assetName
   if (-not (Test-Path -LiteralPath $filePath -PathType Leaf)) { Write-Error "Missing: $($mod.filename)"; exit 1 }
 
   $file = Get-Item -LiteralPath $filePath
   $hash = (Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash
-  $expectedUrl = "https://github.com/$Repo/releases/download/$AssetTag/$($mod.filename)"
+  $expectedUrl = "https://github.com/$Repo/releases/download/$AssetTag/$assetName"
   if ($file.Length -ne $mod.size -or $hash -ne $mod.sha256 -or $mod.url -ne $expectedUrl) {
     Write-Error "Manifest mismatch: $($mod.filename)"
     exit 1
   }
-  $expected[$mod.filename] = $file.Length
+  $expected[$assetName] = $file.Length
 }
 
 $previousErrorActionPreference = $ErrorActionPreference

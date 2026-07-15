@@ -39,18 +39,18 @@ fs.mkdirSync(STAGING, { recursive: true });
 const jars = fs.readdirSync(INSTANCE_MODS).filter(f => f.toLowerCase().endsWith('.jar')).sort();
 const seen = new Set();
 const list = jars.map(original => {
-  let filename = safeName(original);
+  let assetName = safeName(original);
   let n = 1;
-  while (seen.has(filename.toLowerCase())) filename = safeName(original).replace(/\.jar$/i, `.${n++}.jar`);
-  seen.add(filename.toLowerCase());
+  while (seen.has(assetName.toLowerCase())) assetName = safeName(original).replace(/\.jar$/i, `.${n++}.jar`);
+  seen.add(assetName.toLowerCase());
 
   const buf = fs.readFileSync(path.join(INSTANCE_MODS, original));
-  fs.writeFileSync(path.join(STAGING, filename), buf);
+  fs.writeFileSync(path.join(STAGING, assetName), buf);
 
   return {
     name: prettyName(original),
-    filename,
-    url: `https://github.com/${OWNER}/${REPO}/releases/download/${ASSET_TAG}/${filename}`,
+    filename: original,
+    url: `https://github.com/${OWNER}/${REPO}/releases/download/${ASSET_TAG}/${assetName}`,
     sha256: sha256(buf),
     size: buf.length,
     manifestVersion: MANIFEST_VERSION
