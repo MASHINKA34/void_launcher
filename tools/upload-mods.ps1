@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 gh auth status 2>$null
 if ($LASTEXITCODE -ne 0) { Write-Error "Not logged in. Run: gh auth login"; exit 1 }
 
-$manifest = @(Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json)
+$manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($manifest.Count -eq 0) { Write-Error "Manifest is empty"; exit 1 }
 
 $versions = @($manifest | ForEach-Object { $_.manifestVersion } | Sort-Object -Unique)
@@ -35,8 +35,12 @@ foreach ($mod in $manifest) {
   $expected[$mod.filename] = $file.Length
 }
 
-$exists = gh release view $AssetTag -R $Repo 2>$null
-if ($LASTEXITCODE -ne 0) {
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "SilentlyContinue"
+$null = gh release view $AssetTag -R $Repo 2>$null
+$releaseExists = $LASTEXITCODE -eq 0
+$ErrorActionPreference = $previousErrorActionPreference
+if (-not $releaseExists) {
   Write-Host "Creating release '$AssetTag'..."
   gh release create $AssetTag -R $Repo --title $AssetTag --notes "Modpack mods" --latest=false
   if ($LASTEXITCODE -ne 0) { Write-Error "Failed to create release: $AssetTag"; exit 1 }
