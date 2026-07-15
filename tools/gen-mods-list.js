@@ -9,7 +9,7 @@ const RELEASE_TAG = 'mods';
 const STAGING = path.join(__dirname, 'staging-mods');
 const OUT = path.join(__dirname, '..', 'mods-list.json');
 const MANIFEST_VERSION = Date.now();
-const ASSET_TAG = `${RELEASE_TAG}-${MANIFEST_VERSION}`;
+const ASSET_TAG = RELEASE_TAG;
 
 const STOP = /^(v?\d|neoforge|forge|fabric|quilt|mc?1\.\d|1\.\d)/i;
 

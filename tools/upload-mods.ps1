@@ -16,7 +16,7 @@ if ($manifest.Count -eq 0) { Write-Error "Manifest is empty"; exit 1 }
 $versions = @($manifest | ForEach-Object { $_.manifestVersion } | Sort-Object -Unique)
 if ($versions.Count -ne 1 -or -not $versions[0]) { Write-Error "Manifest version is invalid"; exit 1 }
 
-$AssetTag = "$Tag-$($versions[0])"
+$AssetTag = $Tag
 $expected = @{}
 foreach ($mod in $manifest) {
   if (-not $mod.filename -or -not $mod.sha256 -or -not $mod.size) { Write-Error "Invalid manifest entry"; exit 1 }
@@ -62,6 +62,14 @@ foreach ($jar in $jars) {
     if ($LASTEXITCODE -eq 0) { $ok = $true } else { Start-Sleep -Seconds (2 * $attempt) }
   }
   if (-not $ok) { Write-Error "Failed: $($jar.Name)"; exit 1 }
+}
+
+$release = gh release view $AssetTag -R $Repo --json assets | ConvertFrom-Json
+foreach ($asset in $release.assets) {
+  if (-not $expected.ContainsKey($asset.name)) {
+    gh release delete-asset $AssetTag $asset.name -R $Repo --yes
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to delete: $($asset.name)"; exit 1 }
+  }
 }
 
 $release = gh release view $AssetTag -R $Repo --json assets | ConvertFrom-Json
