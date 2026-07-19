@@ -1,6 +1,6 @@
 param(
   [string]$Version = "21.1.233",
-  [string]$Java = "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot\bin\java.exe"
+  [string]$Java = "java"
 )
 
 $ErrorActionPreference = "Stop"

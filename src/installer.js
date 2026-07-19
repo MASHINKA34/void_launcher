@@ -1,7 +1,4 @@
-/**
- * installer.js
- * Handles first-launch setup: Java 21, Minecraft 1.21.1, NeoForge 21.1.233
- */
+
 
 const fs       = require('fs');
 const path     = require('path');
@@ -50,7 +47,6 @@ function closeInstallLog() {
   installLog = null;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -226,9 +222,6 @@ async function downloadFile(url, destPath, label, options = {}) {
     retryDelayMs:     options.retryDelayMs || 1_500,
     step:             options.step || null,
     verify:           options.verify || null,
-    // Keep the partial .part on final failure so the next attempt (retry button or
-    // app restart) resumes instead of re-downloading from zero — vital for large
-    // files on unstable connections. A corrupt .part is still dropped by verify.
     keepPartOnFail:   options.keepPartOnFail || false
   };
 
@@ -270,9 +263,6 @@ async function downloadFile(url, destPath, label, options = {}) {
   throw new Error(`${label}: ${normalizeNetworkError(lastError)}`);
 }
 
-// Resolve a public Yandex.Disk link to a direct download URL via the public API.
-// `publicKey` is the shared folder (or file) link; `filePath` selects a file inside a
-// shared folder (e.g. '/neoforge/neoforge-...zip'). Mirror for GitHub-blocked users.
 async function resolveYandexUrl(publicKey, filePath) {
   let api = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(publicKey)}`;
   if (filePath) api += `&path=${encodeURIComponent(filePath)}`;
@@ -284,11 +274,7 @@ async function resolveYandexUrl(publicKey, filePath) {
   return data.href;
 }
 
-/**
- * Tries several sources in order until one succeeds. A source is either a URL string
- * or an async function returning a URL (used for Yandex.Disk, which needs an API call).
- * Use for files available from a primary mirror + official/extra fallbacks.
- */
+
 async function downloadFromSources(sourcesIn, destPath, label, options = {}) {
   const sources = sourcesIn.filter(Boolean);
   let lastError = null;
@@ -309,7 +295,6 @@ async function downloadFromSources(sourcesIn, destPath, label, options = {}) {
     try {
       const src = sources[i];
       const url = typeof src === 'function' ? await src() : src;
-      // Non-final mirrors get fewer retries so we fall back to the next source quickly.
       await downloadFile(url, destPath, label, {
         ...options,
         retries: isLast ? (options.retries || 3) : (options.mirrorRetries || 2)
@@ -337,10 +322,6 @@ async function extractViaPowerShell(zipPath, destDir) {
 }
 
 function extractWithAdmZip(zipPath, destDir) {
-  // adm-zip's async inflater attaches no 'error' handler to its zlib stream, so a
-  // corrupt/truncated entry surfaces as an uncaughtException that crashes the whole
-  // process. Scope a temporary handler over the extraction window and turn it into a
-  // normal rejection (which routes us to the PowerShell fallback).
   return new Promise((resolve, reject) => {
     let settled = false;
     const onUncaught = (err) => finish(err);
@@ -372,7 +353,6 @@ async function extractZip(zipPath, destDir) {
   }
 }
 
-// ─── Java detection ───────────────────────────────────────────────────────────
 
 const WIN_JAVA_DIRS = [
   'C:\\Program Files\\Java',
@@ -383,16 +363,13 @@ const WIN_JAVA_DIRS = [
   'C:\\Program Files\\BellSoft',
 ];
 
-// Returns the major Java version of an executable (8, 17, 21, ...), or null if unknown.
-// `java -version` prints e.g. `version "21.0.10"` (modern) or `version "1.8.0_401"` (Java 8),
-// usually to stderr and with exit code 0.
 async function getJavaMajor(exePath) {
   const parse = (text) => {
     if (!text) return null;
     const m = text.match(/version "(\d+)(?:\.(\d+))?/);
     if (!m) return null;
     let major = parseInt(m[1], 10);
-    if (major === 1 && m[2]) major = parseInt(m[2], 10); // 1.8 → 8
+    if (major === 1 && m[2]) major = parseInt(m[2], 10);
     return Number.isNaN(major) ? null : major;
   };
   try {
@@ -415,7 +392,6 @@ async function findJavaInDir(baseDir, minVersion) {
     const exePath = path.join(baseDir, entry, 'bin', 'java.exe');
     if (fs.existsSync(exePath)) return exePath;
 
-    // Some layouts: baseDir/jdk-21.x.x/jdk-21.x.x/bin/java.exe
     const sub = fs.readdirSync(path.join(baseDir, entry)).find(s => s.startsWith('jdk'));
     if (sub) {
       const nested = path.join(baseDir, entry, sub, 'bin', 'java.exe');
@@ -428,25 +404,20 @@ async function findJavaInDir(baseDir, minVersion) {
 const REQUIRED_JAVA_MAJOR = 21;
 
 async function findJava(gameDir) {
-  // Accept a candidate only if it is actually Java 21+ (a system Java 8 must be rejected,
-  // otherwise NeoForge fails at launch with "Unrecognized option: -p").
   const accept = async (exe) => {
     if (!exe || !fs.existsSync(exe)) return false;
     const major = await getJavaMajor(exe);
     return major !== null && major >= REQUIRED_JAVA_MAJOR;
   };
 
-  // 1. Bundled runtime in game dir — the Java 21 we install ourselves.
   const bundled = path.join(gameDir, 'runtime', 'java21', 'bin', 'java.exe');
   if (await accept(bundled)) return bundled;
 
-  // 2. JAVA_HOME (only if Java 21+)
   if (process.env.JAVA_HOME) {
     const exe = path.join(process.env.JAVA_HOME, 'bin', 'java.exe');
     if (await accept(exe)) return exe;
   }
 
-  // 3. PATH (check every entry, skip older Javas like a system-wide Java 8)
   try {
     const { stdout } = await execAsync('where java', { timeout: 5000 });
     for (const line of stdout.trim().split(/\r?\n/)) {
@@ -455,7 +426,6 @@ async function findJava(gameDir) {
     }
   } catch (_) {}
 
-  // 4. Common Windows install directories
   for (const base of WIN_JAVA_DIRS) {
     const found = await findJavaInDir(base, '21');
     if (await accept(found)) return found;
@@ -464,7 +434,6 @@ async function findJava(gameDir) {
   return null;
 }
 
-// ─── Java installation ────────────────────────────────────────────────────────
 
 async function installJava(gameDir) {
   emit({ type: 'step', step: 'java', status: 'downloading', message: 'Downloading Java 21...' });
@@ -559,7 +528,6 @@ async function installJava(gameDir) {
   return javaExe;
 }
 
-// ─── Minecraft download ───────────────────────────────────────────────────────
 
 async function downloadMinecraft(gameDir, javaExe) {
   emit({ type: 'step', step: 'minecraft', status: 'downloading', message: 'Downloading Minecraft 1.21.1...' });
@@ -627,7 +595,6 @@ async function downloadMinecraft(gameDir, javaExe) {
 
     launcher.on('debug', (msg) => {
       touch();
-      // Launcher finishes file downloads before starting the game
       if (typeof msg === 'string' && msg.includes('Downloaded')) {
         emit({ type: 'step', step: 'minecraft', status: 'progress', message: msg });
       }
@@ -650,19 +617,14 @@ async function downloadMinecraft(gameDir, javaExe) {
   emit({ type: 'step', step: 'minecraft', status: 'done', message: 'Minecraft 1.21.1 ready.' });
 }
 
-// ─── NeoForge installation ────────────────────────────────────────────────────
 
 async function installNeoForge(gameDir, javaExe) {
-  // launcher_profiles.json is expected by the NeoForge installer (Mojang launcher format).
   ensureLauncherProfiles(gameDir);
 
   const nfVersion = config.NEOFORGE_VERSION;
   const hasMirror = config.GITHUB_OWNER && config.GITHUB_REPO &&
                     config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER';
 
-  // Preferred path: download a pre-installed NeoForge archive from our GitHub mirror and
-  // unpack it. This avoids maven.neoforged.net entirely (it is often blocked/throttled),
-  // so no installer needs to run and no libraries are fetched at install time.
   if (hasMirror) {
     try {
       await installNeoForgeFromArchive(gameDir, nfVersion);
@@ -679,14 +641,11 @@ async function installNeoForge(gameDir, javaExe) {
     }
   }
 
-  // Fallback: the official installer (requires access to maven.neoforged.net).
   await installNeoForgeViaInstaller(gameDir, javaExe, nfVersion);
   ensureDir(path.join(gameDir, 'mods'));
   emit({ type: 'step', step: 'neoforge', status: 'done', message: 'NeoForge installed.' });
 }
 
-// Pre-installed NeoForge: a zip with versions/<neoforge> + the neoforged-hosted libraries,
-// produced once on a machine where maven.neoforged.net is reachable, then served from GitHub.
 async function installNeoForgeFromArchive(gameDir, nfVersion) {
   const archiveName = `neoforge-${nfVersion}-offline.zip`;
   const archiveUrl  = `https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/releases/download/neoforge/${archiveName}`;
@@ -699,16 +658,12 @@ async function installNeoForgeFromArchive(gameDir, nfVersion) {
     ? makeSizeShaVerifier(nf.OFFLINE_SIZE, nf.OFFLINE_SHA256, 'NeoForge (offline)')
     : null;
 
-  // Reuse a fully-downloaded archive from a previous attempt; otherwise resume the .part.
   let haveArchive = false;
   if (verify && fs.existsSync(archivePath)) {
     try { await verify(archivePath); haveArchive = true; }
     catch (_) { removeFileIfExists(archivePath); }
   }
   if (!haveArchive) {
-    // Sources: GitHub mirror → Yandex.Disk (for users where GitHub is blocked).
-    // Big file on a flaky link: many retries + keep the .part so progress accumulates
-    // across attempts and app restarts until the 97 MB finally lands.
     const sources = [archiveUrl];
     if (config.YANDEX_DISK_URL && nf.OFFLINE_YANDEX_PATH) {
       sources.push(() => resolveYandexUrl(config.YANDEX_DISK_URL, nf.OFFLINE_YANDEX_PATH));
@@ -727,9 +682,6 @@ async function installNeoForgeFromArchive(gameDir, nfVersion) {
     removeFileIfExists(`${archivePath}.part`);
   }
 
-  // Verify the unpacked archive is complete: the version manifest AND the universal jar
-  // that registers the neoforge/minecraft mod providers. If either is missing, throw so
-  // the caller falls back to the official installer.
   const versionJson  = path.join(gameDir, 'versions', `neoforge-${nfVersion}`, `neoforge-${nfVersion}.json`);
   const universalJar = path.join(gameDir, 'libraries', 'net', 'neoforged', 'neoforge', nfVersion, `neoforge-${nfVersion}-universal.jar`);
   if (!fs.existsSync(versionJson) || !fs.existsSync(universalJar)) {
@@ -776,7 +728,6 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
 
   const nf = config.NEOFORGE || {};
 
-  // Источники по приоритету: своё зеркало в GitHub Releases → официальный maven → Яндекс.Диск.
   const sources = [];
   if (config.GITHUB_OWNER && config.GITHUB_REPO &&
       config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER') {
@@ -842,11 +793,9 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
     proc.on('error', finish);
   });
 
-  // Clean up installer jar
   try { fs.unlinkSync(installerJar); } catch (_) {}
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
 
 function isMinecraftInstalled(gameDir) {
   const versionDir = path.join(gameDir, 'versions', config.MC_VERSION);
@@ -896,7 +845,6 @@ async function install(gameDir, javaPathOverride) {
   ensureDir(gameDir);
   openInstallLog(gameDir);
   try {
-    // ── Step 1: Java ──────────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'java', message: 'Checking Java 21...' });
     let javaExe = null;
 
@@ -917,7 +865,6 @@ async function install(gameDir, javaPathOverride) {
       emit({ type: 'step', step: 'java', status: 'done', message: `Java found: ${javaExe}` });
     }
 
-    // ── Step 2: Minecraft ─────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'minecraft', message: 'Downloading Minecraft 1.21.1...' });
     if (isMinecraftInstalled(gameDir)) {
       emit({ type: 'step', step: 'minecraft', status: 'done', message: 'Minecraft 1.21.1 ready.' });
@@ -925,7 +872,6 @@ async function install(gameDir, javaPathOverride) {
       await downloadMinecraft(gameDir, javaExe);
     }
 
-    // ── Step 3: NeoForge ──────────────────────────────────────────────────────
     emit({ type: 'step-start', step: 'neoforge', message: 'Installing NeoForge...' });
     if (isNeoForgeInstalled(gameDir)) {
       ensureDir(path.join(gameDir, 'mods'));
@@ -947,9 +893,6 @@ async function install(gameDir, javaPathOverride) {
   }
 }
 
-// Wipe the parts of the install that get corrupted by a broken download/patch
-// (Minecraft + NeoForge jars/libs) while keeping the expensive, integrity-checked
-// pieces: the bundled Java runtime, downloaded assets, mods, configs and saves.
 function cleanForRepair(gameDir) {
   removeDirIfExists(path.join(gameDir, 'versions'));
   removeDirIfExists(path.join(gameDir, 'libraries'));

@@ -1,11 +1,7 @@
-/**
- * serverPing.js
- * Minecraft 1.7+ server list ping protocol over raw TCP.
- */
+
 
 const net = require('net');
 
-// ─── VarInt encoding ─────────────────────────────────────────────────────────
 
 function encodeVarInt(value) {
   const bytes = [];
@@ -34,7 +30,6 @@ function decodeVarInt(buf, offset) {
   return { value, bytesRead: read };
 }
 
-// ─── Packet builder ──────────────────────────────────────────────────────────
 
 function encodeString(str) {
   const buf = Buffer.from(str, 'utf8');
@@ -42,24 +37,21 @@ function encodeString(str) {
 }
 
 function buildHandshake(host, port) {
-  // Packet 0x00 Handshake
   const body = Buffer.concat([
-    encodeVarInt(0x00),          // Packet ID
-    encodeVarInt(767),           // Protocol version (1.21.1 = 767)
-    encodeString(host),          // Server address
+    encodeVarInt(0x00),
+    encodeVarInt(767),
+    encodeString(host),
     (() => { const b = Buffer.alloc(2); b.writeUInt16BE(port); return b; })(),
-    encodeVarInt(1)              // Next state: STATUS
+    encodeVarInt(1)
   ]);
   return Buffer.concat([encodeVarInt(body.length), body]);
 }
 
 function buildStatusRequest() {
-  // Packet 0x00 Status Request (empty body)
   const body = encodeVarInt(0x00);
   return Buffer.concat([encodeVarInt(body.length), body]);
 }
 
-// ─── Main ping ───────────────────────────────────────────────────────────────
 
 function ping(host, port = 25565, timeoutMs = 1500) {
   return new Promise((resolve) => {
@@ -99,15 +91,12 @@ function ping(host, port = 25565, timeoutMs = 1500) {
       buf = Buffer.concat([buf, chunk]);
 
       try {
-        // Outer: packet length
         const { value: pktLen, bytesRead: pktLenSize } = decodeVarInt(buf, 0);
-        if (buf.length < pktLenSize + pktLen) return; // need more data
+        if (buf.length < pktLenSize + pktLen) return;
 
-        // Packet ID
         const { value: pktId, bytesRead: pktIdSize } = decodeVarInt(buf, pktLenSize);
         if (pktId !== 0x00) return;
 
-        // JSON string
         const jsonOff = pktLenSize + pktIdSize;
         const { value: jsonLen, bytesRead: jsonLenSize } = decodeVarInt(buf, jsonOff);
         const jsonStart = jsonOff + jsonLenSize;
@@ -131,7 +120,6 @@ function ping(host, port = 25565, timeoutMs = 1500) {
           version: response.version?.name ?? ''
         });
       } catch (_) {
-        // Incomplete data — wait for more
       }
     });
   });

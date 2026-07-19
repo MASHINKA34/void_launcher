@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════ ЭКРАН ВХОДА -->
+
 <div id="screen-login" class="screen active">
   <canvas id="particles-canvas"></canvas>
 
@@ -27,7 +27,7 @@
   </div>
 
   <div class="login-card">
-    <!-- Логотип -->
+
     <div class="logo-wrap">
       <img class="logo-svg" src="../assets/icon.png" width="80" height="80" alt="VoID Cube" draggable="false">
     </div>
@@ -80,9 +80,9 @@
   <div class="version-tag" id="login-version-tag">v1.2.1</div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ ЭКРАН УСТАНОВКИ -->
+
 <div id="screen-install" class="screen">
-  <!-- Тайтлбар экрана установки -->
+
   <div class="titlebar" id="install-titlebar">
     <div class="titlebar-left">
       <img src="../assets/icon.png" width="18" height="18" style="margin-right:6px;opacity:.85;border-radius:3px" draggable="false" alt="">
@@ -102,14 +102,14 @@
   </div>
 
   <div class="install-container">
-    <!-- Логотип -->
+
     <div class="install-logo">
       <img src="../assets/icon.png" width="48" height="48" alt="VoID Cube" draggable="false" style="border-radius:6px">
       <span>Первый запуск</span>
     </div>
 
     <div id="install-steps">
-      <!-- Шаги заполняются из JS -->
+
     </div>
 
     <div class="install-progress-wrap">
@@ -131,10 +131,10 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ ГЛАВНЫЙ ЭКРАН -->
+
 <div id="screen-main" class="screen">
 
-  <!-- Тайтлбар -->
+
   <div class="titlebar" id="titlebar">
     <div class="titlebar-left">
       <img src="../assets/icon.png" width="18" height="18" style="margin-right:6px;opacity:.85;border-radius:3px" draggable="false" alt="">
@@ -153,10 +153,10 @@
     </div>
   </div>
 
-  <!-- Разметка приложения -->
+
   <div class="app-layout">
 
-    <!-- Боковая панель -->
+
     <nav class="sidebar">
       <button class="sidebar-icon active" id="nav-home" data-tab="home" title="Главная">
         <i data-lucide="house" width="22" height="22"></i>
@@ -172,13 +172,13 @@
       </button>
     </nav>
 
-    <!-- Область контента -->
+
     <div class="content-area">
 
-      <!-- ── ВКЛАДКА: ГЛАВНАЯ ─────────────────────────────────────────────── -->
+
       <div id="tab-home" class="tab-pane active">
 
-        <!-- Баннер обновления лаунчера -->
+
         <div id="update-banner" class="update-banner hidden">
           <div class="update-banner-left">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -197,7 +197,7 @@
           </div>
         </div>
 
-        <!-- Верхняя панель -->
+
         <div class="top-bar">
           <div class="player-info">
             <div class="player-avatar" id="player-avatar">P</div>
@@ -212,9 +212,9 @@
           </div>
         </div>
 
-        <!-- Герой + Новости -->
+
         <div class="home-body">
-          <!-- Герой -->
+
           <div class="hero-area">
             <div class="version-badge" id="home-version-badge">NeoForge 1.21.1</div>
 
@@ -229,7 +229,7 @@
             <div class="mods-info" id="mods-info">Загрузка...</div>
           </div>
 
-          <!-- Новости -->
+
           <div class="news-panel">
             <div class="news-header">Последние новости</div>
             <div class="news-list" id="news-list">
@@ -238,7 +238,7 @@
           </div>
         </div>
 
-        <!-- Модальное окно новости -->
+
         <div id="news-modal-overlay" class="news-modal-overlay hidden">
           <div class="news-modal">
             <div class="news-modal-date"  id="news-modal-date"></div>
@@ -248,7 +248,7 @@
           </div>
         </div>
 
-        <!-- Синхронизация модов (показывается при синхронизации) -->
+
         <div id="sync-overlay" class="sync-overlay hidden">
           <div class="sync-box">
             <div class="sync-title">Синхронизация модов...</div>
@@ -261,12 +261,12 @@
         </div>
       </div>
 
-      <!-- ── ВКЛАДКА: НАСТРОЙКИ ──────────────────────────────────────────── -->
+
       <div id="tab-settings" class="tab-pane">
         <div class="settings-wrap">
           <h2 class="settings-title">Настройки</h2>
 
-          <!-- ОЗУ -->
+
           <div class="setting-group">
             <label class="setting-label">Оперативная память</label>
             <div class="ram-row">
@@ -275,7 +275,7 @@
             </div>
           </div>
 
-          <!-- Разрешение -->
+
           <div class="setting-group">
             <label class="setting-label">Разрешение экрана</label>
             <div class="resolution-row">
@@ -285,7 +285,7 @@
             </div>
           </div>
 
-          <!-- Папка игры -->
+
           <div class="setting-group">
             <label class="setting-label">Папка игры</label>
             <div class="folder-row">
@@ -294,7 +294,7 @@
             </div>
           </div>
 
-          <!-- Путь к Java -->
+
           <div class="setting-group">
             <label class="setting-label">Путь к Java</label>
             <div class="folder-row">
@@ -303,7 +303,7 @@
             </div>
           </div>
 
-          <!-- Видеокарта -->
+
           <div class="setting-group">
             <label class="setting-label">Видеокарта</label>
             <select id="setting-gpu" class="text-input">
@@ -313,7 +313,7 @@
             </select>
           </div>
 
-          <!-- Никнейм -->
+
           <div class="setting-group">
             <label class="setting-label">Никнейм</label>
             <div class="folder-row">
@@ -322,7 +322,7 @@
             </div>
           </div>
 
-          <!-- Скины -->
+
           <div class="setting-group">
             <label class="setting-label">Скины</label>
             <div class="folder-row">
@@ -351,7 +351,7 @@
             <div class="setting-hint">Красивые дальние горизонты, но сильно нагружает ПК. На слабом компьютере лучше выключить.</div>
           </div>
 
-          <!-- О лаунчере -->
+
           <div class="setting-group about-group">
             <label class="setting-label">О лаунчере</label>
             <div class="about-rows">
@@ -365,7 +365,7 @@
         </div>
       </div>
 
-      <!-- ── ВКЛАДКА: КОНСОЛЬ ────────────────────────────────────────────── -->
+
       <div id="tab-console" class="tab-pane">
         <div class="console-header">
           <span class="console-title">Журнал консоли</span>
@@ -382,7 +382,7 @@
         <div class="console-output" id="console-output"></div>
       </div>
 
-      <!-- ── ВКЛАДКА: МОДЫ ──────────────────────────────────────────────── -->
+
       <div id="tab-mods" class="tab-pane">
         <div class="mods-tab-header">
           <span class="mods-tab-title">Сборка модов</span>
@@ -393,11 +393,11 @@
         </div>
       </div>
 
-    </div><!-- /content-area -->
-  </div><!-- /app-layout -->
-</div><!-- /screen-main -->
+    </div>
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════════════════════════ МОДАЛЬНОЕ ОКНО ОШИБКИ -->
+
 <div id="error-modal" class="modal-backdrop hidden">
   <div class="modal-box">
     <div class="modal-icon">
@@ -417,7 +417,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ МОДАЛЬНОЕ ОКНО ВЫБОРА НИКА -->
+
 <div id="profiles-modal" class="modal-backdrop hidden">
   <div class="modal-box profiles-modal-box">
     <div class="modal-title">Выбор никнейма</div>

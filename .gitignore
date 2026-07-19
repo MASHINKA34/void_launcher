@@ -1,33 +1,26 @@
-# Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build output
 dist/
 build/
 out/
 
-# Electron builder cache
 .cache/
 
-# Runtime data / user files
 *.log
 *.pid
 *.seed
 
-# User-generated game data (stored in userData, never in repo)
 userdata/
 game/
 runtime/
 
-# Settings and profile (machine-specific)
 settings.json
 profile.json
 accounts.json
 
-# OS files
 .DS_Store
 .DS_Store?
 ._*
@@ -37,7 +30,6 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# IDE
 .vscode/
 .idea/
 *.suo
@@ -46,21 +38,16 @@ desktop.ini
 *.sln
 *.sw?
 
-# Temporary files
 tmp/
 temp/
 *.tmp
 *.bak
 
-# Installer artifacts
 *.jar
 !mods-list.json
 
-# Mod upload staging (generated, ~268MB)
 tools/staging-mods/
 
-# Built NeoForge offline artifacts (generated, hosted in Releases)
 tools/*.zip
 
-# Windows shortcuts
 *.lnk

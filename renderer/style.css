@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════════ CSS Variables */
+
 :root {
   --bg-primary:    #0d0618;
   --bg-secondary:  #1a0a2e;
@@ -17,7 +17,7 @@
   --transition:    0.3s ease;
 }
 
-/* ═══════════════════════════════════════════════════ Reset & Base */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -40,13 +40,13 @@ body.app-paused *::after {
   animation-play-state: paused !important;
 }
 
-/* ═══════════════════════════════════════════════════ Scrollbar */
+
 ::-webkit-scrollbar              { width: 6px; }
 ::-webkit-scrollbar-track        { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb        { background: var(--purple-main); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover  { background: var(--purple-accent); }
 
-/* ═══════════════════════════════════════════════════ Screens */
+
 .screen {
   position: absolute;
   inset: 0;
@@ -59,7 +59,7 @@ body.app-paused *::after {
   pointer-events: all;
 }
 
-/* ═══════════════════════════════════════════════════ LOGIN SCREEN */
+
 #screen-login {
   display: flex;
   align-items: center;
@@ -188,7 +188,7 @@ body.app-paused *::after {
   padding: 0 4px;
 }
 
-/* ═══════════════════════════════════════════════════ Buttons */
+
 .btn-primary {
   padding: 13px 24px;
   background: linear-gradient(135deg, #7c3aed, #a855f7);
@@ -274,7 +274,7 @@ body.app-paused *::after {
   opacity: 0.6;
 }
 
-/* ═══════════════════════════════════════════════════ INSTALL SCREEN */
+
 #screen-install {
   display: flex;
   flex-direction: column;
@@ -406,14 +406,14 @@ body.app-paused *::after {
 }
 .install-error-actions .btn-secondary { width: 100%; }
 
-/* ═══════════════════════════════════════════════════ MAIN SCREEN */
+
 #screen-main {
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
 }
 
-/* Titlebar */
+
 .titlebar {
   height: 38px;
   display: flex;
@@ -451,14 +451,14 @@ body.app-paused *::after {
 .tb-btn:hover        { background: rgba(168,85,247,0.12); color: var(--text-primary); }
 .tb-btn.tb-close:hover { background: rgba(239,68,68,0.15); color: var(--error); }
 
-/* App layout */
+
 .app-layout {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* Sidebar */
+
 .sidebar {
   width: 60px;
   display: flex;
@@ -491,12 +491,12 @@ body.app-paused *::after {
   color: var(--purple-accent);
   box-shadow: 0 0 14px rgba(168, 85, 247, 0.2);
 }
-/* Lucide SVG внутри кнопок сайдбара */
+
 .sidebar-icon svg {
   width: 22px; height: 22px;
   stroke-width: 1.8px;
 }
-/* Tooltip */
+
 .sidebar-icon::after {
   content: attr(title);
   position: absolute;
@@ -515,14 +515,14 @@ body.app-paused *::after {
 }
 .sidebar-icon:hover::after { opacity: 1; }
 
-/* Content area */
+
 .content-area {
   flex: 1;
   overflow: hidden;
   position: relative;
 }
 
-/* Tab panes */
+
 .tab-pane {
   position: absolute;
   inset: 0;
@@ -535,10 +535,10 @@ body.app-paused *::after {
   pointer-events: all;
 }
 
-/* ═════════════════════════════════════════ TAB: HOME */
+
 #tab-home { display: flex; flex-direction: column; overflow: hidden; }
 
-/* Top bar */
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -586,14 +586,14 @@ body.app-paused *::after {
   0%,100% { opacity: 1; } 50% { opacity: 0.3; }
 }
 
-/* Home body */
+
 .home-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* Hero area */
+
 .hero-area {
   flex: 1;
   display: flex;
@@ -614,7 +614,7 @@ body.app-paused *::after {
   letter-spacing: 1px;
 }
 
-/* Play button */
+
 .play-ring-wrap {
   position: relative;
   width: 160px; height: 160px;
@@ -625,7 +625,7 @@ body.app-paused *::after {
   inset: 0;
   border-radius: 50%;
   border: 2px solid rgba(168, 85, 247, 0.25);
-  pointer-events: none; /* ← НЕ перехватывает клики */
+  pointer-events: none;
   animation: ring-pulse 2.5s ease-in-out infinite;
 }
 @keyframes ring-pulse {
@@ -646,15 +646,15 @@ body.app-paused *::after {
   cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 6px;
-  /* Спокойное состояние — без анимации, лёгкая тень */
+
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
   transition: box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
   outline: none;
   position: relative;
-  z-index: 1; /* выше .play-ring */
+  z-index: 1;
 }
 
-/* ── Hover — кнопка "загорается" ─────────────────────── */
+
 .btn-play:hover:not(:disabled) {
   box-shadow:
     0 0 25px  rgba(168, 85, 247, 0.9),
@@ -679,7 +679,7 @@ body.app-paused *::after {
   50%       { box-shadow: 0 0 40px rgba(168,85,247,1),   0 0 80px rgba(168,85,247,0.7), 0 0 120px rgba(168,85,247,0.3); }
 }
 
-/* Спиннер внутри кнопки ИГРАТЬ */
+
 .play-spinner {
   width: 20px; height: 20px;
   border: 2px solid rgba(255,255,255,0.25);
@@ -692,7 +692,7 @@ body.app-paused *::after {
 
 .mods-info { font-size: 12px; color: var(--text-muted); }
 
-/* News panel */
+
 .news-panel {
   width: 260px;
   border-left: 1px solid rgba(168, 85, 247, 0.08);
@@ -747,7 +747,7 @@ body.app-paused *::after {
   -webkit-user-select: text;
 }
 
-/* News modal */
+
 .news-modal-overlay {
   position: fixed;
   inset: 0;
@@ -808,7 +808,7 @@ body.app-paused *::after {
 }
 .news-modal-close:hover { background: rgba(168, 85, 247, 0.3); }
 
-/* Mods tab */
+
 #tab-mods { display: flex; flex-direction: column; overflow: hidden; }
 
 .mods-tab-header {
@@ -965,7 +965,7 @@ body.app-paused *::after {
   border: 1px solid rgba(34,197,94,0.2);
 }
 
-/* Nick dropdown */
+
 .nick-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -1000,7 +1000,7 @@ body.app-paused *::after {
 }
 .nick-dropdown-item:hover .nick-delete { opacity: 1; color: #ef4444; }
 
-/* Profiles modal */
+
 .profiles-modal-box { width: 360px; }
 .profiles-list {
   display: flex;
@@ -1042,7 +1042,7 @@ body.app-paused *::after {
 .profiles-new-wrap { margin-top: 10px; }
 .profiles-new-wrap .input-error { margin-top: 4px; }
 
-/* Sync overlay */
+
 .sync-overlay {
   position: absolute;
   inset: 0;
@@ -1062,7 +1062,7 @@ body.app-paused *::after {
 .sync-mod-name { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; min-height: 20px; }
 .sync-detail   { font-size: 11px; color: var(--text-muted); margin-top: 8px; min-height: 16px; }
 
-/* ═════════════════════════════════════════ TAB: SETTINGS */
+
 #tab-settings { overflow-y: auto; }
 
 .settings-wrap {
@@ -1093,7 +1093,7 @@ body.app-paused *::after {
   margin-bottom: 8px;
 }
 
-/* RAM slider */
+
 .ram-row { display: flex; align-items: center; gap: 14px; }
 .range-input {
   flex: 1;
@@ -1123,7 +1123,7 @@ body.app-paused *::after {
   flex-shrink: 0;
 }
 
-/* Text inputs */
+
 .text-input {
   flex: 1;
   padding: 9px 12px;
@@ -1176,7 +1176,7 @@ select.text-input option {
   cursor: pointer;
 }
 
-/* About section */
+
 .about-group .about-rows {
   background: var(--bg-card);
   border: 1px solid rgba(168,85,247,0.12);
@@ -1200,7 +1200,7 @@ select.text-input option {
   color: var(--success);
 }
 
-/* ═════════════════════════════════════════ TAB: CONSOLE */
+
 #tab-console { display: flex; flex-direction: column; overflow: hidden; }
 
 .console-header {
@@ -1231,7 +1231,7 @@ select.text-input option {
 .console-line.info    { color: #80c0ff; }
 .console-line.system  { color: #c084fc; font-style: italic; }
 
-/* ═══════════════════════════════════════════════════ ERROR MODAL */
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1263,7 +1263,7 @@ select.text-input option {
 }
 .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-/* ═══════════════════════════════════════════════════ Utilities */
+
 .hidden { display: none !important; }
 
 @keyframes spin {
@@ -1275,7 +1275,7 @@ select.text-input option {
   to   { opacity: 1; transform: translateY(0);   }
 }
 
-/* ═══════════════════════════════════════════════════ Update Banner */
+
 .update-banner {
   display: flex;
   align-items: center;

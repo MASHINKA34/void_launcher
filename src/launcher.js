@@ -1,7 +1,4 @@
-/**
- * launcher.js
- * Launches Minecraft with NeoForge via minecraft-launcher-core (offline mode).
- */
+
 
 const path = require('path');
 const fs   = require('fs');
@@ -209,8 +206,6 @@ function createCrashDetector() {
         text.includes('A fatal error has been detected by the Java Runtime Environment')) {
       state.nativeCrash = true;
     }
-    // Missing core Minecraft/NeoForge classes ⇒ the game jars are corrupt or only
-    // half-installed (e.g. LoadingOverlay ClassNotFoundException). Repairable.
     if (/ClassNotFoundException: net\.minecraft\./.test(text) ||
         /NoClassDefFoundError: net\/minecraft\//.test(text) ||
         /ClassNotFoundException: cpw\.mods\./.test(text) ||
@@ -253,8 +248,6 @@ function createCrashDetector() {
   return { inspect, buildMessage };
 }
 
-// Read the NeoForge version JSON and extract the JVM args it requires,
-// substituting the ${variable} placeholders MCLC doesn't handle.
 function buildNeoForgeJvmArgs(gameDir, versionId) {
   const jsonPath = path.join(gameDir, 'versions', versionId, `${versionId}.json`);
   if (!fs.existsSync(jsonPath)) return [];
@@ -275,7 +268,7 @@ function buildNeoForgeJvmArgs(gameDir, versionId) {
 
   const result = [];
   for (const arg of jvmArgs) {
-    if (typeof arg !== 'string') continue; // skip conditional rule-objects
+    if (typeof arg !== 'string') continue;
     let s = arg;
     for (const [k, v] of Object.entries(vars)) {
       s = s.split(k).join(v);
@@ -323,7 +316,6 @@ async function launch(opts) {
   const neoforgeId = findNeoForgeVersionId(gameDir);
   if (!neoforgeId) throw new Error('NeoForge is not installed. Please run installation first.');
 
-  // NeoForge version JSON JVM args (module path, add-modules, add-opens, etc.)
   const neoforgeJvmArgs = buildNeoForgeJvmArgs(gameDir, neoforgeId);
 
   const launcher = new Client();
@@ -352,9 +344,7 @@ async function launch(opts) {
     },
     javaPath: javaPath !== 'auto' ? javaPath : undefined,
     customArgs: [
-      // NeoForge-required JVM args (module path, add-modules, add-opens, add-exports)
       ...neoforgeJvmArgs,
-      // G1GC performance flags
       '-XX:+UseG1GC',
       '-XX:+ParallelRefProcEnabled',
       '-XX:MaxGCPauseMillis=200',
@@ -380,8 +370,6 @@ async function launch(opts) {
     };
   }
 
-  // Resolve a Java 21+ runtime. NeoForge 1.21.1 requires Java 21 — launching with an
-  // older system Java (e.g. Java 8) fails with "Unrecognized option: -p".
   let resolvedJava = null;
   if (javaPath && javaPath !== 'auto') {
     const major = await installer.getJavaMajor(javaPath);
@@ -432,7 +420,6 @@ async function launch(opts) {
       if (!started) { started = true; resolve(0); }
     });
 
-    // Fallback resolve after 5s if no data event fires
     setTimeout(() => { if (!started) { started = true; resolve(0); } }, 5000);
   });
 }

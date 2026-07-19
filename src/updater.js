@@ -1,7 +1,4 @@
-/**
- * updater.js
- * Checks GitHub Releases for a newer version and downloads/installs it.
- */
+
 
 const path   = require('path');
 const fs     = require('fs');
@@ -108,7 +105,6 @@ function buildDownloadSources(opts) {
   });
 }
 
-// Returns 1 if a > b, -1 if a < b, 0 if equal (ignores leading 'v')
 function compareVersions(a, b) {
   const pa = a.replace(/^v/, '').split('.').map(Number);
   const pb = b.replace(/^v/, '').split('.').map(Number);

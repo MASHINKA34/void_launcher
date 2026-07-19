@@ -9,15 +9,9 @@ module.exports = {
   LAUNCHER_VERSION: '1.3.2',
   GAME_DIR_NAME:    'mylauncher-minecraft',
 
-  // GitHub репозиторий для автообновлений лаунчера.
-  // Теги релизов должны быть вида: v1.0.1, v1.0.2 и т.д.
   GITHUB_OWNER: 'MASHINKA34',
   GITHUB_REPO:  'void_launcher',
 
-  // ОДНА публичная папка Яндекс.Диска со всеми зависимостями — запасной источник,
-  // если GitHub заблокирован (актуально для РФ). Внутри разложить по подпапкам,
-  // пути указаны в *_YANDEX_PATH ниже: /java/<zip>, /neoforge/<offline.zip>, /neoforge/<installer.jar>.
-  // Пусто = Яндекс не используется. Пример: 'https://disk.yandex.ru/d/XXXXXXXX'
   YANDEX_DISK_URL: 'https://disk.yandex.ru/d/XyPjlhuALVgu5Q',
 
   JAVA: {

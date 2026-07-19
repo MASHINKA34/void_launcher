@@ -14,7 +14,6 @@ let mainWindow = null;
 let tray = null;
 let activeAuthProfile = null;
 
-// ─── Window ───────────────────────────────────────────────────────────────────
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -72,7 +71,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// ─── Window controls ──────────────────────────────────────────────────────────
 
 ipcMain.handle('minimize-window', () => {
   if (mainWindow) mainWindow.minimize();
@@ -82,7 +80,6 @@ ipcMain.handle('close-window', () => {
   app.quit();
 });
 
-// ─── Settings ─────────────────────────────────────────────────────────────────
 
 function getDefaultSettings() {
   return {
@@ -120,7 +117,6 @@ ipcMain.handle('save-settings', (_, settings) => {
   }
 });
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
 
 function getUserDataPath(...parts) {
   return path.join(app.getPath('userData'), ...parts);
@@ -266,7 +262,6 @@ ipcMain.handle('auth-restore-session', () => {
   }
 });
 
-// ─── System info ──────────────────────────────────────────────────────────────
 
 ipcMain.handle('get-system-ram', () => {
   return Math.floor(os.totalmem() / 1024 / 1024 / 1024);
@@ -312,7 +307,6 @@ ipcMain.handle('set-local-skin', async (_, { gameDir, username } = {}) => {
   }
 });
 
-// ─── Content ──────────────────────────────────────────────────────────────────
 
 const NEWS_URL     = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/news.json';
 const MODS_LIST_URL = 'https://raw.githubusercontent.com/MASHINKA34/void_launcher/main/mods-list.json';
@@ -443,7 +437,6 @@ ipcMain.handle('get-mods-list', () => {
   return [];
 });
 
-// ─── Installation ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('check-installation', async (_, gameDir, javaPath) => {
   const installer = require('./src/installer');
@@ -502,7 +495,6 @@ ipcMain.handle('open-logs-folder', async (_, gameDir) => {
   }
 });
 
-// ─── Mod sync ─────────────────────────────────────────────────────────────────
 
 let modSyncInFlight = false;
 
@@ -541,7 +533,6 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
   }
 });
 
-// ─── Game launch ─────────────────────────────────────────────────────────────
 
 function openGameLogStream(gameDir) {
   try {
@@ -606,14 +597,12 @@ ipcMain.handle('launch-game', async (_, launchOptions) => {
   }
 });
 
-// ─── Server ping ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('ping-server', async () => {
   const serverPing = require('./src/serverPing');
   return await serverPing.ping(config.SERVER_IP, config.SERVER_PORT, 1500);
 });
 
-// ─── Auto-update ──────────────────────────────────────────────────────────────
 
 ipcMain.handle('check-update', async () => {
   const updater = require('./src/updater');

@@ -1,8 +1,4 @@
-/**
- * modSync.js
- * Synchronises the mods folder with mods-list.json before every launch.
- * Steps: remove unknown jars → verify hashes → download missing/corrupted mods.
- */
+
 
 const fs     = require('fs');
 const path   = require('path');
@@ -133,7 +129,6 @@ function buildModSources(mod) {
   });
 }
 
-// ─── Hash ─────────────────────────────────────────────────────────────────────
 
 function getFileSHA256(filePath) {
   return new Promise((resolve, reject) => {
@@ -145,7 +140,6 @@ function getFileSHA256(filePath) {
   });
 }
 
-// ─── Download ─────────────────────────────────────────────────────────────────
 
 async function downloadModFromUrl(mod, url, partPath) {
   const res = await fetchWithTimeout(url, {
@@ -262,7 +256,6 @@ async function downloadAndVerify(mod, destPath) {
   throw new Error(normalizeDownloadError(mod, lastError));
 }
 
-// ─── Main sync ────────────────────────────────────────────────────────────────
 
 async function sync(gameDir, modsListPath) {
   try {

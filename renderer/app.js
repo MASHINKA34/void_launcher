@@ -1,8 +1,8 @@
 'use strict';
-/* ─────────────────────────────────────────────────────────────── State */
+
 const state = {
-  profile:  null,   // { username }
-  settings: null,   // loaded settings
+  profile:  null,
+  settings: null,
   systemRam: 16,
   modsList:  [],
   serverPingInterval: null,
@@ -11,7 +11,7 @@ const state = {
   isGameRunning: false
 };
 
-/* ─────────────────────────────────────────────────────────────── Util */
+
 function $(id)   { return document.getElementById(id); }
 function qs(sel) { return document.querySelector(sel); }
 
@@ -42,7 +42,7 @@ function fmtSpeed(bps) {
   return `${(bps/1024/1024).toFixed(1)} MB/s`;
 }
 
-/* ─────────────────────────────────────────────────────────────── Error modal */
+
 let modalRetryFn = null;
 let modalRepairFn = null;
 
@@ -70,7 +70,7 @@ $('modal-repair')?.addEventListener('click', () => {
   if (modalRepairFn) modalRepairFn();
 });
 
-/* ─────────────────────────────────────────────────────────────── Particles */
+
 let particlesStarted = false;
 let particlesFrame = null;
 let particlesPaused = false;
@@ -136,7 +136,7 @@ function initParticles() {
   setParticlesPaused(document.hidden);
 }
 
-/* ─────────────────────────────────────────────────────────────── Login Screen */
+
 const NICK_RE = /^[a-zA-Z0-9_]{3,16}$/;
 const PASSWORD_MIN = 4;
 let authMode = 'login';
@@ -311,7 +311,7 @@ function initLoginScreen(prefillNick = '') {
   setTimeout(() => (input.value ? passInput : input).focus(), 0);
 }
 
-/* ─────────────────────────────────────────────────────────────── Install Screen */
+
 const STEPS = [
   { id: 'java',      label: 'Java 21 Runtime'   },
   { id: 'minecraft', label: 'Minecraft 1.21.1'  },
@@ -430,8 +430,6 @@ async function runInstallation(repair = false, autoAttempt = 0) {
   }
 
   if (!result.success) {
-    // Downloads resume from where they dropped, so silently retry a couple of times
-    // before bothering the user. Skip for repair (it re-cleans the resumable part).
     const MAX_AUTO = 2;
     if (!repair && autoAttempt < MAX_AUTO) {
       setInstallProgress(null, `Соединение прервалось — повторная попытка ${autoAttempt + 2}/${MAX_AUTO + 1}...`, '');
@@ -451,7 +449,7 @@ async function runInstallation(repair = false, autoAttempt = 0) {
   return true;
 }
 
-/* ─────────────────────────────────────────────────────────────── Server ping */
+
 function updateServerStatus(res) {
   const dot  = qs('#server-status .status-dot');
   const text = $('status-text');
@@ -481,7 +479,7 @@ async function pingServer() {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────── News */
+
 function escapeHtml(text) {
   return String(text ?? '')
     .replace(/&/g, '&amp;')
@@ -539,7 +537,6 @@ async function loadNews() {
     list.innerHTML = '';
     list.appendChild(fragment);
   } catch (_) {
-    // не трогаем список если уже есть новости
     if (!list.querySelector('.news-item')) {
       list.innerHTML = '<div class="news-loading">Ошибка загрузки новостей.</div>';
     }
@@ -553,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ─────────────────────────────────────────────────────────────── Mods info */
+
 function modsWord(n) {
   return n === 1 ? 'мод' : (n >= 2 && n <= 4) ? 'мода' : 'модов';
 }
@@ -611,7 +608,7 @@ async function loadModsInfo() {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────── Console */
+
 let consoleAutoScroll = true;
 
 function appendConsole(text, cls) {
@@ -668,7 +665,7 @@ function initConsole() {
   });
 }
 
-/* ─────────────────────────────────────────────────────────────── Sync mods */
+
 function handleModSyncProgress(data) {
   const overlay  = $('sync-overlay');
   const modName  = $('sync-mod-name');
@@ -700,7 +697,7 @@ function handleModSyncProgress(data) {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────── Play */
+
 let playButtonBound = false;
 
 function setPlayBtnState(state_) {
@@ -736,7 +733,6 @@ async function startGame() {
   window.api.onModSyncProgress(handleModSyncProgress);
 
   try {
-    // ── Синхронизация модов ─────────────────────────────────────────
     overlay.classList.remove('hidden');
     appendConsole('[Лаунчер] Синхронизация модов...\n', 'system');
 
@@ -760,7 +756,6 @@ async function startGame() {
     }
     loadModsInfo();
 
-    // ── Запуск игры ─────────────────────────────────────────────────
     setPlayBtnState('loading');
     showTab('console');
     appendConsole(`[Лаунчер] Запуск Minecraft...\n[Лаунчер] Игрок: ${state.profile.username}\n[Лаунчер] Папка: ${state.settings.gameDir}\n[Лаунчер] ОЗУ: ${state.settings.ram}ГБ\n`, 'system');
@@ -796,7 +791,7 @@ async function startGame() {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────── Settings UI */
+
 async function loadSettings() {
   const s = state.settings;
   $('setting-ram').max    = state.systemRam;
@@ -814,7 +809,6 @@ async function loadSettings() {
 }
 
 function initSettingsUI() {
-  // RAM slider — обновляем и UI и state сразу
   $('setting-ram').addEventListener('input', () => {
     const val = parseInt($('setting-ram').value, 10);
     $('ram-value').textContent = `${val} ГБ`;
@@ -826,7 +820,6 @@ function initSettingsUI() {
     window.api.saveSettings(state.settings);
   });
 
-  // Browse folder
   $('btn-browse').addEventListener('click', async () => {
     const folder = await window.api.browseFolder();
     if (folder) {
@@ -861,7 +854,6 @@ function initSettingsUI() {
     window.api.saveSettings(state.settings);
   });
 
-  // Detect Java
   $('btn-detect-java').addEventListener('click', async () => {
     $('btn-detect-java').textContent = 'Поиск...';
     $('btn-detect-java').disabled    = true;
@@ -875,7 +867,6 @@ function initSettingsUI() {
     }
   });
 
-  // Save settings
   $('btn-save-settings').addEventListener('click', async () => {
     const newSettings = {
       ...state.settings,
@@ -897,7 +888,6 @@ function initSettingsUI() {
     setTimeout(() => saved.classList.add('hidden'), 2500);
   });
 
-  // Change nickname
   $('btn-change-nick').addEventListener('click', async () => {
     await window.api.logoutAccount();
     await window.api.deleteProfile();
@@ -914,7 +904,7 @@ function initSettingsUI() {
   });
 }
 
-/* ─────────────────────────────────────────────────────────────── Profiles modal */
+
 async function openProfilesModal() {
   const modal       = $('profiles-modal');
   const list        = $('profiles-list');
@@ -997,7 +987,7 @@ async function openProfilesModal() {
   };
 }
 
-/* ─────────────────────────────────────────────────────────────── Title bar */
+
 function minimizeApp() {
   setAppPaused(true);
   window.api.minimize();
@@ -1010,7 +1000,6 @@ function initTitleBar() {
   $('btn-minimize').addEventListener('click', minimizeApp);
   $('btn-close').addEventListener('click',    () => window.api.close());
 
-  // Install screen titlebar buttons
   $('install-btn-minimize').addEventListener('click', minimizeApp);
   $('install-btn-close').addEventListener('click',    () => window.api.close());
 
@@ -1018,8 +1007,6 @@ function initTitleBar() {
     window.api.openLogsFolder(state.settings?.gameDir);
   });
 
-  // Install-error actions wired once at boot so they can never be left without a
-  // handler or stuck disabled by an in-flight install.
   $('btn-retry')?.addEventListener('click', async () => {
     if (await runInstallation(false)) await initMainScreen();
   });
@@ -1028,9 +1015,8 @@ function initTitleBar() {
   });
 }
 
-/* ─────────────────────────────────────────────────────────────── Sidebar nav */
+
 function initSidebar() {
-  // Применяем Lucide иконки
   if (window.lucide) window.lucide.createIcons();
 
   document.querySelectorAll('.sidebar-icon').forEach(btn => {
@@ -1042,7 +1028,7 @@ function initSidebar() {
   });
 }
 
-/* ─────────────────────────────────────────────────────────────── Auto-update */
+
 async function checkAndShowUpdate() {
   try {
     const info = await window.api.checkUpdate();
@@ -1089,7 +1075,6 @@ async function checkAndShowUpdate() {
         return;
       }
 
-      // Скачано — запускаем установщик и закрываем лаунчер
       progFill.style.width = '100%';
       progPct.textContent  = '100%';
       btn.textContent = 'Установка...';
@@ -1099,30 +1084,25 @@ async function checkAndShowUpdate() {
       setTimeout(() => window.api.installUpdate(result.filePath), 600);
     };
   } catch (_) {
-    // Тихо игнорируем — обновление не критично
   }
 }
 
-/* ─────────────────────────────────────────────────────────────── Enter main */
+
 let newsRefreshInterval = null;
 
 async function initMainScreen() {
   showScreen('main');
   showTab('home');
 
-  // Проверяем обновления лаунчера (тихо, в фоне)
   checkAndShowUpdate();
 
-  // Load content
   await Promise.all([loadNews(), loadModsInfo()]);
   if (!newsRefreshInterval) newsRefreshInterval = setInterval(loadNews, 60_000);
 
-  // Server ping
   await pingServer();
   if (state.serverPingInterval) clearInterval(state.serverPingInterval);
   state.serverPingInterval = setInterval(pingServer, 5_000);
 
-  // PLAY button
   if (!playButtonBound) {
     $('btn-play').addEventListener('click', startGame);
     playButtonBound = true;
@@ -1130,29 +1110,26 @@ async function initMainScreen() {
 }
 
 async function enterMain() {
-  // Load settings
   state.settings  = await window.api.getSettings();
   state.systemRam = await window.api.getSystemRam();
 
-  // Update player UI
   const nick = state.profile.username;
   $('player-name').textContent   = nick;
   $('player-avatar').textContent = nick.charAt(0).toUpperCase();
 
   showScreen('main');
 
-  // Check installation
   const installed = await window.api.checkInstallation(state.settings.gameDir, state.settings.javaPath);
 
   if (!installed.fullyInstalled) {
     const ok = await runInstallation();
-    if (!ok) return; // stays on install screen with error
+    if (!ok) return;
   }
 
   await initMainScreen();
 }
 
-/* ─────────────────────────────────────────────────────────────── Boot */
+
 async function boot() {
   initTitleBar();
   initSidebar();
@@ -1183,7 +1160,6 @@ async function boot() {
   initLoginScreen(profile?.username || '');
 }
 
-// Инициализация Lucide иконок
 if (window.lucide) window.lucide.createIcons();
 
 boot().catch(err => {

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const INSTANCE_MODS = process.argv[2] || 'C:\\Users\\mashi\\curseforge\\minecraft\\Instances\\kal\\mods';
+const INSTANCE_MODS = process.argv[2] ? path.resolve(process.argv[2]) : null;
 const OWNER = 'MASHINKA34';
 const REPO = 'void_launcher';
 const RELEASE_TAG = 'mods';
@@ -12,6 +12,16 @@ const MANIFEST_VERSION = Date.now();
 const ASSET_TAG = RELEASE_TAG;
 
 const STOP = /^(v?\d|neoforge|forge|fabric|quilt|mc?1\.\d|1\.\d)/i;
+
+if (!INSTANCE_MODS) {
+  console.error('Usage: node tools/gen-mods-list.js <mods-directory>');
+  process.exit(1);
+}
+
+if (!fs.existsSync(INSTANCE_MODS) || !fs.statSync(INSTANCE_MODS).isDirectory()) {
+  console.error(`Mods directory not found: ${INSTANCE_MODS}`);
+  process.exit(1);
+}
 
 function prettyName(filename) {
   const base = filename.replace(/\.jar$/i, '');

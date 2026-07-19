@@ -1,9 +1,4 @@
-/**
- * Local launcher account store.
- *
- * This protects the launcher flow from casual nickname spoofing. A Minecraft
- * offline-mode server still needs server-side auth/online-mode for real trust.
- */
+
 
 const fs = require('fs');
 const path = require('path');
