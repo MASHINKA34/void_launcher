@@ -1,11 +1,14 @@
 {
   "name": "voidcube",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "VoID Cube — приватный лаунчер Minecraft",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder build --win"
+    "build": "electron-builder build --win",
+    "bundle": "node tools/make-bundle.js",
+    "build:offline": "node tools/make-bundle.js && electron-builder build --win dir",
+    "build:portable": "npm run build:offline && node tools/make-portable.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.18",
@@ -36,6 +39,15 @@
       "src/**/*",
       "node_modules/**/*",
       "!node_modules/.cache"
+    ],
+    "extraResources": [
+      {
+        "from": "bundle",
+        "to": "bundle",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "win": {
       "target": [

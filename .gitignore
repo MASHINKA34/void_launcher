@@ -52,3 +52,5 @@ tools/staging-mods/
 tools/*.zip
 
 *.lnk
+
+bundle/
