@@ -3,10 +3,10 @@ module.exports = {
   SERVER_PORT: 25565,
 
   MC_VERSION:       '1.21.1',
-  NEOFORGE_VERSION: '21.1.233',
+  NEOFORGE_VERSION: '21.1.235',
 
   LAUNCHER_NAME:    'VoID Cube',
-  LAUNCHER_VERSION: '1.3.2',
+  LAUNCHER_VERSION: '1.4.0',
   GAME_DIR_NAME:    'mylauncher-minecraft',
 
   GITHUB_OWNER: 'MASHINKA34',
@@ -24,11 +24,13 @@ module.exports = {
   },
 
   NEOFORGE: {
-    OFFLINE_SHA256:   'c035091ad352016ea8f883b9138d59fe43e3b8233c882fa149249a15e3b56bba',
-    OFFLINE_SIZE:     97280992,
-    INSTALLER_SHA256: '311475c8315ed0be6b5f1dbbf5a377b6c0976457c0bd5aa6d19b0fe25fd77148',
-    INSTALLER_SIZE:   6964847,
-    OFFLINE_YANDEX_PATH:   '/neoforge/neoforge-21.1.233-offline.zip',
-    INSTALLER_YANDEX_PATH: '/neoforge/neoforge-21.1.233-installer.jar'
-  }
+    OFFLINE_SHA256:   null,
+    OFFLINE_SIZE:     0,
+    INSTALLER_SHA256: '58edd322dc3cbbcd5c75d9a44f93d01211fda2953665483077ddd41fbecf942c',
+    INSTALLER_SIZE:   6965992,
+    OFFLINE_YANDEX_PATH:   null,
+    INSTALLER_YANDEX_PATH: '/neoforge/neoforge-21.1.235-installer.jar'
+  },
+
+  BUNDLE_DIR_NAME: 'bundle'
 };
