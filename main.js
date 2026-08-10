@@ -6,9 +6,30 @@ const config = require('./config');
 const auth = require('./src/auth');
 const { fetchWithTimeout } = require('./src/net');
 const modSync = require('./src/modSync');
+const bundle = require('./src/bundle');
 
 app.commandLine.appendSwitch('disable-gpu-disk-cache');
 app.commandLine.appendSwitch('no-sandbox');
+
+function detectPortableRoot() {
+  if (!app.isPackaged) return null;
+  try {
+    const exeDir = path.dirname(app.getPath('exe'));
+    return fs.existsSync(path.join(exeDir, 'portable.txt')) ? exeDir : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+const portableRoot = detectPortableRoot();
+
+if (portableRoot) {
+  const dataDir = path.join(portableRoot, 'data');
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+    app.setPath('userData', dataDir);
+  } catch (_) {}
+}
 
 let mainWindow = null;
 let tray = null;
@@ -86,7 +107,9 @@ function getDefaultSettings() {
     ram: 4,
     width: 1280,
     height: 720,
-    gameDir: path.join(app.getPath('userData'), config.GAME_DIR_NAME),
+    gameDir: portableRoot
+      ? path.join(portableRoot, 'game')
+      : path.join(app.getPath('userData'), config.GAME_DIR_NAME),
     javaPath: 'auto',
     autoJoinServer: false,
     fullscreen: false,
@@ -438,8 +461,24 @@ ipcMain.handle('get-mods-list', () => {
 });
 
 
+function getBundleDir() {
+  return bundle.resolveBundleDir(__dirname, process.resourcesPath, app.isPackaged);
+}
+
+function seedFromBundle(gameDir, onProgress) {
+  try {
+    bundle.setProgressCallback(onProgress || null);
+    return bundle.seed(getBundleDir(), gameDir);
+  } catch (_) {
+    return { available: false };
+  } finally {
+    bundle.setProgressCallback(null);
+  }
+}
+
 ipcMain.handle('check-installation', async (_, gameDir, javaPath) => {
   const installer = require('./src/installer');
+  seedFromBundle(gameDir);
   return await installer.checkInstallation(gameDir, javaPath);
 });
 
@@ -452,9 +491,12 @@ ipcMain.handle('install-game', async (_, { gameDir, javaPath }) => {
   installInFlight = true;
   try {
     const installer = require('./src/installer');
-    installer.setProgressCallback((progress) => {
+    const sendProgress = (progress) => {
       if (mainWindow) mainWindow.webContents.send('install-progress', progress);
-    });
+    };
+    installer.setProgressCallback(sendProgress);
+    installer.setBundleDir(getBundleDir());
+    seedFromBundle(gameDir, sendProgress);
     return await installer.install(gameDir, javaPath);
   } finally {
     installInFlight = false;
@@ -468,9 +510,12 @@ ipcMain.handle('repair-installation', async (_, { gameDir, javaPath }) => {
   installInFlight = true;
   try {
     const installer = require('./src/installer');
-    installer.setProgressCallback((progress) => {
+    const sendProgress = (progress) => {
       if (mainWindow) mainWindow.webContents.send('install-progress', progress);
-    });
+    };
+    installer.setProgressCallback(sendProgress);
+    installer.setBundleDir(getBundleDir());
+    seedFromBundle(gameDir, sendProgress);
     return await installer.repair(gameDir, javaPath);
   } finally {
     installInFlight = false;
@@ -512,20 +557,29 @@ ipcMain.handle('sync-mods', async (_, { gameDir }) => {
     const localModsListPath = path.join(__dirname, 'mods-list.json');
     const cachePath = path.join(app.getPath('userData'), 'mods-list-cache.json');
     const bundledList = modSync.validateManifest(JSON.parse(fs.readFileSync(localModsListPath, 'utf8')));
+    seedFromBundle(gameDir, (progress) => {
+      if (mainWindow) mainWindow.webContents.send('mod-sync-progress', progress);
+    });
     let remoteList;
+    let staleList = false;
 
     try {
       remoteList = await fetchCurrentModsList(15_000, bundledList[0].manifestVersion);
     } catch (_) {
-      return {
-        success: false,
-        error: 'Не удалось получить актуальный список модов. Проверьте интернет, VPN или прокси и повторите запуск.'
-      };
+      if (!getBundleDir()) {
+        return {
+          success: false,
+          error: 'Не удалось получить актуальный список модов. Проверьте интернет, VPN или прокси и повторите запуск.'
+        };
+      }
+      remoteList = bundledList;
+      staleList = true;
     }
 
     const normalizedList = mergeModMetadata(remoteList);
     writeJsonAtomic(cachePath, normalizedList);
-    return await modSync.sync(gameDir, cachePath);
+    const result = await modSync.sync(gameDir, cachePath);
+    return staleList ? { ...result, staleList: true } : result;
   } catch (err) {
     return { success: false, error: err.message };
   } finally {

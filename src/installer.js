@@ -15,9 +15,26 @@ const execAsync = util.promisify(exec);
 const execFileAsync = util.promisify(execFile);
 
 let progressCallback = null;
+let bundleDir = null;
 
 function setProgressCallback(cb) {
   progressCallback = cb;
+}
+
+function setBundleDir(dir) {
+  bundleDir = dir || null;
+}
+
+function copyFromBundle(relativePath, destPath) {
+  if (!bundleDir) return false;
+  const src = path.join(bundleDir, relativePath);
+  try {
+    if (!fs.statSync(src).isFile()) return false;
+    fs.copyFileSync(src, destPath);
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 function emit(data) {
@@ -622,7 +639,9 @@ async function installNeoForge(gameDir, javaExe) {
   ensureLauncherProfiles(gameDir);
 
   const nfVersion = config.NEOFORGE_VERSION;
-  const hasMirror = config.GITHUB_OWNER && config.GITHUB_REPO &&
+  const hasOfflineArchive = !!(config.NEOFORGE && config.NEOFORGE.OFFLINE_SHA256);
+  const hasMirror = hasOfflineArchive &&
+                    config.GITHUB_OWNER && config.GITHUB_REPO &&
                     config.GITHUB_OWNER !== 'YOUR_GITHUB_OWNER';
 
   if (hasMirror) {
@@ -741,7 +760,27 @@ async function installNeoForgeViaInstaller(gameDir, javaExe, nfVersion) {
   const verify = (nf.INSTALLER_SHA256 || nf.INSTALLER_SIZE)
     ? makeSizeShaVerifier(nf.INSTALLER_SIZE, nf.INSTALLER_SHA256, 'NeoForge Installer')
     : null;
-  await downloadFromSources(sources, installerJar, 'NeoForge Installer', { step: 'neoforge', verify });
+
+  if (!fs.existsSync(installerJar) && copyFromBundle(path.join('neoforge', installerName), installerJar)) {
+    dlog('NeoForge installer taken from bundle');
+  }
+
+  let haveInstaller = false;
+  if (fs.existsSync(installerJar)) {
+    if (!verify) {
+      haveInstaller = true;
+    } else {
+      try { await verify(installerJar); haveInstaller = true; }
+      catch (_) { removeFileIfExists(installerJar); }
+    }
+  }
+
+  if (haveInstaller) {
+    dlog('NeoForge installer already present, skipping download');
+    emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Установщик NeoForge уже в комплекте.' });
+  } else {
+    await downloadFromSources(sources, installerJar, 'NeoForge Installer', { step: 'neoforge', verify });
+  }
 
   emit({ type: 'step', step: 'neoforge', status: 'installing', message: 'Installing NeoForge (this may take a few minutes)...' });
 
@@ -915,4 +954,4 @@ async function repair(gameDir, javaPathOverride) {
   return install(gameDir, javaPathOverride);
 }
 
-module.exports = { checkInstallation, install, repair, findJava, getJavaMajor, setProgressCallback };
+module.exports = { checkInstallation, install, repair, findJava, getJavaMajor, setProgressCallback, setBundleDir };
