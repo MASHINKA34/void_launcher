@@ -546,6 +546,30 @@ async function installJava(gameDir) {
 }
 
 
+const MOJANG_META_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json';
+
+async function isOnline(url = MOJANG_META_URL) {
+  try {
+    const res = await fetchWithTimeout(url, {
+      headers: { 'User-Agent': config.LAUNCHER_NAME },
+      redirect: 'follow'
+    }, 10_000);
+    return res.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function assertOnlineForFirstRun() {
+  if (await isOnline()) return;
+  throw new Error(
+    'Нет соединения с серверами Mojang. Первый запуск требует интернета: ' +
+    'сам Minecraft 1.21.1 и библиотеки NeoForge (около 900 МБ) в комплект не входят ' +
+    'и качаются один раз. Java и все моды уже установлены. ' +
+    'Подключи интернет и нажми «Повторить» — дальше игра работает офлайн.'
+  );
+}
+
 async function downloadMinecraft(gameDir, javaExe) {
   emit({ type: 'step', step: 'minecraft', status: 'downloading', message: 'Downloading Minecraft 1.21.1...' });
 
@@ -884,6 +908,11 @@ async function install(gameDir, javaPathOverride) {
   ensureDir(gameDir);
   openInstallLog(gameDir);
   try {
+    if (!isMinecraftInstalled(gameDir) || !isNeoForgeInstalled(gameDir)) {
+      emit({ type: 'step-start', step: 'java', message: 'Проверка соединения...' });
+      await assertOnlineForFirstRun();
+    }
+
     emit({ type: 'step-start', step: 'java', message: 'Checking Java 21...' });
     let javaExe = null;
 

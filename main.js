@@ -36,6 +36,50 @@ let tray = null;
 let activeAuthProfile = null;
 
 
+function logCrash(kind, err) {
+  const text = `[${new Date().toISOString()}] ${kind}: ${err?.stack || err}\n`;
+  try {
+    const dir = path.join(app.getPath('userData'), 'logs');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(path.join(dir, 'launcher-crash.log'), text, 'utf8');
+  } catch (_) {}
+  console.error(text);
+}
+
+function describeCrash(err) {
+  const message = String(err?.message || err || '');
+
+  if (/version_manifest\.json/i.test(message) && /ENOENT/i.test(message)) {
+    return 'Не удалось скачать данные Minecraft: похоже, нет интернета.\n\n' +
+           'Java и моды уже в комплекте, но сам Minecraft (около 900 МБ) качается ' +
+           'один раз при первом запуске. Подключи интернет и запусти лаунчер снова — ' +
+           'дальше игра работает офлайн.';
+  }
+
+  if (/ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT/i.test(message)) {
+    return 'Нет соединения с серверами загрузки.\n\n' +
+           'Проверь интернет, фаервол или VPN и запусти лаунчер снова.';
+  }
+
+  if (/EACCES|EPERM/i.test(message)) {
+    return 'Нет прав на запись в папку лаунчера.\n\n' +
+           'Перенеси папку из Program Files в обычную, например C:\\VoIDCube, ' +
+           'и не запускай прямо из архива.';
+  }
+
+  return `Лаунчер столкнулся с ошибкой:\n\n${message}`;
+}
+
+function handleCrash(kind, err) {
+  logCrash(kind, err);
+  try {
+    dialog.showErrorBox('VoID Cube', describeCrash(err));
+  } catch (_) {}
+}
+
+process.on('uncaughtException', (err) => handleCrash('uncaughtException', err));
+process.on('unhandledRejection', (err) => handleCrash('unhandledRejection', err));
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 900,
