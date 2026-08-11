@@ -9,7 +9,8 @@
     "bundle": "node tools/make-bundle.js",
     "build:offline": "node tools/make-bundle.js && electron-builder build --win dir",
     "build:portable": "npm run build:offline && node tools/make-portable.js",
-    "gamedata": "node tools/make-gamedata.js"
+    "gamedata": "node tools/make-gamedata.js",
+    "prepare:friend": "node tools/prepare-for-friend.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.18",
