@@ -1,13 +1,22 @@
 const fetch = require('node-fetch');
 const { Readable } = require('stream');
 
-function getFetch() {
+function getFetchers() {
+  const fetchers = [];
+
   try {
     const electron = require('electron');
-    if (electron?.net?.fetch) return electron.net.fetch.bind(electron.net);
+    if (electron?.net?.fetch) {
+      fetchers.push({ name: 'electron', fn: electron.net.fetch.bind(electron.net) });
+    }
   } catch (_) {}
 
-  return fetch;
+  fetchers.push({ name: 'node', fn: fetch });
+  return fetchers;
+}
+
+function getFetch() {
+  return getFetchers()[0].fn;
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 90_000) {
@@ -27,6 +36,32 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 90_000) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function fetchAny(url, options = {}, timeoutMs = 10_000) {
+  const attempts = [];
+
+  for (const fetcher of getFetchers()) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetcher.fn(url, { ...options, signal: controller.signal });
+      return { res, via: fetcher.name, attempts };
+    } catch (err) {
+      attempts.push({
+        via: fetcher.name,
+        error: err?.name === 'AbortError'
+          ? `TIMEOUT ${Math.round(timeoutMs / 1000)}s`
+          : String(err?.code || err?.message || err)
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  const error = new Error(attempts.map(a => `${a.via}: ${a.error}`).join(' | ') || 'no fetch backend');
+  error.attempts = attempts;
+  throw error;
 }
 
 function toNodeReadable(body) {
@@ -61,4 +96,4 @@ function normalizeNetworkError(err) {
   return 'не удалось скачать файл. Попробуйте снова';
 }
 
-module.exports = { fetchWithTimeout, toNodeReadable, normalizeNetworkError };
+module.exports = { fetchWithTimeout, fetchAny, toNodeReadable, normalizeNetworkError };

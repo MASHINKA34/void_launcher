@@ -9,7 +9,7 @@ const crypto   = require('crypto');
 const AdmZip   = require('adm-zip');
 const { Client } = require('minecraft-launcher-core');
 const config   = require('../config');
-const { fetchWithTimeout, toNodeReadable, normalizeNetworkError } = require('./net');
+const { fetchWithTimeout, fetchAny, toNodeReadable, normalizeNetworkError } = require('./net');
 
 const execAsync = util.promisify(exec);
 const execFileAsync = util.promisify(execFile);
@@ -390,7 +390,7 @@ async function getJavaMajor(exePath) {
     return Number.isNaN(major) ? null : major;
   };
   try {
-    const { stdout, stderr } = await execAsync(`"${exePath}" -version`, { timeout: 5000 });
+    const { stdout, stderr } = await execFileAsync(exePath, ['-version'], { timeout: 5000, windowsHide: true });
     return parse(`${stderr || ''}\n${stdout || ''}`);
   } catch (err) {
     return parse(`${err.stderr || ''}\n${err.stdout || ''}`);
@@ -546,27 +546,56 @@ async function installJava(gameDir) {
 }
 
 
-const MOJANG_META_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json';
+const CONNECTIVITY_TARGETS = [
+  { host: 'piston-meta.mojang.com',            url: 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json' },
+  { host: 'libraries.minecraft.net',           url: 'https://libraries.minecraft.net/' },
+  { host: 'resources.download.minecraft.net',  url: 'https://resources.download.minecraft.net/' },
+  { host: 'maven.neoforged.net',               url: 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml' }
+];
 
-async function isOnline(url = MOJANG_META_URL) {
-  try {
-    const res = await fetchWithTimeout(url, {
-      headers: { 'User-Agent': config.LAUNCHER_NAME },
-      redirect: 'follow'
-    }, 10_000);
-    return res.ok;
-  } catch (_) {
-    return false;
+async function probeConnectivity() {
+  const results = [];
+
+  for (const target of CONNECTIVITY_TARGETS) {
+    try {
+      const { res, via } = await fetchAny(target.url, {
+        headers: { 'User-Agent': config.LAUNCHER_NAME },
+        redirect: 'follow'
+      }, 10_000);
+      results.push({ host: target.host, reachable: true, status: res.status, via });
+    } catch (err) {
+      results.push({ host: target.host, reachable: false, error: err.message });
+    }
   }
+
+  for (const r of results) {
+    dlog(`connectivity ${r.host}: ${r.reachable ? `HTTP ${r.status} via ${r.via}` : `FAIL ${r.error}`}`);
+  }
+
+  return { online: results.some(r => r.reachable), results };
 }
 
 async function assertOnlineForFirstRun() {
-  if (await isOnline()) return;
+  const probe = await probeConnectivity();
+  if (probe.online) return;
+
+  const details = probe.results
+    .map(r => `${r.host}: ${r.error}`)
+    .join('\n');
+
+  const blocked = /BLOCKED|ACCESS_DENIED|CONNECTION_REFUSED|ECONNREFUSED|ETIMEDOUT|TIMEOUT/i.test(details);
+
   throw new Error(
-    'Нет соединения с серверами Mojang. Первый запуск требует интернета: ' +
+    'Ни один сервер загрузки не отвечает. Первый запуск требует интернета: ' +
     'сам Minecraft 1.21.1 и библиотеки NeoForge (около 900 МБ) в комплект не входят ' +
-    'и качаются один раз. Java и все моды уже установлены. ' +
-    'Подключи интернет и нажми «Повторить» — дальше игра работает офлайн.'
+    'и качаются один раз, Java и моды уже установлены.\n\n' +
+    (blocked
+      ? 'Соединения обрываются, а не теряются по DNS — скорее всего лаунчер заблокирован ' +
+        'фаерволом или антивирусом. Разреши "VoID Cube.exe" в брандмауэре Windows ' +
+        '(Параметры -> Сеть и интернет -> Брандмауэр -> Разрешить работу с приложением) ' +
+        'и в антивирусе, потом нажми «Повторить».\n\n'
+      : 'Проверь интернет и нажми «Повторить».\n\n') +
+    `Что именно не ответило:\n${details}`
   );
 }
 
