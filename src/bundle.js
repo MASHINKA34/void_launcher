@@ -1,7 +1,8 @@
 
 
-const fs   = require('fs');
-const path = require('path');
+const fs     = require('fs');
+const path   = require('path');
+const AdmZip = require('adm-zip');
 const config = require('../config');
 
 let progressCallback = null;
@@ -107,6 +108,41 @@ function seedNeoForgeInstaller(bundleDir, gameDir) {
   return { copied: 1 };
 }
 
+const GAME_DATA_ZIP = 'game-data.zip';
+
+function findGameDataZip(searchDirs) {
+  for (const dir of searchDirs) {
+    if (!dir) continue;
+    const candidate = path.join(dir, GAME_DATA_ZIP);
+    if (isFile(candidate)) return candidate;
+  }
+  return null;
+}
+
+function importGameData(zipPath, gameDir) {
+  if (!isFile(zipPath)) return { skipped: 'not-found' };
+
+  emit({
+    type: 'step',
+    step: 'minecraft',
+    status: 'installing',
+    message: 'Распаковка файлов игры из game-data.zip, это займёт пару минут...'
+  });
+
+  ensureDir(gameDir);
+  const zip = new AdmZip(zipPath);
+  zip.extractAllTo(gameDir, true, false);
+
+  const marker = `${zipPath}.installed`;
+  try {
+    if (fs.existsSync(marker)) fs.unlinkSync(marker);
+    fs.renameSync(zipPath, marker);
+  } catch (_) {}
+
+  emit({ type: 'step', step: 'minecraft', status: 'installing', message: 'Файлы игры распакованы.' });
+  return { imported: true };
+}
+
 function seed(bundleDir, gameDir) {
   if (!bundleDir || !isDir(bundleDir) || !gameDir) {
     return { available: false };
@@ -127,4 +163,11 @@ function seed(bundleDir, gameDir) {
   return result;
 }
 
-module.exports = { seed, resolveBundleDir, setProgressCallback };
+module.exports = {
+  seed,
+  resolveBundleDir,
+  setProgressCallback,
+  findGameDataZip,
+  importGameData,
+  GAME_DATA_ZIP
+};

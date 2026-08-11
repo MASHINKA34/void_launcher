@@ -512,6 +512,21 @@ function getBundleDir() {
 function seedFromBundle(gameDir, onProgress) {
   try {
     bundle.setProgressCallback(onProgress || null);
+
+    const zipPath = bundle.findGameDataZip([
+      portableRoot,
+      portableRoot ? path.join(portableRoot, 'game') : null,
+      app.isPackaged ? path.dirname(app.getPath('exe')) : __dirname
+    ]);
+
+    if (zipPath) {
+      try {
+        bundle.importGameData(zipPath, gameDir);
+      } catch (err) {
+        logCrash('importGameData', err);
+      }
+    }
+
     return bundle.seed(getBundleDir(), gameDir);
   } catch (_) {
     return { available: false };
